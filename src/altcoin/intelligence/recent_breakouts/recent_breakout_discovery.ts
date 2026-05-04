@@ -22,28 +22,24 @@ interface BreakoutCandidate {
 }
 
 const SEED_TOKENS = [
-  { sym: "BSB", cg: "block-street", chain: "ethereum", contract: "0xDB6Ba5D510F114F9b2eA08BEa7d30e32eEe33411" },
-  { sym: "LAB", cg: "lab", chain: "bsc", contract: "0x7ec43Cf65F1663F820427C62A5780b8f2E25593A" },
-  { sym: "FLOKI", cg: "floki", chain: "ethereum", contract: "0xcf0c122c6b73ff809c693db761e7baebe62b6a2e" },
-  { sym: "BONK", cg: "bonk", chain: "solana", contract: "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263" },
-  { sym: "PEPE", cg: "pepe", chain: "ethereum", contract: "0x6982508145454ce325ddbe47a25d4ec3d2311933" },
-  { sym: "WIF", cg: "dogwifcoin", chain: "solana", contract: "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm" },
-  // Additional tokens to check
-  { sym: "POPCAT", cg: "popcat", chain: "solana", contract: "" },
-  { sym: "TURBO", cg: "turbo", chain: "ethereum", contract: "" },
-  { sym: "VIRTUAL", cg: "virtual-protocol", chain: "ethereum", contract: "" },
-  { sym: "FET", cg: "fetch-ai", chain: "ethereum", contract: "" },
-  { sym: "PENDLE", cg: "pendle", chain: "ethereum", contract: "0x808507121b80c02388fad14726482e061b8da827" },
-  { sym: "ONDO", cg: "ondo-finance", chain: "ethereum", contract: "0xfAbA6f8e4a5E8Ab82F62fe7C39859FA577269BE3" },
-  { sym: "ENA", cg: "ethena", chain: "ethereum", contract: "0x57e114B691Db790C35207b2e685D4A43181e6061" },
-  { sym: "JUP", cg: "jupiter-exchange-solana", chain: "solana", contract: "JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN" },
-  { sym: "RNDR", cg: "render-token", chain: "ethereum", contract: "" },
-  { sym: "SUI", cg: "sui", chain: "sui", contract: "" },
-  { sym: "TIA", cg: "celestia", chain: "celestia", contract: "" },
-  { sym: "SEI", cg: "sei-network", chain: "sei", contract: "" },
-  { sym: "TAO", cg: "bittensor", chain: "bittensor", contract: "" },
-  { sym: "DOGE", cg: "dogecoin", chain: "dogecoin", contract: "" },
-  { sym: "SHIB", cg: "shiba-inu", chain: "ethereum", contract: "0x95ad61b0a150d79219dcf64e1e6cc01f0b64c4ce" },
+  // P0 seed tokens (must not be skipped)
+  { sym: "UB", cg: "unibase", chain: "ethereum", contract: "", priority: "P0_SEED" },
+  { sym: "AI", cg: "gensyn", chain: "ethereum", contract: "", priority: "P0_SEED" },
+  { sym: "SIREN", cg: "siren-2", chain: "ethereum", contract: "", priority: "P0_SEED" },
+  { sym: "TROLL", cg: "troll-2", chain: "ethereum", contract: "", priority: "P0_SEED" },
+  { sym: "BSB", cg: "block-street", chain: "ethereum", contract: "0xDB6Ba5D510F114F9b2eA08BEa7d30e32eEe33411", priority: "P0_SEED" },
+  { sym: "LAB", cg: "lab", chain: "bsc", contract: "0x7ec43Cf65F1663F820427C62A5780b8f2E25593A", priority: "P0_SEED" },
+  // P1 momentum tokens
+  { sym: "PENDLE", cg: "pendle", chain: "ethereum", contract: "0x808507121b80c02388fad14726482e061b8da827", priority: "P1_MOMENTUM" },
+  { sym: "ONDO", cg: "ondo-finance", chain: "ethereum", contract: "0xfAbA6f8e4a5E8Ab82F62fe7C39859FA577269BE3", priority: "P1_MOMENTUM" },
+  { sym: "TAO", cg: "bittensor", chain: "bittensor", contract: "", priority: "P1_MOMENTUM" },
+  { sym: "DOGE", cg: "dogecoin", chain: "dogecoin", contract: "", priority: "P1_MOMENTUM" },
+  { sym: "VIRTUAL", cg: "virtual-protocol", chain: "ethereum", contract: "", priority: "P1_MOMENTUM" },
+  // Control / background
+  { sym: "PEPE", cg: "pepe", chain: "ethereum", contract: "0x6982508145454ce325ddbe47a25d4ec3d2311933", priority: "CONTROL" },
+  { sym: "WIF", cg: "dogwifcoin", chain: "solana", contract: "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm", priority: "CONTROL" },
+  { sym: "FLOKI", cg: "floki", chain: "ethereum", contract: "0xcf0c122c6b73ff809c693db761e7baebe62b6a2e", priority: "CONTROL" },
+  { sym: "BONK", cg: "bonk", chain: "solana", contract: "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263", priority: "CONTROL" },
 ];
 
 async function fetchPriceData(cgId: string): Promise<number[][] | null> {
@@ -117,11 +113,19 @@ async function main() {
     const latestPrice = values[values.length - 1];
     const latestDate = new Date(windowPrices[windowPrices.length - 1][0]).toISOString().slice(0, 10);
 
-    let includeReason = "";
-    if (max7dReturn >= 0.50) includeReason = `7d return ${(max7dReturn*100).toFixed(0)}%`;
-    else if (max7dReturn >= 0.30) includeReason = `Moderate 7d return ${(max7dReturn*100).toFixed(0)}%`;
-    else if (okxSwap.available) includeReason = "OKX swap available — structural monitoring candidate";
-    else includeReason = "Below threshold";
+    // Breakout tiering (FIXED)
+    let breakoutTier = "CONTROL_OR_BACKGROUND";
+    if (max7dReturn >= 1.0) breakoutTier = "P0_EXPLOSIVE_BREAKOUT";
+    else if (max7dReturn >= 0.50) breakoutTier = "P1_STRONG_BREAKOUT";
+    else if (max7dReturn >= 0.20) breakoutTier = "P2_MOMENTUM";
+
+    // Perp status (FIXED)
+    let perpStatus = "NO_PERP_FOUND";
+    if (okxSwap.available) perpStatus = "OKX_SWAP_CONFIRMED";
+
+    const includeReason = breakoutTier.startsWith("P0") || breakoutTier.startsWith("P1") || breakoutTier.startsWith("P2")
+      ? `${breakoutTier}: 7d return ${(max7dReturn*100).toFixed(0)}%`
+      : `CONTROL: 7d return ${(max7dReturn*100).toFixed(0)}%`;
 
     const cand: BreakoutCandidate = {
       symbol: token.sym, name: token.cg, coingeckoId: token.cg,
@@ -133,9 +137,11 @@ async function main() {
       okxPerpListingDate: null,
       otherPerpAvailable: false, perpSources: okxSwap.available ? "OKX" : "unverified",
       dataQuality: prices.length >= 90 ? "HIGH" : prices.length >= 7 ? "MEDIUM" : "LOW",
-      includeInResearch: max7dReturn >= 0.30 || okxSwap.available,
+      includeInResearch: breakoutTier.startsWith("P0") || breakoutTier.startsWith("P1") || (token as any).priority === "P0_SEED",
       reason: includeReason,
     };
+    (cand as any).breakoutTier = breakoutTier;
+    (cand as any).perpStatus = perpStatus;
     candidates.push(cand);
 
     if (okxSwap.available) confirmedPerp.push(cand);
