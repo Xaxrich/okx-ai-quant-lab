@@ -62,7 +62,8 @@ async function fetchWithRetry(cgId: string, retries: number = 2): Promise<any> {
   for (let i = 0; i < retries; i++) {
     try {
       const apiKey = process.env.COINGECKO_API_KEY || "";
-    const url = `https://api.coingecko.com/api/v3/coins/${cgId}/market_chart?vs_currency=usd&days=90`;
+    const baseUrl = apiKey ? "https://pro-api.coingecko.com/api/v3" : "https://api.coingecko.com/api/v3";
+    const url = `${baseUrl}/coins/${cgId}/market_chart?vs_currency=usd&days=90`;
     const headers: Record<string, string> = {};
     if (apiKey) { headers["x-cg-pro-api-key"] = apiKey; }
     const r = await fetch(url, { headers });
