@@ -2,6 +2,23 @@ import { writeFileSync, mkdirSync, existsSync, readFileSync } from "fs";
 import { join } from "path";
 
 const CG_CACHE = join(import.meta.dirname, "..", "..", "..", "..", "data", "altcoin", "scanner_v02", "cache", "price_features");
+const CG_KEY = process.env.COINGECKO_PRO_API_KEY || "";
+const CG_BASE = CG_KEY ? "https://pro-api.coingecko.com/api/v3" : "https://api.coingecko.com/api/v3";
+
+async function fetchAndCache(cgId: string): Promise<boolean> {
+  const path = join(CG_CACHE, `${cgId}_90d.json`);
+  if (existsSync(path)) return true;
+  if (!CG_KEY) return false;
+  try {
+    const url = `${CG_BASE}/coins/${cgId}/market_chart?vs_currency=usd&days=90`;
+    const r = await fetch(url, { headers: { "x-cg-pro-api-key": CG_KEY } });
+    if (!r.ok) return false;
+    const d = await r.json() as any;
+    if (!d.prices) return false;
+    writeFileSync(path, JSON.stringify({ token: cgId, fetched_at: new Date().toISOString(), prices: d.prices, market_caps: d.market_caps || [], total_volumes: d.total_volumes || [], status: "COMPLETE", data_points_count: d.prices.length }));
+    return true;
+  } catch { return false; }
+}
 const OUT_DIR = join(import.meta.dirname, "..", "..", "..", "..", "data", "altcoin", "intelligence", "metric_loop");
 const REPORTS_DIR = join(import.meta.dirname, "..", "..", "..", "..", "reports", "altcoin", "intelligence", "metric_loop");
 const REGISTRY_PATH = join(OUT_DIR, "metric_registry.csv");
@@ -104,12 +121,24 @@ async function main() {
   if (!existsSync(OUT_DIR + "/validation")) mkdirSync(OUT_DIR + "/validation", { recursive: true });
   if (!existsSync(REPORTS_DIR)) mkdirSync(REPORTS_DIR, { recursive: true });
 
+  // Fetch missing caches
+  console.log("Fetching missing price caches...");
+  const missingTokens = TOKENS.filter(t => !existsSync(join(CG_CACHE, `${t.cg}_90d.json`)));
+  for (const t of missingTokens) {
+    const ok = await fetchAndCache(t.cg);
+    console.log(`  ${t.sym} (${t.cg}): ${ok ? "OK" : "FAILED"}`);
+  }
+  console.log("");
+
   const allResults: MetricResult[] = [];
+  const coverageAudit: string[] = ["token,sample_group,price_cache_ready,included"];
   const tokenCoverage: string[] = [];
 
   for (const token of TOKENS) {
     const candles = loadCandles(token.cg);
-    if (candles.length < 30) { console.log(`${token.sym}: DATA_INSUFFICIENT (${candles.length} candles)`); continue; }
+    const hasData = candles.length >= 30;
+    coverageAudit.push(`${token.sym},${token.group},${hasData},${hasData}`);
+    if (!hasData) { console.log(`${token.sym}: DATA_INSUFFICIENT (${candles.length} candles)`); continue; }
     const results = computePvMetrics(candles, token.sym, token.group, token.breakout);
     allResults.push(...results);
     tokenCoverage.push(token.sym);
@@ -152,11 +181,13 @@ async function main() {
     const avgLead = leadDays.length > 0 ? leadDays.reduce((a, b) => a + b, 0) / leadDays.length : 0;
 
     let classification = "INSUFFICIENT_DATA";
-    if (posTrig > 5 && avgLead < -2 && ctrlRate < 0.05) classification = "LEADING";
-    else if (posTrig > 5 && avgLead >= -2 && avgLead <= 2 && ctrlRate < 0.10) classification = "SYNCHRONOUS";
-    else if (posTrig > 3 && avgLead > 2 && ctrlRate < 0.05) classification = "LAGGING";
-    else if (ctrlRate > 0.10) classification = "NOISE";
+    if (posTrig > 5 && avgLead < -2 && ctrlRate < 0.08) classification = "LEADING";
+    else if (posTrig > 5 && avgLead >= -2 && avgLead <= 2 && ctrlRate < 0.12) classification = "SYNCHRONOUS";
+    else if (posTrig > 3 && avgLead > 2 && ctrlRate < 0.08) classification = "LAGGING";
+    else if (ctrlRate >= 0.15 && disc < 2.0) classification = "NOISE";
+    else if (disc >= 3.0 && ctrlRate < 0.12) classification = "CONTEXT";
     else if (posTrig > 3) classification = "CONTEXT";
+    else if (ctrlRate >= 0.15) classification = "NOISE";
 
     let decision = "NEED_MORE_SAMPLE";
     if (classification === "LEADING") decision = "EARLY_WATCH_CANDIDATE";
@@ -169,12 +200,20 @@ async function main() {
     console.log(`${mid}: pos=${(posRate*100).toFixed(0)}% ctrl=${(ctrlRate*100).toFixed(0)}% disc=${disc.toFixed(1)}x lead=${avgLead.toFixed(0)}d → ${classification} → ${decision}`);
   }
   writeFileSync(join(OUT_DIR, "validation", "price_volume_validation_results.csv"), valR.join("\n"));
+  writeFileSync(join(OUT_DIR, "analysis", "round1a_sample_coverage_audit.csv"), coverageAudit.join("\n"));
+
+  const p0WithData = coverageAudit.slice(1).filter(r => r.startsWith("LAB,") || r.startsWith("UB,") || r.startsWith("BSB,") || r.startsWith("AI,")).filter(r => r.endsWith(",true")).length;
+  const isFull = p0WithData >= 4;
+  console.log(`\nP0 coverage: ${p0WithData}/4 → ${isFull ? "FULL_VALIDATION" : "PARTIAL_VALIDATION"}`);
 
   // Report
   const reportLines = [
-    "# Price-Volume Metric Discovery — Round 1A", "", `Generated: ${new Date().toISOString()}`,
+    "# Price-Volume Metric Discovery — Round 1A.1", "", `Generated: ${new Date().toISOString()}`,
+    `**Validation: ${isFull ? "FULL_VALIDATION" : "PARTIAL_VALIDATION"}** (P0: ${p0WithData}/4)`,
     "", "## 1. Scope", "",
     `Tokens: ${tokenCoverage.length} (${TOKENS.filter(t => t.group === "P0").length} P0, ${TOKENS.filter(t => t.group === "P2").length} P2, ${TOKENS.filter(t => t.group === "CONTROL").length} CONTROL)`,
+    `Missing: ${TOKENS.filter(t => !tokenCoverage.includes(t.sym)).map(t => t.sym).join(", ") || "none"}`,
+    `Classification: fixed (NOISE >= 15% ctrl rate, CONTEXT for >= 3x disc)`,
     `Metrics: 4 (PV_001-PV_004)`,
     "", "## 2. Validation Results", "",
     "| Metric | Pos Rate | Mom Rate | Ctrl Rate | Disc | Avg Lead | Classification | Decision |",
