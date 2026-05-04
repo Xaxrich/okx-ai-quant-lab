@@ -1,0 +1,5 @@
+token,group,chain,holders_available,transfers_available,entity_label_coverage,readiness,limitations
+BSB,P0,eth,false,true,54%,MORALIS_TRANSFER_ONLY,
+LAB,P0,bsc,false,true,23%,MORALIS_TRANSFER_ONLY,
+PEPE,CONTROL,eth,false,true,48%,MORALIS_TRANSFER_ONLY,
+FLOKI,CONTROL,eth,false,true,55%,MORALIS_TRANSFER_ONLY,
