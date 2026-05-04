@@ -1,4 +1,4 @@
-import { writeFileSync, mkdirSync, existsSync } from "fs";
+import { writeFileSync, readFileSync, mkdirSync, existsSync } from "fs";
 import { join } from "path";
 
 const REGISTRY_DIR = join(import.meta.dirname, "..", "..", "..", "data", "altcoin", "scanner_v02", "registry");
@@ -64,9 +64,28 @@ async function main() {
 
   let resolved = 0, needCmc = 0;
 
+  // Load existing CMC IDs from previous registry to avoid overwriting good data
+  const existingCmcIds = new Map<string, string>();
+  const registryPath = join(REGISTRY_DIR, "token_metadata_registry.csv");
+  if (existsSync(registryPath)) {
+    const existing = readFileSync(registryPath, "utf-8").split("\n").slice(1);
+    for (const line of existing) {
+      const parts = line.split(",");
+      if (parts.length >= 5 && parts[4] && parts[4].length > 0) {
+        existingCmcIds.set(parts[0], parts[4]);
+      }
+    }
+    console.log(`Loaded ${existingCmcIds.size} CMC IDs from existing registry.`);
+  }
+
   for (const [symbol, info] of Object.entries(KNOWN)) {
-    // Try to resolve CMC ID if not known
+    // Try to resolve CMC ID if not known. Check existing registry first.
     let cmcId = info.cmcId;
+    const existingRow = existingCmcIds.get(symbol);
+    if (cmcId === null && existingRow && existingRow.length > 0) {
+      cmcId = parseInt(existingRow);
+      if (!isNaN(cmcId)) resolved++;
+    }
     if (cmcId === null) {
       console.log(`Resolving CMC ID for ${symbol}...`);
       cmcId = await resolveCmcId(symbol);

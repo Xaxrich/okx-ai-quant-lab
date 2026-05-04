@@ -1,6 +1,6 @@
 # Scanner Universe Report
 
-Generated: 2026-05-04T08:05:06.771Z
+Generated: 2026-05-04T08:21:56.964Z
 Tokens: 28
 
 ## 1. Summary
@@ -11,7 +11,9 @@ Tokens: 28
 | WATCH_RISK | 2 |
 | WATCH | 1 |
 | NEED_MORE_DATA | 0 |
-| NO_CURRENT_FLAG | 20 |
+| INSUFFICIENT_DEEP_DATA | 8 |
+| NO_CURRENT_FLAG | 17 |
+| RESEARCH_ONLY | 0 |
 
 ## 2. Results by Label
 
@@ -24,7 +26,18 @@ Tokens: 28
 
 - **FLOKI** (meme): score=10, dq=1. DEX_SELL_PRESSURE
 
-### NO_CURRENT_FLAG (20)
+### INSUFFICIENT_DEEP_DATA (8)
+
+- **POPCAT** (meme): score=15, dq=0.41. Feature coverage insufficient (15%). Missing: price_features_90d, dex_aggregation, supply_scope, buy_sell_txns.
+- **TURBO** (meme): score=15, dq=0.41. Feature coverage insufficient (15%). Missing: price_features_90d, dex_aggregation, supply_scope, buy_sell_txns.
+- **FET** (ai): score=15, dq=0.64. Feature coverage insufficient (40%). Missing: price_features_90d, dex_aggregation, buy_sell_txns.
+- **RNDR** (ai): score=10, dq=0.51. Feature coverage insufficient (35%). Missing: price_features_90d, supply_scope, cmc_supply_fields.
+- **VIRTUAL** (ai): score=15, dq=0.41. Feature coverage insufficient (15%). Missing: price_features_90d, dex_aggregation, supply_scope, buy_sell_txns.
+- **ARB** (control): score=0, dq=0.76. Feature coverage insufficient (60%). Missing: supply_scope, cmc_supply_fields.
+- **OP** (control): score=0, dq=0.76. Feature coverage insufficient (60%). Missing: supply_scope, cmc_supply_fields.
+- **PEOPLE** (control): score=0, dq=0.76. Feature coverage insufficient (60%). Missing: supply_scope, cmc_supply_fields.
+
+### NO_CURRENT_FLAG (17)
 
 - **PEPE** (meme): score=0, dq=1. No flags triggered.
 - **WIF** (meme): score=0, dq=0.85. No flags triggered.
@@ -43,9 +56,6 @@ Tokens: 28
 - **BTC** (control): score=0, dq=0.92. No flags triggered.
 - **ETH** (control): score=0, dq=0.92. No flags triggered.
 - **SOL** (control): score=0, dq=0.92. No flags triggered.
-- **ARB** (control): score=0, dq=0.76. No flags triggered.
-- **OP** (control): score=0, dq=0.76. No flags triggered.
-- **PEOPLE** (control): score=0, dq=0.76. No flags triggered.
 
 ## 3. Results by Category
 

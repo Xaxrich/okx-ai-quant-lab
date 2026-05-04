@@ -33,6 +33,6 @@ export function overallDataQuality(identityScore: number, featureScore: number):
 
 export function dataQualityLabel(identityScore: number, featureScore: number): "NEED_MORE_DATA" | "INSUFFICIENT_DEEP_DATA" | "SUFFICIENT" {
   if (identityScore < 0.5) return "NEED_MORE_DATA";
-  if (featureScore < 0.5) return "INSUFFICIENT_DEEP_DATA";
+  if (featureScore < 0.7) return "INSUFFICIENT_DEEP_DATA";
   return "SUFFICIENT";
 }

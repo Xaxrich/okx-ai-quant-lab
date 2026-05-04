@@ -284,10 +284,10 @@ async function main() {
     "", "## 1. Summary",
     `| Label | Count |`, `|-------|:---:|`,
   ];
-  const labels = ["STRUCTURAL_RISK_HIGH", "WATCH_RISK_HIGH", "WATCH_RISK", "WATCH", "NEED_MORE_DATA", "NO_CURRENT_FLAG"];
-  for (const l of labels) report.push(`| ${l} | ${(byLabel[l] || []).length} |`);
+  const allLabels = ["STRUCTURAL_RISK_HIGH", "WATCH_RISK_HIGH", "WATCH_RISK", "WATCH", "NEED_MORE_DATA", "INSUFFICIENT_DEEP_DATA", "NO_CURRENT_FLAG", "RESEARCH_ONLY"];
+  for (const l of allLabels) report.push(`| ${l} | ${(byLabel[l] || []).length} |`);
   report.push("", "## 2. Results by Label", "");
-  for (const l of labels) {
+  for (const l of allLabels) {
     const tokens = byLabel[l] || [];
     if (tokens.length === 0) continue;
     report.push(`### ${l} (${tokens.length})`, "");
@@ -331,7 +331,7 @@ async function main() {
 
   // Console summary
   console.log(`\n=== Summary ===`);
-  for (const l of labels) console.log(`  ${l}: ${(byLabel[l] || []).length}`);
+  for (const l of allLabels) console.log(`  ${l}: ${(byLabel[l] || []).length}`);
   console.log(`\nReports saved.`);
 }
 

@@ -1,6 +1,6 @@
 # Daily Altcoin Snapshot Scanner Report
 
-Generated: 2026-05-04T08:05:06.772Z
+Generated: 2026-05-04T08:21:56.965Z
 
 ## Summary
 | Tokens scanned | 28 |
@@ -8,7 +8,7 @@ Generated: 2026-05-04T08:05:06.772Z
 | WATCH_RISK / WATCH_RISK_HIGH | 2 |
 | WATCH | 1 |
 | NEED_MORE_DATA | 0 |
-| NO_CURRENT_FLAG | 20 |
+| NO_CURRENT_FLAG | 17 |
 
 ## Disclaimer
 

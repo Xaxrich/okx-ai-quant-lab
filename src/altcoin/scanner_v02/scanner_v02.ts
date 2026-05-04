@@ -1,3 +1,7 @@
+// DEPRECATED: This is the legacy integrated scanner. Use score_universe.ts instead.
+// Run via: npm run scanner:v02:legacy-integrated
+// The new main entry is: npm run scanner:v02 → score_universe.ts
+
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from "fs";
 import { join } from "path";
 

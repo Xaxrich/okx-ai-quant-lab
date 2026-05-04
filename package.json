@@ -31,14 +31,17 @@
     "scanner:mvp-v2": "tsx src/altcoin/scanner_mvp/scanner_mvp_v2.ts",
     "scanner:fetch-integrated": "tsx src/altcoin/scanner_mvp/integrated_data_fetcher.ts",
     "security:check-secrets": "tsx src/security/secret_redaction_check.ts",
-    "scanner:v02": "tsx src/altcoin/scanner_v02/scanner_v02.ts",
+    "scanner:v02": "tsx src/altcoin/scanner_v02/score_universe.ts",
+    "scanner:v02:legacy-integrated": "tsx src/altcoin/scanner_v02/scanner_v02.ts",
     "scanner:v02:multichain-supply": "tsx src/altcoin/scanner_v02/reconcile_multichain_supply.ts",
     "scanner:v02:dex-aggregate": "tsx src/altcoin/scanner_v02/aggregate_dex_pairs.ts",
     "scanner:v02:score-tokens": "tsx src/altcoin/scanner_v02/score_tokens.ts",
     "scanner:v02:batch-fetch": "tsx src/altcoin/scanner_v02/batch_fetch_universe_data.ts",
-    "scanner:v02:universe-report": "tsx src/altcoin/scanner_v02/score_universe.ts",
     "scanner:v02:build-registry": "tsx src/altcoin/scanner_v02/build_token_metadata_registry.ts",
-    "scanner:v02:fetch-missing-price": "tsx src/altcoin/scanner_v02/price_features/fetch_missing_price_features.ts"
+    "scanner:v02:fetch-missing-price": "tsx src/altcoin/scanner_v02/price_features/fetch_missing_price_features.ts",
+    "scanner:v02:coingecko-auth-check": "tsx src/altcoin/scanner_v02/price_features/fetch_missing_price_features.ts --max-requests 0",
+    "scanner:v02:daily-report": "tsx src/altcoin/scanner_v02/score_universe.ts",
+    "scanner:v02:universe-report": "tsx src/altcoin/scanner_v02/score_universe.ts"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
