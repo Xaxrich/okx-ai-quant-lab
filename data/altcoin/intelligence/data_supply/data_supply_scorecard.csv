@@ -1,0 +1,7 @@
+token,market_data_score,supply_data_score,dex_snapshot_score,dex_history_score,holder_score,transfer_flow_score,derivatives_score,social_score,overall,has_okx_spot,has_okx_swap,has_okx_funding,has_okx_oi,has_etherscan_holderlist,has_etherscan_tokentx,has_coingecko_market_chart,has_coingecko_onchain_pools,has_cmc_supply,has_dexscreener_pairs,dexscreener_pair_count,missing_data_layers
+BSB,90,75,80,50,10,50,80,10,56,false,true,true,true,false,true,true,true,true,true,10,"etherscan_holderlist; okx_spot; social_data"
+LAB,90,20,80,50,10,10,80,10,44,false,true,true,true,false,false,true,true,false,true,10,"cmc_supply; etherscan_holderlist; etherscan_tokentx; okx_spot; social_data"
+PEPE,90,20,80,50,10,50,80,10,49,true,true,true,true,false,true,true,true,false,true,30,"cmc_supply; etherscan_holderlist; social_data"
+WIF,90,20,80,50,10,10,80,10,44,true,true,true,true,false,false,true,true,false,true,30,"cmc_supply; etherscan_holderlist; etherscan_tokentx; social_data"
+BONK,90,20,80,50,10,10,80,10,44,true,true,true,true,false,false,true,true,false,true,30,"cmc_supply; etherscan_holderlist; etherscan_tokentx; social_data"
+FLOKI,90,20,80,50,10,50,80,10,49,true,true,true,true,false,true,true,true,false,true,12,"cmc_supply; etherscan_holderlist; social_data"
