@@ -34,48 +34,128 @@ const TOKENS = [
   { sym: "DOGE", group: "CONTROL" }, { sym: "TAO", group: "CONTROL" },
 ];
 
-function safeExtract(obj: any, candidates: string[]): { value: number | null; status: string } {
-  for (const c of candidates) {
-    if (c in obj && obj[c] !== null && obj[c] !== undefined) {
-      const v = parseFloat(obj[c]);
-      if (!isNaN(v)) return { value: v, status: "OK" };
-      return { value: null, status: "FIELD_PARSE_FAILED" };
-    }
-  }
-  return { value: null, status: "FIELD_MISSING" };
+export type OhlcValueMode = "close" | "open" | "high";
+
+export interface OhlcParseResult {
+  time: number | null;
+  o: number | null;
+  h: number | null;
+  l: number | null;
+  c: number | null;
+  parseStatus: string;
+  limitation: string;
 }
 
-async function fetchOiHistory(sym: string): Promise<{ date: string | null; oi: number | null; parseStatus: string }[]> {
+export function parseOhlcRow(row: any, valueMode: OhlcValueMode): OhlcParseResult {
+  const result: OhlcParseResult = { time: null, o: null, h: null, l: null, c: null, parseStatus: "FIELD_MISSING", limitation: "" };
+  if (row === null || row === undefined) return result;
+
+  let timeRaw: unknown, oRaw: unknown, hRaw: unknown, lRaw: unknown, cRaw: unknown;
+
+  if (Array.isArray(row)) {
+    [timeRaw, oRaw, hRaw, lRaw, cRaw] = row;
+  } else if (typeof row === "object") {
+    timeRaw = row.time; oRaw = row.open; hRaw = row.high; lRaw = row.low; cRaw = row.close;
+  } else {
+    return result;
+  }
+
+  const toNum = (v: unknown): number | null => {
+    if (v === null || v === undefined || v === "") return null;
+    const n = typeof v === "string" ? parseFloat(v) : Number(v);
+    return isNaN(n) ? null : n;
+  };
+
+  result.time = toNum(timeRaw);
+  result.o = toNum(oRaw);
+  result.h = toNum(hRaw);
+  result.l = toNum(lRaw);
+  result.c = toNum(cRaw);
+
+  const hasOhlc = result.o !== null || result.h !== null || result.l !== null || result.c !== null;
+  if (!hasOhlc) {
+    // Check if any OHLC field name exists but failed to parse
+    const hasAnyOhlcField = (typeof row === "object" && !Array.isArray(row))
+      ? ("open" in row || "high" in row || "low" in row || "close" in row)
+      : Array.isArray(row) && row.length >= 2;
+    result.parseStatus = hasAnyOhlcField ? "FIELD_PARSE_FAILED" : "FIELD_MISSING";
+    return result;
+  }
+
+  if (valueMode === "close") {
+    if (result.c !== null) {
+      result.parseStatus = "OK";
+    } else if (result.o !== null) {
+      result.parseStatus = "OK";
+      result.limitation = "OHLC_CLOSE_MISSING_USED_OPEN";
+    } else {
+      result.parseStatus = "FIELD_MISSING";
+    }
+  } else if (valueMode === "open") {
+    if (result.o !== null) {
+      result.parseStatus = "OK";
+    } else {
+      result.parseStatus = "FIELD_MISSING";
+    }
+  } else if (valueMode === "high") {
+    if (result.h !== null) {
+      result.parseStatus = "OK";
+    } else {
+      result.parseStatus = "FIELD_MISSING";
+    }
+  }
+
+  return result;
+}
+
+export function ohlcValue(parsed: OhlcParseResult, mode: OhlcValueMode): { value: number | null; status: string; limitation: string } {
+  if (parsed.parseStatus === "FIELD_MISSING") return { value: null, status: "FIELD_MISSING", limitation: "" };
+  let val: number | null = null;
+  if (mode === "close") val = parsed.c !== null ? parsed.c : parsed.o;
+  else if (mode === "open") val = parsed.o;
+  else if (mode === "high") val = parsed.h;
+  return { value: val, status: parsed.parseStatus, limitation: parsed.limitation };
+}
+
+async function fetchOiHistory(sym: string): Promise<{ date: string | null; oi: number | null; parseStatus: string; limitation: string }[]> {
   const r = await cgGet(`/api/futures/open-interest/aggregated-history?symbol=${sym}&interval=1d&limit=90&unit=usd`);
   if (r.status !== "OK" || !r.data?.data) return [];
   return r.data.data.map((d: any) => {
-    const date = normalizeCoinGlassTimestamp(d.time);
-    const oi = safeExtract(d, ["close", "open"]);
-    return { date, oi: oi.value, parseStatus: oi.status };
+    const parsed = parseOhlcRow(d, "close");
+    const date = normalizeCoinGlassTimestamp(parsed.time);
+    const oi = ohlcValue(parsed, "close");
+    return { date, oi: oi.value, parseStatus: oi.status, limitation: oi.limitation };
   });
 }
 
-async function fetchFundingHistory(sym: string): Promise<{ date: string | null; rate: number | null; parseStatus: string }[]> {
-  const r = await cgGet(`/api/futures/funding-rate/oi-weight-history?symbol=${sym}&interval=1d&limit=90`);
+async function fetchFundingHistory(sym: string, weightType: "oi" | "vol"): Promise<{ date: string | null; rate: number | null; parseStatus: string; limitation: string }[]> {
+  const path = weightType === "oi"
+    ? `/api/futures/funding-rate/oi-weight-history?symbol=${sym}&interval=1d&limit=90`
+    : `/api/futures/funding-rate/vol-weight-history?symbol=${sym}&interval=1d&limit=90`;
+  const r = await cgGet(path);
   if (r.status !== "OK" || !r.data?.data) return [];
   return r.data.data.map((d: any) => {
-    const date = normalizeCoinGlassTimestamp(d.time);
-    const rate = safeExtract(d, ["close", "open"]);
-    return { date, rate: rate.value, parseStatus: rate.status };
+    const parsed = parseOhlcRow(d, "close");
+    const date = normalizeCoinGlassTimestamp(parsed.time);
+    const rate = ohlcValue(parsed, "close");
+    return { date, rate: rate.value, parseStatus: rate.status, limitation: rate.limitation };
   });
 }
 
-async function fetchLiquidationHistory(sym: string): Promise<{ date: string | null; longLiq: number | null; shortLiq: number | null; totalLiq: number | null; parseStatus: string }[]> {
+async function fetchLiquidationHistory(sym: string): Promise<{ date: string | null; longLiq: number | null; shortLiq: number | null; totalLiq: number | null; parseStatus: string; limitation: string }[]> {
   const r = await cgGet(`/api/futures/liquidation/aggregated-history?symbol=${sym}&interval=4h&limit=180&exchange_list=Binance,OKX,Bybit`);
   if (r.status !== "OK" || !r.data?.data) return [];
   return r.data.data.map((d: any) => {
-    const date = normalizeCoinGlassTimestamp(d.time);
-    const long = safeExtract(d, ["aggregated_long_liquidation_usd", "longLiquidationUsd", "long"]);
-    const short = safeExtract(d, ["aggregated_short_liquidation_usd", "shortLiquidationUsd", "short"]);
-    const total = long.value !== null || short.value !== null
-      ? { value: (long.value ?? 0) + (short.value ?? 0), status: "OK" }
-      : { value: null, status: "FIELD_MISSING" };
-    return { date, longLiq: long.value, shortLiq: short.value, totalLiq: total.value, parseStatus: long.status === "OK" || short.status === "OK" ? "OK" : long.status };
+    const date = normalizeCoinGlassTimestamp(d.time ?? d.t);
+    const longRaw = d.aggregated_long_liquidation_usd;
+    const shortRaw = d.aggregated_short_liquidation_usd;
+    const longNum = longRaw !== null && longRaw !== undefined ? parseFloat(longRaw) : null;
+    const shortNum = shortRaw !== null && shortRaw !== undefined ? parseFloat(shortRaw) : null;
+    const longOk = longNum !== null && !isNaN(longNum);
+    const shortOk = shortNum !== null && !isNaN(shortNum);
+    const total = (longOk || shortOk) ? (longNum ?? 0) + (shortNum ?? 0) : null;
+    const parseStatus = longOk || shortOk ? "OK" : "FIELD_MISSING";
+    return { date, longLiq: longOk ? longNum : null, shortLiq: shortOk ? shortNum : null, totalLiq: total, parseStatus, limitation: "" };
   });
 }
 
@@ -97,9 +177,14 @@ async function main() {
     console.log(`${sym} (${token.group}): fetching...`);
 
     const oiHist = await fetchOiHistory(sym);
-    const fundHist = await fetchFundingHistory(sym);
+    const fundHist = await fetchFundingHistory(sym, "oi");
     const liqHist = await fetchLiquidationHistory(sym);
     console.log(`  OI: ${oiHist.length} | Funding: ${fundHist.length} | Liq: ${liqHist.length}`);
+
+    // Collect OHLCV limitations
+    const ohlcLimits = new Set<string>();
+    for (const d of oiHist) { if (d.limitation) ohlcLimits.add(d.limitation); }
+    for (const d of fundHist) { if (d.limitation) ohlcLimits.add(d.limitation); }
 
     // Field-level parse audit
     const oiFieldMissing = oiHist.filter(d => d.parseStatus === "FIELD_MISSING").length;
@@ -170,7 +255,7 @@ async function main() {
         ? parseFloat(((dailyLiqRow.long - dailyLiqRow.short) / dailyLiqRow.total).toFixed(3)) : null;
 
       let readiness = "COINGLASS_FEATURE_READY";
-      const limits: string[] = [];
+      const limits: string[] = [...ohlcLimits];
       if (fundHist.length === 0) { limits.push("funding missing"); }
       if (dailyLiq.size === 0) { limits.push("liquidation missing"); }
 
@@ -183,7 +268,7 @@ async function main() {
       });
     }
 
-    readinessRows.push(`${sym},${token.group},${sym},${oiHist.length},${oiFieldMissing},${oiParseFailed},${fundHist.length},${fundFieldMissing},${fundParseFailed},${liqHist.length},${liqFieldMissing},${liqParseFailed},${invalidDates},COINGLASS_FEATURE_READY,`);
+    readinessRows.push(`${sym},${token.group},${sym},${oiHist.length},${oiFieldMissing},${oiParseFailed},${fundHist.length},${fundFieldMissing},${fundParseFailed},${liqHist.length},${liqFieldMissing},${liqParseFailed},${invalidDates},COINGLASS_FEATURE_READY,${[...ohlcLimits].join("; ")}`);
     console.log(`  COMPLETE: ${oiHist.length} feature rows\n`);
   }
 
@@ -230,7 +315,7 @@ async function main() {
     "- Cross-exchange liquidation history (new capability)",
     "- Exchange-level OI distribution (who dominates derivatives)",
     "", "## 4. Next", "",
-    "**RUN_DERIVATIVES_V2_METRIC_LOOP** — feature table ready, metrics COMPUTABLE.",
+    allReady ? "**RUN_DERIVATIVES_V2_METRIC_LOOP** — feature table ready, metrics COMPUTABLE." : "**NOT_READY** — fix parse issues before running metric loop.",
     "", "## 5. Cannot Prove", "",
     "- Cannot confirm derivatives positioning from OI alone",
     "- Cannot distinguish long vs short build-up",

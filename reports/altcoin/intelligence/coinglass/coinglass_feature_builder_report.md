@@ -1,6 +1,6 @@
 # CoinGlass Feature Builder Report
 
-Generated: 2026-05-04T13:54:38.372Z
+Generated: 2026-05-04T14:08:03.453Z
 
 ## 1. Status
 

@@ -113,19 +113,65 @@
     "token": "PEPE",
     "request_path": "/api/futures/liquidation/aggregated-history",
     "status": "OK",
-    "row_count": 0,
-    "response_type": "undefined",
+    "row_count": 3,
+    "response_type": "object",
     "top_level_keys": [
-      "code",
-      "msg"
+      "code"
     ],
     "data_keys": [],
-    "first_row_keys": [],
-    "first_row_sample": null,
-    "timestamp_candidates": [],
-    "numeric_candidates": [],
-    "parser_ready": false,
-    "parser_recommendation": "",
+    "first_row_keys": [
+      "time",
+      "aggregated_long_liquidation_usd",
+      "aggregated_short_liquidation_usd"
+    ],
+    "first_row_sample": {
+      "time": 1777680000000,
+      "aggregated_long_liquidation_usd": 2801.067,
+      "aggregated_short_liquidation_usd": 30691.033
+    },
+    "timestamp_candidates": [
+      "time"
+    ],
+    "numeric_candidates": [
+      "time=1777680000000.00",
+      "aggregated_long_liquidation_usd=2801.07",
+      "aggregated_short_liquidation_usd=30691.03"
+    ],
+    "parser_ready": true,
+    "parser_recommendation": "Use timestamp from: time. Numeric fields: time=1777680000000.00, aggregated_long_liquidation_usd=2801.07, aggregated_short_liquidation_usd=30691.03",
+    "limitations": []
+  },
+  {
+    "endpoint_name": "liquidation",
+    "token": "PEPE",
+    "request_path": "/api/futures/liquidation/aggregated-history",
+    "status": "OK",
+    "row_count": 3,
+    "response_type": "object",
+    "top_level_keys": [
+      "code"
+    ],
+    "data_keys": [],
+    "first_row_keys": [
+      "time",
+      "aggregated_long_liquidation_usd",
+      "aggregated_short_liquidation_usd"
+    ],
+    "first_row_sample": {
+      "time": 1777867200000,
+      "aggregated_long_liquidation_usd": 44558.091,
+      "aggregated_short_liquidation_usd": 42780.146
+    },
+    "timestamp_candidates": [
+      "time"
+    ],
+    "numeric_candidates": [
+      "time=1777867200000.00",
+      "aggregated_long_liquidation_usd=44558.09",
+      "aggregated_short_liquidation_usd=42780.15"
+    ],
+    "parser_ready": true,
+    "parser_recommendation": "Use timestamp from: time. Numeric fields: time=1777867200000.00, aggregated_long_liquidation_usd=44558.09, aggregated_short_liquidation_usd=42780.15",
     "limitations": []
   },
   {
@@ -238,19 +284,65 @@
     "token": "BSB",
     "request_path": "/api/futures/liquidation/aggregated-history",
     "status": "OK",
-    "row_count": 0,
-    "response_type": "undefined",
+    "row_count": 3,
+    "response_type": "object",
     "top_level_keys": [
-      "code",
-      "msg"
+      "code"
     ],
     "data_keys": [],
-    "first_row_keys": [],
-    "first_row_sample": null,
-    "timestamp_candidates": [],
-    "numeric_candidates": [],
-    "parser_ready": false,
-    "parser_recommendation": "",
+    "first_row_keys": [
+      "time",
+      "aggregated_long_liquidation_usd",
+      "aggregated_short_liquidation_usd"
+    ],
+    "first_row_sample": {
+      "time": 1777680000000,
+      "aggregated_long_liquidation_usd": 336996.1858416,
+      "aggregated_short_liquidation_usd": 1182018.8362924
+    },
+    "timestamp_candidates": [
+      "time"
+    ],
+    "numeric_candidates": [
+      "time=1777680000000.00",
+      "aggregated_long_liquidation_usd=336996.19",
+      "aggregated_short_liquidation_usd=1182018.84"
+    ],
+    "parser_ready": true,
+    "parser_recommendation": "Use timestamp from: time. Numeric fields: time=1777680000000.00, aggregated_long_liquidation_usd=336996.19, aggregated_short_liquidation_usd=1182018.84",
+    "limitations": []
+  },
+  {
+    "endpoint_name": "liquidation",
+    "token": "BSB",
+    "request_path": "/api/futures/liquidation/aggregated-history",
+    "status": "OK",
+    "row_count": 3,
+    "response_type": "object",
+    "top_level_keys": [
+      "code"
+    ],
+    "data_keys": [],
+    "first_row_keys": [
+      "time",
+      "aggregated_long_liquidation_usd",
+      "aggregated_short_liquidation_usd"
+    ],
+    "first_row_sample": {
+      "time": 1777867200000,
+      "aggregated_long_liquidation_usd": 232754.7430146,
+      "aggregated_short_liquidation_usd": 815723.3030782
+    },
+    "timestamp_candidates": [
+      "time"
+    ],
+    "numeric_candidates": [
+      "time=1777867200000.00",
+      "aggregated_long_liquidation_usd=232754.74",
+      "aggregated_short_liquidation_usd=815723.30"
+    ],
+    "parser_ready": true,
+    "parser_recommendation": "Use timestamp from: time. Numeric fields: time=1777867200000.00, aggregated_long_liquidation_usd=232754.74, aggregated_short_liquidation_usd=815723.30",
     "limitations": []
   },
   {
@@ -367,19 +459,65 @@
     "token": "LAB",
     "request_path": "/api/futures/liquidation/aggregated-history",
     "status": "OK",
-    "row_count": 0,
-    "response_type": "undefined",
+    "row_count": 3,
+    "response_type": "object",
     "top_level_keys": [
-      "code",
-      "msg"
+      "code"
     ],
     "data_keys": [],
-    "first_row_keys": [],
-    "first_row_sample": null,
-    "timestamp_candidates": [],
-    "numeric_candidates": [],
-    "parser_ready": false,
-    "parser_recommendation": "",
+    "first_row_keys": [
+      "time",
+      "aggregated_long_liquidation_usd",
+      "aggregated_short_liquidation_usd"
+    ],
+    "first_row_sample": {
+      "time": 1777680000000,
+      "aggregated_long_liquidation_usd": 8808971.7585011,
+      "aggregated_short_liquidation_usd": 16363294.7542701
+    },
+    "timestamp_candidates": [
+      "time"
+    ],
+    "numeric_candidates": [
+      "time=1777680000000.00",
+      "aggregated_long_liquidation_usd=8808971.76",
+      "aggregated_short_liquidation_usd=16363294.75"
+    ],
+    "parser_ready": true,
+    "parser_recommendation": "Use timestamp from: time. Numeric fields: time=1777680000000.00, aggregated_long_liquidation_usd=8808971.76, aggregated_short_liquidation_usd=16363294.75",
+    "limitations": []
+  },
+  {
+    "endpoint_name": "liquidation",
+    "token": "LAB",
+    "request_path": "/api/futures/liquidation/aggregated-history",
+    "status": "OK",
+    "row_count": 3,
+    "response_type": "object",
+    "top_level_keys": [
+      "code"
+    ],
+    "data_keys": [],
+    "first_row_keys": [
+      "time",
+      "aggregated_long_liquidation_usd",
+      "aggregated_short_liquidation_usd"
+    ],
+    "first_row_sample": {
+      "time": 1777867200000,
+      "aggregated_long_liquidation_usd": 760452.3750788,
+      "aggregated_short_liquidation_usd": 169877.5787953
+    },
+    "timestamp_candidates": [
+      "time"
+    ],
+    "numeric_candidates": [
+      "time=1777867200000.00",
+      "aggregated_long_liquidation_usd=760452.38",
+      "aggregated_short_liquidation_usd=169877.58"
+    ],
+    "parser_ready": true,
+    "parser_recommendation": "Use timestamp from: time. Numeric fields: time=1777867200000.00, aggregated_long_liquidation_usd=760452.38, aggregated_short_liquidation_usd=169877.58",
     "limitations": []
   },
   {
@@ -491,6 +629,25 @@
     "endpoint_name": "liquidation",
     "token": "UB",
     "request_path": "/api/futures/liquidation/aggregated-history",
+    "status": "ALL_VARIANTS_FAILED",
+    "row_count": 0,
+    "response_type": "",
+    "top_level_keys": [],
+    "data_keys": [],
+    "first_row_keys": [],
+    "first_row_sample": null,
+    "timestamp_candidates": [],
+    "numeric_candidates": [],
+    "parser_ready": false,
+    "parser_recommendation": "",
+    "limitations": [
+      "All 6 liquidation variants returned 0 rows"
+    ]
+  },
+  {
+    "endpoint_name": "aggregated_oi",
+    "token": "AI",
+    "request_path": "/api/futures/open-interest/aggregated-history",
     "status": "OK",
     "row_count": 0,
     "response_type": "undefined",
@@ -505,41 +662,6 @@
     "numeric_candidates": [],
     "parser_ready": false,
     "parser_recommendation": "",
-    "limitations": []
-  },
-  {
-    "endpoint_name": "aggregated_oi",
-    "token": "AI",
-    "request_path": "/api/futures/open-interest/aggregated-history",
-    "status": "OK",
-    "row_count": 3,
-    "response_type": "object",
-    "top_level_keys": [
-      "code"
-    ],
-    "data_keys": [],
-    "first_row_keys": [
-      "time",
-      "open",
-      "high",
-      "low",
-      "close"
-    ],
-    "first_row_sample": {
-      "time": 1777680000000,
-      "open": "1827836",
-      "high": "2025242",
-      "low": "1618335",
-      "close": "1690029"
-    },
-    "timestamp_candidates": [
-      "time"
-    ],
-    "numeric_candidates": [
-      "time=1777680000000.00"
-    ],
-    "parser_ready": true,
-    "parser_recommendation": "Use timestamp from: time. Numeric fields: time=1777680000000.00",
     "limitations": []
   },
   {
@@ -547,75 +669,25 @@
     "token": "AI",
     "request_path": "/api/futures/funding-rate/oi-weight-history",
     "status": "OK",
-    "row_count": 3,
-    "response_type": "object",
+    "row_count": 0,
+    "response_type": "undefined",
     "top_level_keys": [
-      "code"
+      "code",
+      "msg"
     ],
     "data_keys": [],
-    "first_row_keys": [
-      "time",
-      "open",
-      "high",
-      "low",
-      "close"
-    ],
-    "first_row_sample": {
-      "time": 1777680000000,
-      "open": "0.03539",
-      "high": "0.094183",
-      "low": "-0.070743",
-      "close": "0.093333"
-    },
-    "timestamp_candidates": [
-      "time"
-    ],
-    "numeric_candidates": [
-      "time=1777680000000.00"
-    ],
-    "parser_ready": true,
-    "parser_recommendation": "Use timestamp from: time. Numeric fields: time=1777680000000.00",
+    "first_row_keys": [],
+    "first_row_sample": null,
+    "timestamp_candidates": [],
+    "numeric_candidates": [],
+    "parser_ready": false,
+    "parser_recommendation": "",
     "limitations": []
   },
   {
     "endpoint_name": "vol_weighted_funding",
     "token": "AI",
     "request_path": "/api/futures/funding-rate/vol-weight-history",
-    "status": "OK",
-    "row_count": 3,
-    "response_type": "object",
-    "top_level_keys": [
-      "code"
-    ],
-    "data_keys": [],
-    "first_row_keys": [
-      "time",
-      "open",
-      "high",
-      "low",
-      "close"
-    ],
-    "first_row_sample": {
-      "time": 1777680000000,
-      "open": "0.042838",
-      "high": "0.108297",
-      "low": "-0.008964",
-      "close": "0.106867"
-    },
-    "timestamp_candidates": [
-      "time"
-    ],
-    "numeric_candidates": [
-      "time=1777680000000.00"
-    ],
-    "parser_ready": true,
-    "parser_recommendation": "Use timestamp from: time. Numeric fields: time=1777680000000.00",
-    "limitations": []
-  },
-  {
-    "endpoint_name": "liquidation",
-    "token": "AI",
-    "request_path": "/api/futures/liquidation/aggregated-history",
     "status": "OK",
     "row_count": 0,
     "response_type": "undefined",
@@ -631,5 +703,24 @@
     "parser_ready": false,
     "parser_recommendation": "",
     "limitations": []
+  },
+  {
+    "endpoint_name": "liquidation",
+    "token": "AI",
+    "request_path": "/api/futures/liquidation/aggregated-history",
+    "status": "ALL_VARIANTS_FAILED",
+    "row_count": 0,
+    "response_type": "",
+    "top_level_keys": [],
+    "data_keys": [],
+    "first_row_keys": [],
+    "first_row_sample": null,
+    "timestamp_candidates": [],
+    "numeric_candidates": [],
+    "parser_ready": false,
+    "parser_recommendation": "",
+    "limitations": [
+      "All 6 liquidation variants returned 0 rows"
+    ]
   }
 ]

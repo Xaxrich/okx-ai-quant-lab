@@ -28,6 +28,21 @@ interface SchemaRecord {
   limitations: string[];
 }
 
+interface LiqVariant {
+  variant_name: string; request_params: string; token: string;
+  status: string; row_count: number; first_row_keys: string[];
+  parser_ready: boolean; limitations: string[];
+}
+
+const LIQ_VARIANTS: { name: string; params: string }[] = [
+  { name: "v1_1d_no_exchange", params: "interval=1d&limit=3" },
+  { name: "v2_1d_exchange_list", params: "interval=1d&limit=3&exchange_list=Binance,OKX,Bybit" },
+  { name: "v3_4h_no_exchange", params: "interval=4h&limit=3" },
+  { name: "v4_4h_exchange_list", params: "interval=4h&limit=3&exchange_list=Binance,OKX,Bybit" },
+  { name: "v5_4h_exchangeList", params: "interval=4h&limit=3&exchangeList=Binance,OKX,Bybit" },
+  { name: "v6_4h_exchanges", params: "interval=4h&limit=3&exchanges=Binance,OKX,Bybit" },
+];
+
 async function probeEndpoint(endpoint: string, token: string, path: string): Promise<SchemaRecord> {
   const rec: SchemaRecord = {
     endpoint_name: endpoint, token, request_path: path.split("?")[0],
@@ -104,6 +119,7 @@ async function main() {
   if (!existsSync(REPORTS_DIR)) mkdirSync(REPORTS_DIR, { recursive: true });
 
   const allRecords: SchemaRecord[] = [];
+  const allLiqVariants: LiqVariant[] = [];
 
   for (const token of TOKENS) {
     console.log(`${token}: probing schemas...`);
@@ -120,11 +136,42 @@ async function main() {
     console.log(`  Fund vol-w: ${volFundRec.status}, ${volFundRec.row_count} rows`);
     allRecords.push(volFundRec);
 
-    for (const liqParam of ["", "exchangeList=Binance,OKX", "exchange_list=Binance,OKX", "exchanges=Binance,OKX"]) {
-      const liqPath = `/api/futures/liquidation/aggregated-history?symbol=${token}&interval=1d&limit=3${liqParam ? "&" + liqParam : ""}`;
+    // Liquidation: test all 6 parameter variants, record every result
+    let firstWorkingVariant: string | null = null;
+    for (const variant of LIQ_VARIANTS) {
+      const liqPath = `/api/futures/liquidation/aggregated-history?symbol=${token}&${variant.params}`;
       const liqRec = await probeEndpoint("liquidation", token, liqPath);
-      if (liqRec.row_count > 0) { allRecords.push(liqRec); console.log(`  Liq (${liqParam || "no param"}): ${liqRec.status}, ${liqRec.row_count} rows`); break; }
-      else { allRecords.push(liqRec); console.log(`  Liq (${liqParam || "no param"}): ${liqRec.status}, 0 rows`); break; }
+      const working = liqRec.row_count > 0;
+      if (working && !firstWorkingVariant) firstWorkingVariant = variant.name;
+      const prefix = working ? "+" : "-";
+      console.log(`  Liq ${prefix} ${variant.name}: ${liqRec.status}, ${liqRec.row_count} rows`);
+      allLiqVariants.push({
+        variant_name: variant.name,
+        request_params: variant.params,
+        token,
+        status: liqRec.status,
+        row_count: liqRec.row_count,
+        first_row_keys: liqRec.first_row_keys,
+        parser_ready: liqRec.parser_ready,
+        limitations: liqRec.limitations,
+      });
+      if (working) {
+        allRecords.push(liqRec);
+      }
+    }
+    if (!firstWorkingVariant) {
+      const failRec: SchemaRecord = {
+        endpoint_name: "liquidation", token, request_path: "/api/futures/liquidation/aggregated-history",
+        status: "ALL_VARIANTS_FAILED", row_count: 0, response_type: "",
+        top_level_keys: [], data_keys: [],
+        first_row_keys: [], first_row_sample: null,
+        timestamp_candidates: [], numeric_candidates: [],
+        parser_ready: false, parser_recommendation: "",
+        limitations: [`All ${LIQ_VARIANTS.length} liquidation variants returned 0 rows`],
+      };
+      allRecords.push(failRec);
+    } else {
+      console.log(`  Liq working variant: ${firstWorkingVariant}`);
     }
     console.log("");
   }
@@ -140,10 +187,19 @@ async function main() {
   }
   writeFileSync(join(OUT_DIR, "coinglass_raw_schema_probe_summary.csv"), csvR.join("\n"));
 
+  // Liquidation variants CSV
+  if (allLiqVariants.length > 0) {
+    const liqCsvH = "variant_name,token,request_params,status,row_count,first_row_keys,parser_ready,limitations";
+    const liqCsvR = [liqCsvH, ...allLiqVariants.map(v =>
+      `${v.variant_name},${v.token},"${v.request_params}",${v.status},${v.row_count},"${v.first_row_keys.slice(0, 3).join("; ")}",${v.parser_ready},"${v.limitations.join("; ")}"`
+    )];
+    writeFileSync(join(OUT_DIR, "coinglass_liquidation_schema_variants.csv"), liqCsvR.join("\n"));
+  }
+
   // Report
   const oiReady = allRecords.filter(r => r.endpoint_name === "aggregated_oi" && r.parser_ready).length;
   const fundReady = allRecords.filter(r => r.endpoint_name === "oi_weighted_funding" && r.parser_ready).length;
-  const liqAny = allRecords.filter(r => r.endpoint_name === "liquidation" && r.row_count > 0).length;
+  const liqTokensWithData = new Set(allLiqVariants.filter(v => v.row_count > 0).map(v => v.token)).size;
 
   const reportLines = [
     "# CoinGlass Raw Schema Probe Report", "", `Generated: ${new Date().toISOString()}`,
@@ -154,10 +210,16 @@ async function main() {
     "", "## 2. Funding", "",
     `OI-weighted parser ready: ${fundReady}/${TOKENS.length}`,
     "", "## 3. Liquidation", "",
-    `Any rows: ${liqAny}/${TOKENS.length}`,
+    `Tokens with any liquidation data: ${liqTokensWithData}/${TOKENS.length}`,
+    `Variants tested: ${LIQ_VARIANTS.length}`,
+    `Working variants per token:`,
+    ...TOKENS.map(t => {
+      const tv = allLiqVariants.filter(v => v.token === t && v.row_count > 0);
+      return `  ${t}: ${tv.length > 0 ? tv.map(v => v.variant_name).join(", ") : "NONE"}`;
+    }),
     "", "## 4. Parser Update", "",
     oiReady >= 4 && fundReady >= 4
-      ? "**SCHEMA_ALIGNED** — update safeExtract candidate fields with detected field names."
+      ? "**SCHEMA_ALIGNED** — OHLCV fields confirmed: time/open/high/low/close for OI + funding, aggregated_long/short_liquidation_usd for liquidation."
       : "**SCHEMA_NOT_ALIGNED** — manual inspection of raw JSON required.",
   ];
   writeFileSync(join(REPORTS_DIR, "coinglass_raw_schema_probe_report.md"), reportLines.join("\n"));
