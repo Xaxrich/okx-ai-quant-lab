@@ -1,11 +1,17 @@
 import { readFileSync, readdirSync, existsSync, statSync } from "fs";
 import { join } from "path";
 
-const ETHERSCAN_KEY = process.env.ETHERSCAN_API_KEY || "";
-const CMC_KEY = process.env.COINMARKETCAP_API_KEY || "";
+const KEYS: { name: string; value: string }[] = [
+  { name: "ETHERSCAN_API_KEY", value: process.env.ETHERSCAN_API_KEY || "" },
+  { name: "COINMARKETCAP_API_KEY", value: process.env.COINMARKETCAP_API_KEY || "" },
+  { name: "COINGECKO_PRO_API_KEY", value: process.env.COINGECKO_PRO_API_KEY || "" },
+  { name: "COINGECKO_DEMO_API_KEY", value: process.env.COINGECKO_DEMO_API_KEY || "" },
+  { name: "BSCSCAN_API_KEY", value: process.env.BSCSCAN_API_KEY || "" },
+];
 
-if (!ETHERSCAN_KEY || !CMC_KEY) {
-  console.log("WARNING: API keys not in environment. Run with: ETHERSCAN_API_KEY=xxx COINMARKETCAP_API_KEY=xxx npm run security:check-secrets");
+const nonEmptyKeys = KEYS.filter(k => k.value.length > 0);
+if (nonEmptyKeys.length === 0) {
+  console.log("WARNING: No API keys in environment. Security check limited.");
 }
 
 const SCAN_DIRS = ["logs", "reports", "data", "src", "scripts", "__tests__", "config", "."];
@@ -50,11 +56,10 @@ async function main() {
     for (const file of files) {
       try {
         const content = readFileSync(file, "utf-8");
-        if (content.includes(ETHERSCAN_KEY)) {
-          findings.push({ file: file.replace(baseDir + "/", "").replace(baseDir + "\\", ""), type: "ETHERSCAN_API_KEY" });
-        }
-        if (content.includes(CMC_KEY)) {
-          findings.push({ file: file.replace(baseDir + "/", "").replace(baseDir + "\\", ""), type: "COINMARKETCAP_API_KEY" });
+        for (const key of nonEmptyKeys) {
+          if (content.includes(key.value)) {
+            findings.push({ file: file.replace(baseDir + "/", "").replace(baseDir + "\\", ""), type: key.name });
+          }
         }
       } catch { /* skip binary files */ }
     }
@@ -93,9 +98,11 @@ async function main() {
   // Check .env.example has no real keys
   try {
     const example = readFileSync(join(import.meta.dirname, "..", "..", ".env.example"), "utf-8");
-    if (example.includes(ETHERSCAN_KEY) || example.includes(CMC_KEY)) {
-      console.log("REDACTED_SECRET_FOUND: .env.example contains real API keys — REMOVE IMMEDIATELY");
-    } else {
+    let exampleClean = true;
+    for (const key of nonEmptyKeys) {
+      if (example.includes(key.value)) { console.log(`REDACTED_SECRET_FOUND: .env.example contains ${key.name}`); exampleClean = false; }
+    }
+    if (exampleClean) {
       console.log("OK: .env.example contains no real keys");
     }
   } catch {
@@ -109,9 +116,11 @@ async function main() {
     let clean = true;
     for (const r of reports) {
       const content = readFileSync(join(scannerReportDir, r), "utf-8");
-      if (content.includes(ETHERSCAN_KEY) || content.includes(CMC_KEY)) {
-        console.log(`REDACTED_SECRET_FOUND: scanner report ${r} contains API key`);
-        clean = false;
+      for (const key of nonEmptyKeys) {
+        if (content.includes(key.value)) {
+          console.log(`REDACTED_SECRET_FOUND: scanner report ${r} contains ${key.name}`);
+          clean = false;
+        }
       }
     }
     if (clean) console.log(`OK: ${reports.length} scanner reports checked — no keys found`);

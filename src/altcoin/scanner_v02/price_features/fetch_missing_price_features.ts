@@ -1,5 +1,6 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
 import { join } from "path";
+import { getCoinGeckoAuth } from "../../data_sources/coingecko_auth.js";
 
 const CACHE_DIR = join(import.meta.dirname, "..", "..", "..", "..", "data", "altcoin", "scanner_v02", "cache", "price_features");
 const REGISTRY_DIR = join(import.meta.dirname, "..", "..", "..", "..", "data", "altcoin", "scanner_v02", "registry");
@@ -58,24 +59,26 @@ function cacheValid(entry: CacheManifestEntry | undefined): boolean {
   return age < 86400000; // 24h TTL
 }
 
-async function fetchWithRetry(cgId: string, retries: number = 2): Promise<any> {
-  for (let i = 0; i < retries; i++) {
-    try {
-      const apiKey = process.env.COINGECKO_API_KEY || "";
-    const baseUrl = apiKey ? "https://pro-api.coingecko.com/api/v3" : "https://api.coingecko.com/api/v3";
-    const url = `${baseUrl}/coins/${cgId}/market_chart?vs_currency=usd&days=90`;
-    const headers: Record<string, string> = {};
-    if (apiKey) { headers["x-cg-pro-api-key"] = apiKey; }
-    const r = await fetch(url, { headers });
-    if (r.status === 429) return { status: "RATE_LIMITED" };
-      if (!r.ok) return { status: `HTTP_${r.status}` };
-      return { status: "OK", data: await r.json() };
-    } catch (err: any) {
-      if (i < retries - 1) await sleep(5000);
-      else return { status: "FETCH_ERROR", error: err.message };
+function fetchWithRetry(cgId: string, retries: number = 2): Promise<any> {
+  const auth = getCoinGeckoAuth();
+
+  async function attempt(): Promise<any> {
+    for (let i = 0; i < retries; i++) {
+      try {
+        const url = `${auth.baseUrl}/coins/${cgId}/market_chart?vs_currency=usd&days=90`;
+        const r = await fetch(url, { headers: auth.headers });
+        if (r.status === 429) return { status: "RATE_LIMITED" };
+        if (r.status === 404) return { status: "ID_NOT_FOUND" };
+        if (!r.ok) return { status: `HTTP_${r.status}` };
+        return { status: "OK", data: await r.json() };
+      } catch (err: any) {
+        if (i < retries - 1) await sleep(5000);
+        else return { status: "FETCH_ERROR", error: err.message };
+      }
     }
+    return { status: "UNKNOWN_ERROR" };
   }
-  return { status: "UNKNOWN_ERROR" };
+  return attempt();
 }
 
 function sleep(ms: number): Promise<void> { return new Promise(r => setTimeout(r, ms)); }
