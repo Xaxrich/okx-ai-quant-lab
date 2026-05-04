@@ -61,9 +61,12 @@ function cacheValid(entry: CacheManifestEntry | undefined): boolean {
 async function fetchWithRetry(cgId: string, retries: number = 2): Promise<any> {
   for (let i = 0; i < retries; i++) {
     try {
-      const url = `https://api.coingecko.com/api/v3/coins/${cgId}/market_chart?vs_currency=usd&days=90`;
-      const r = await fetch(url);
-      if (r.status === 429) return { status: "RATE_LIMITED" };
+      const apiKey = process.env.COINGECKO_API_KEY || "";
+    const url = `https://api.coingecko.com/api/v3/coins/${cgId}/market_chart?vs_currency=usd&days=90`;
+    const headers: Record<string, string> = {};
+    if (apiKey) { headers["x-cg-pro-api-key"] = apiKey; }
+    const r = await fetch(url, { headers });
+    if (r.status === 429) return { status: "RATE_LIMITED" };
       if (!r.ok) return { status: `HTTP_${r.status}` };
       return { status: "OK", data: await r.json() };
     } catch (err: any) {
