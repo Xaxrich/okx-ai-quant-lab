@@ -1,0 +1,9 @@
+endpoint,token,status,rows,usable
+token_holders,BSB,OK,0,false
+token_transfers,BSB,OK,10,true
+token_holders,LAB,OK,0,false
+token_transfers,LAB,OK,10,true
+token_holders,PEPE,OK,0,false
+token_transfers,PEPE,OK,10,true
+token_holders,FLOKI,OK,0,false
+token_transfers,FLOKI,OK,10,true
