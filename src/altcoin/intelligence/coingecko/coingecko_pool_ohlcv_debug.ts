@@ -78,7 +78,8 @@ async function debugOhlcv(token: typeof TOKENS[0], pool: PoolInfo): Promise<Debu
         errMsg = d.error || "";
         respStatus = "ERROR";
       } else {
-        const rows = Array.isArray(d.data) ? d.data : (d.data?.attributes ? [d.data] : []);
+        const ohlcvList = d?.data?.attributes?.ohlcv_list;
+        const rows: any[] = Array.isArray(ohlcvList) ? ohlcvList : [];
         rowsReturned = rows.length;
         respStatus = "OK";
         if (rows.length > 0) {

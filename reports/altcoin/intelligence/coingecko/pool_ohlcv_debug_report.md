@@ -1,6 +1,6 @@
 # Pool OHLCV Debug Report
 
-Generated: 2026-05-04T09:30:57.113Z
+Generated: 2026-05-04T09:50:17.716Z
 Auth: PRO | https://pro-api.coingecko.com/api/v3
 
 ## Results

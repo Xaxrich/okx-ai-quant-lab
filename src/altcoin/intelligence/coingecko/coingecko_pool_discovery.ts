@@ -76,19 +76,23 @@ async function fetchTopPools(token: typeof TOKENS[0]): Promise<PoolInfo[]> {
 }
 
 function selectPrimaryPool(pools: PoolInfo[], token: string): PrimaryPool | null {
-  if (pools.length === 0) return null;
+  // Filter: exclude pools with reserve_in_usd <= 0 or < 1000
+  const validPools = pools.filter(p => p.reserveInUsd > 1000);
+  const useFallback = validPools.length === 0;
+  const candidatePools = useFallback ? pools : validPools;
+  if (candidatePools.length === 0) return null;
 
   const stableQuotes = new Set(["USDT", "USDC", "WETH", "ETH", "SOL", "BNB", "DAI", "WBTC"]);
-  const maxReserve = Math.max(...pools.map(p => p.reserveInUsd));
-  const maxVolume = Math.max(...pools.map(p => p.volumeH24Usd));
-  const maxTx = Math.max(...pools.map(p => p.txH24Buys + p.txH24Sells));
+  const maxReserve = Math.max(...candidatePools.map(p => p.reserveInUsd));
+  const maxVolume = Math.max(...candidatePools.map(p => p.volumeH24Usd));
+  const maxTx = Math.max(...candidatePools.map(p => p.txH24Buys + p.txH24Sells));
 
-  const scored = pools.map(p => {
+  const scored = candidatePools.map(p => {
     const normReserve = maxReserve > 0 ? p.reserveInUsd / maxReserve : 0;
     const normVolume = maxVolume > 0 ? p.volumeH24Usd / maxVolume : 0;
     const normTx = maxTx > 0 ? (p.txH24Buys + p.txH24Sells) / maxTx : 0;
     const stableBonus = stableQuotes.has(p.quoteTokenSymbol) ? 1 : 0;
-    const score = 0.5 * normReserve + 0.3 * normVolume + 0.1 * normTx + 0.1 * stableBonus;
+    const score = 0.6 * normReserve + 0.2 * normVolume + 0.1 * normTx + 0.1 * stableBonus;
     return { ...p, score };
   });
 
@@ -101,9 +105,10 @@ function selectPrimaryPool(pools: PoolInfo[], token: string): PrimaryPool | null
   const totalVolume = pools.reduce((s, p) => s + p.volumeH24Usd, 0);
 
   const limitations: string[] = [];
+  if (useFallback) limitations.push("PRIMARY_POOL_LOW_LIQUIDITY — all pools below $1000 reserve, using fallback.");
+  if (token === "BSB") limitations.push("BSB_MULTICHAIN_POOL_RESOLUTION_REQUIRED — single-chain search only.");
   if (pools.length < 3) limitations.push("Fewer than 3 pools found.");
-  if (primary.reserveInUsd < 1000) limitations.push("Primary pool has very low liquidity.");
-  const conf = pools.length >= 5 && primary.reserveInUsd > 100000 ? "HIGH" : pools.length >= 2 ? "MEDIUM" : "LOW";
+  const conf = useFallback ? "LOW" : pools.length >= 5 && primary.reserveInUsd > 100000 ? "HIGH" : pools.length >= 2 ? "MEDIUM" : "LOW";
 
   return {
     token, primaryPoolAddress: primary.poolAddress, primaryPoolId: primary.poolId,
@@ -127,11 +132,13 @@ async function probeOhlcv(token: string, network: string, poolAddr: string, time
     if (!r.ok) return { token, poolAddress: poolAddr, timeframe, rowsReturned: 0, earliestTs: "", latestTs: "", ohlcvStatus: `HTTP_${r.status}`, usable: false, limitations: [`HTTP ${r.status}`] };
 
     const d = await r.json() as any;
-    const rows: any[] = Array.isArray(d.data) ? d.data : (d.data?.attributes ? [d.data] : []);
-    const earliest = rows.length > 0 ? new Date(parseInt(rows[0][0] as string)).toISOString().slice(0, 10) : "";
-    const latest = rows.length > 0 ? new Date(parseInt(rows[rows.length - 1][0] as string)).toISOString().slice(0, 10) : "";
+    const ohlcvList = d?.data?.attributes?.ohlcv_list;
+    const rows: any[] = Array.isArray(ohlcvList) ? ohlcvList : [];
+    const earliest = rows.length > 0 ? new Date(parseInt(rows[0][0] as string) * 1000).toISOString().slice(0, 10) : "";
+    const latest = rows.length > 0 ? new Date(parseInt(rows[rows.length - 1][0] as string) * 1000).toISOString().slice(0, 10) : "";
+    const status = rows.length > 0 ? "OK" : "PARSER_NO_OHLCV_LIST";
 
-    return { token, poolAddress: poolAddr, timeframe, rowsReturned: rows.length, earliestTs: earliest, latestTs: latest, ohlcvStatus: "OK", usable: rows.length > 10, limitations: [] };
+    return { token, poolAddress: poolAddr, timeframe, rowsReturned: rows.length, earliestTs: earliest, latestTs: latest, ohlcvStatus: status, usable: rows.length > 10, limitations: rows.length === 0 ? ["No ohlcv_list in response"] : [] };
   } catch (e: any) {
     return { token, poolAddress: poolAddr, timeframe, rowsReturned: 0, earliestTs: "", latestTs: "", ohlcvStatus: "ERROR", usable: false, limitations: [e.message] };
   }
