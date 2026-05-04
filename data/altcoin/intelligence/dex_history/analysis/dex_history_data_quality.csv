@@ -1,0 +1,7 @@
+token,pool_confidence,hour_rows,day_rows,covers_breakout,covers_peak,readiness_score,readiness_label,limitations
+BSB,MEDIUM,100,5,false,false,40,DEX_HISTORY_PARTIAL,"MULTICHAIN_POOL_RESOLUTION_REQUIRED — single-chain pool only; Primary pool confidence is MEDIUM; Day OHLCV insufficient (<10 candles)"
+LAB,HIGH,720,90,false,false,85,DEX_HISTORY_READY,""
+PEPE,HIGH,720,90,false,false,85,DEX_HISTORY_READY,""
+WIF,HIGH,720,90,false,false,85,DEX_HISTORY_READY,""
+BONK,HIGH,720,90,false,false,85,DEX_HISTORY_READY,""
+FLOKI,HIGH,720,90,false,false,85,DEX_HISTORY_READY,""
