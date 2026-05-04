@@ -1,0 +1,13 @@
+token,group,chain,contract,holders_available,holders_returned,entity_labels_available,top_holder_entity_count,top_holder_unknown_count,cex_holder_count,dex_holder_count,fund_holder_count,market_maker_holder_count,arkham_holder_coverage,confidence,limitations
+BSB,P0,ethereum,0xDB6Ba5D510F114F9b2eA08BEa7d30e32eEe33411,true,20,true,5,15,4,0,0,0,25.0%,HIGH,majority unknown
+LAB,P0,bsc,0x7ec43Cf65F1663F820427C62A5780b8f2E25593A,true,20,true,10,10,8,0,1,0,50.0%,HIGH,
+UB,P0,bsc,0x40b8129b786d766267a7a118cf8c07e31cdb6fde,true,20,true,7,13,5,1,0,0,35.0%,HIGH,majority unknown
+AI,P0,ethereum,,true,20,true,10,10,4,2,2,0,50.0%,HIGH,
+TROLL,P1,ethereum,,true,20,true,5,15,3,0,0,0,25.0%,HIGH,majority unknown
+SIREN,P1,ethereum,,true,20,true,1,19,0,0,0,0,5.0%,HIGH,majority unknown
+PENDLE,P2,ethereum,0x808507121b80c02388fad14726482e061b8da827,true,20,true,15,5,7,0,2,0,75.0%,HIGH,
+ONDO,P2,ethereum,0xfAbA6f8e4a5E8Ab82F62fe7C39859FA577269BE3,true,20,true,18,2,14,0,2,0,90.0%,HIGH,
+PEPE,CONTROL,ethereum,0x6982508145454ce325ddbe47a25d4ec3d2311933,true,20,true,19,1,19,0,0,0,95.0%,HIGH,
+WIF,CONTROL,solana,EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm,true,20,true,18,2,17,1,0,0,90.0%,HIGH,
+BONK,CONTROL,solana,DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263,true,20,true,11,9,8,0,0,0,55.0%,HIGH,
+FLOKI,CONTROL,ethereum,0xcf0c122c6b73ff809c693db761e7baebe62b6a2e,true,20,true,18,2,14,1,0,0,90.0%,HIGH,

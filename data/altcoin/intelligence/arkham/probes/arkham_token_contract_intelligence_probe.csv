@@ -1,0 +1,13 @@
+token,group,chain,contract,contract_intel_available,address_intel_available,enriched_available,arkham_entity_id,arkham_entity_name,arkham_entity_type,contract_name,is_token_contract,confidence,limitations
+BSB,P0,ethereum,0xDB6Ba5D510F114F9b2eA08BEa7d30e32eEe33411,true,true,false,,,,,,HIGH,Label-based identification
+LAB,P0,bsc,0x7ec43Cf65F1663F820427C62A5780b8f2E25593A,true,true,false,,,,,,HIGH,Label-based identification
+UB,P0,bsc,0x40b8129b786d766267a7a118cf8c07e31cdb6fde,true,true,false,,,,,,HIGH,Label-based identification
+AI,P0,ethereum,,false,false,false,,,,,,UNKNOWN,No contract address
+TROLL,P1,ethereum,,false,false,false,,,,,,UNKNOWN,No contract address
+SIREN,P1,ethereum,,false,false,false,,,,,,UNKNOWN,No contract address
+PENDLE,P2,ethereum,0x808507121b80c02388fad14726482e061b8da827,true,true,false,pendle-finance,Pendle Finance,yield,,,HIGH,
+ONDO,P2,ethereum,0xfAbA6f8e4a5E8Ab82F62fe7C39859FA577269BE3,true,true,false,ondo-finance,Ondo Finance,misc,,,HIGH,
+PEPE,CONTROL,ethereum,0x6982508145454ce325ddbe47a25d4ec3d2311933,true,true,false,pepe,Pepe,meme,,,HIGH,
+WIF,CONTROL,solana,EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm,true,true,false,dogwifcoin,dogwifcoin,meme,,,HIGH,
+BONK,CONTROL,solana,DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263,true,true,false,bonk-inu,Bonk,meme,,,HIGH,
+FLOKI,CONTROL,ethereum,0xcf0c122c6b73ff809c693db761e7baebe62b6a2e,true,true,false,floki,Floki,meme,,,HIGH,

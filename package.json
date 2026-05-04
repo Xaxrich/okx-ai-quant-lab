@@ -33,6 +33,11 @@
     "intelligence:coinglass:features": "tsx src/altcoin/intelligence/coinglass/coinglass_feature_builder.ts",
     "intelligence:coinglass:report": "tsx src/altcoin/intelligence/coinglass/coinglass_feature_builder.ts",
     "intelligence:metric-loop": "tsx src/altcoin/intelligence/metric_loop/metric_loop_runner.ts",
+    "intelligence:arkham:probe": "tsx src/altcoin/intelligence/arkham/arkham_capability_probe.ts",
+    "intelligence:arkham:schema-probe": "tsx src/altcoin/intelligence/arkham/arkham_schema_probe.ts",
+    "intelligence:arkham:features": "tsx src/altcoin/intelligence/arkham/arkham_flow_feature_builder.ts",
+    "intelligence:arkham:labels": "tsx src/altcoin/intelligence/arkham/arkham_entity_label_builder.ts",
+    "intelligence:arkham:report": "tsx src/altcoin/intelligence/arkham/arkham_report.ts",
 
     "fetch:data": "npm run okx:fetch-data",
     "backtest": "npm run okx:backtest",

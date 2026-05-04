@@ -1,0 +1,3 @@
+endpoint,ok,status,data_summary,limitations
+/health,true,OK,ok,
+/chains,true,OK,15 chains,ethereum, polygon, bsc, optimism, avalanche...

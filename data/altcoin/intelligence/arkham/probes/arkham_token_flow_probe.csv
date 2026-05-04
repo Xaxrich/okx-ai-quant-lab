@@ -1,0 +1,13 @@
+token,group,chain,contract,top_flow_available,volume_available,inflow_entities_count,outflow_entities_count,cex_flow_available,dex_flow_available,unknown_flow_ratio,rows_returned,time_window,confidence,limitations
+BSB,P0,ethereum,0xDB6Ba5D510F114F9b2eA08BEa7d30e32eEe33411,[object Object],[object Object],0,0,false,false,N/A,0,top flow available,HIGH,
+LAB,P0,bsc,0x7ec43Cf65F1663F820427C62A5780b8f2E25593A,[object Object],[object Object],0,0,false,false,N/A,0,top flow available,HIGH,
+UB,P0,bsc,0x40b8129b786d766267a7a118cf8c07e31cdb6fde,[object Object],[object Object],0,0,false,false,N/A,0,top flow available,HIGH,
+AI,P0,ethereum,,[object Object],[object Object],0,0,false,false,N/A,0,top flow available,HIGH,
+TROLL,P1,ethereum,,[object Object],[object Object],0,0,false,false,N/A,0,top flow available,HIGH,
+SIREN,P1,ethereum,,[object Object],[object Object],0,0,false,false,N/A,0,top flow available,HIGH,
+PENDLE,P2,ethereum,0x808507121b80c02388fad14726482e061b8da827,[object Object],[object Object],0,0,false,false,N/A,0,top flow available,HIGH,
+ONDO,P2,ethereum,0xfAbA6f8e4a5E8Ab82F62fe7C39859FA577269BE3,[object Object],[object Object],0,0,false,false,N/A,0,top flow available,HIGH,
+PEPE,CONTROL,ethereum,0x6982508145454ce325ddbe47a25d4ec3d2311933,[object Object],[object Object],0,0,false,false,N/A,0,top flow available,HIGH,
+WIF,CONTROL,solana,EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm,[object Object],[object Object],0,0,false,false,N/A,0,top flow available,HIGH,
+BONK,CONTROL,solana,DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263,[object Object],[object Object],0,0,false,false,N/A,0,top flow available,HIGH,
+FLOKI,CONTROL,ethereum,0xcf0c122c6b73ff809c693db761e7baebe62b6a2e,[object Object],[object Object],0,0,false,false,N/A,0,top flow available,HIGH,

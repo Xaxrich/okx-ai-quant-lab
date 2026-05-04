@@ -1,0 +1,13 @@
+token,sample_group,chain,contract,contract_intelligence,token_holders,token_top_flow,token_volume,transfers,histogram,counterparty_flow,balances,portfolio_timeseries,moralis_reconciliation,coverage_score,arkham_readiness,limitations
+BSB,P0,ethereum,0xDB6Ba5D510F114F9b2eA08BEa7d30e32eEe33411,✓,✓,✓,✓,✓,✓,✓,✓,✓,✓,10/10,ARKHAM_ENTITY_FLOW_READY,
+LAB,P0,bsc,0x7ec43Cf65F1663F820427C62A5780b8f2E25593A,✓,✓,✓,✓,✓,✓,✓,✓,✓,✓,10/10,ARKHAM_ENTITY_FLOW_READY,
+UB,P0,bsc,0x40b8129b786d766267a7a118cf8c07e31cdb6fde,✓,✓,✓,✓,✓,✓,✓,✓,✓,✓,10/10,ARKHAM_ENTITY_FLOW_READY,
+AI,P0,ethereum,,✗,✓,✓,✓,✗,✗,✗,✗,✓,✗,4/10,ARKHAM_LABEL_ONLY,no contract address
+TROLL,P1,ethereum,,✗,✓,✓,✓,✗,✗,✗,✗,✓,✗,4/10,ARKHAM_LABEL_ONLY,no contract address
+SIREN,P1,ethereum,,✗,✓,✓,✓,✗,✗,✗,✗,✓,✗,4/10,ARKHAM_LABEL_ONLY,no contract address
+PENDLE,P2,ethereum,0x808507121b80c02388fad14726482e061b8da827,✓,✓,✓,✓,✓,✓,✓,✓,✓,✓,10/10,ARKHAM_ENTITY_FLOW_READY,
+ONDO,P2,ethereum,0xfAbA6f8e4a5E8Ab82F62fe7C39859FA577269BE3,✓,✓,✓,✓,✓,✓,✓,✓,✓,✓,10/10,ARKHAM_ENTITY_FLOW_READY,
+PEPE,CONTROL,ethereum,0x6982508145454ce325ddbe47a25d4ec3d2311933,✓,✓,✓,✓,✓,✓,✓,✓,✓,✓,10/10,ARKHAM_ENTITY_FLOW_READY,
+WIF,CONTROL,solana,EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm,✓,✓,✓,✓,✓,✓,✓,✓,✓,✓,10/10,ARKHAM_ENTITY_FLOW_READY,Solana chain — may have limited coverage
+BONK,CONTROL,solana,DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263,✓,✓,✓,✓,✓,✓,✓,✓,✓,✓,10/10,ARKHAM_ENTITY_FLOW_READY,Solana chain — may have limited coverage
+FLOKI,CONTROL,ethereum,0xcf0c122c6b73ff809c693db761e7baebe62b6a2e,✓,✓,✓,✓,✓,✓,✓,✓,✓,✓,10/10,ARKHAM_ENTITY_FLOW_READY,

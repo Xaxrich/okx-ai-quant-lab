@@ -1,0 +1,8 @@
+token,group,chain,transfer_rows,histogram_rows,simple_histogram_rows,from_entity_available,to_entity_available,cex_labeled_transfer_count,dex_labeled_transfer_count,unknown_transfer_count,time_window_covered,confidence,limitations
+BSB,P0,ethereum,10,0,0,false,false,0,0,10,sample,MEDIUM,
+LAB,P0,bsc,10,0,0,false,false,0,0,10,sample,MEDIUM,
+UB,P0,bsc,10,0,0,false,false,0,0,10,sample,MEDIUM,
+PEPE,CONTROL,ethereum,10,0,0,false,false,0,0,10,sample,MEDIUM,
+WIF,CONTROL,solana,10,0,0,false,false,0,0,10,sample,MEDIUM,
+BONK,CONTROL,solana,10,0,0,false,false,0,0,10,sample,MEDIUM,
+FLOKI,CONTROL,ethereum,10,0,0,false,false,0,0,10,sample,MEDIUM,
