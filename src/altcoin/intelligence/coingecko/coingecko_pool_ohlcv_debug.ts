@@ -83,8 +83,8 @@ async function debugOhlcv(token: typeof TOKENS[0], pool: PoolInfo): Promise<Debu
         rowsReturned = rows.length;
         respStatus = "OK";
         if (rows.length > 0) {
-          firstTs = new Date(parseInt(rows[0][0] as string)).toISOString().slice(0, 10);
-          lastTs = new Date(parseInt(rows[rows.length - 1][0] as string)).toISOString().slice(0, 10);
+          firstTs = new Date(parseInt(rows[0][0] as string) * 1000).toISOString().slice(0, 10);
+          lastTs = new Date(parseInt(rows[rows.length - 1][0] as string) * 1000).toISOString().slice(0, 10);
         }
       }
     } catch (e: any) {

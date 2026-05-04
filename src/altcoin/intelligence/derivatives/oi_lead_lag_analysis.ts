@@ -42,7 +42,7 @@ const TOKENS = [
   { sym: "LAB", swap: "LAB-USDT-SWAP", cg: "lab", breakout: "2026-04-23", peak: "2026-05-02", crash: "2026-05-03" },
   { sym: "PEPE", swap: "PEPE-USDT-SWAP", cg: "pepe", breakout: "2026-01-03", peak: "2026-01-03", crash: null },
   { sym: "WIF", swap: "WIF-USDT-SWAP", cg: "dogwifcoin", breakout: "2026-01-05", peak: "2026-01-05", crash: null },
-  { sym: "BONK", swap: "BONK-USDT-SWAP", cg: "bonk", breakout: "2026-07-15", peak: "2026-07-15", crash: null },
+  { sym: "BONK", swap: "BONK-USDT-SWAP", cg: "bonk", breakout: "2025-07-15", peak: "2025-07-15", crash: null },
   { sym: "FLOKI", swap: "FLOKI-USDT-SWAP", cg: "floki", breakout: "2026-03-01", peak: "2026-03-01", crash: null },
 ];
 
@@ -245,10 +245,10 @@ async function main() {
   writeFileSync(join(OUT_DIR, "features", "okx_oi_funding_price_feature_table.csv"), featR.join("\n"));
 
   // Event analysis CSV
-  const eventH = "token,breakout_date,oi_lead_days,oi_confirm_days,oi_overheat_days,fund_overheat_days,delev_days,label,confidence";
+  const eventH = "token,breakout_date,oi_lead_lag_days,first_oi_lead_date,oi_overheat_days,fund_overheat_days,delev_days,label,confidence";
   const eventR = [eventH];
   for (const e of allEvents) {
-    eventR.push(`${e.token},${e.breakoutDate},${e.firstOiLeadDate ? e.oiLeadLagDays : ""},${e.firstOiLeadDate},${e.oiOverheatCount},${e.fundingOverheatCount},${e.deleveragingCount},${e.label},${e.confidence}`);
+    eventR.push(`${e.token},${e.breakoutDate},${e.oiLeadLagDays ?? ""},${e.firstOiLeadDate},${e.oiOverheatCount},${e.fundingOverheatCount},${e.deleveragingCount},${e.label},${e.confidence}`);
   }
   writeFileSync(join(OUT_DIR, "analysis", "okx_derivatives_event_level_analysis.csv"), eventR.join("\n"));
 
