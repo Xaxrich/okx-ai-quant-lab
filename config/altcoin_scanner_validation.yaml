@@ -1,0 +1,125 @@
+# Altcoin Scanner Rule Validation — Sample Universe
+# Phase 4: Rule validation on positive + control samples
+
+positive_samples:
+  - symbol: BSB
+    coingeckoId: block-street
+    category: event_driven_pump
+    eventDate: 2026-04-25
+    peakDate: 2026-04-28
+    crashDate: 2026-04-29
+
+  - symbol: LAB
+    coingeckoId: lab
+    category: compression_breakout_to_crash
+    eventDate: 2026-04-23
+    peakDate: 2026-05-02
+    crashDate: 2026-05-03
+
+  - symbol: PEPE
+    coingeckoId: pepe
+    category: meme_sector_rally
+    eventDate: 2025-12-28
+    peakDate: 2026-01-03
+    crashDate: 2026-01-08
+    note: Jan 2026 rally +66% 7d
+
+  - symbol: BONK
+    coingeckoId: bonk
+    category: meme_sector_rally
+    eventDate: 2025-07-12
+    peakDate: 2025-07-15
+    crashDate: 2025-07-20
+    note: Jul 2025 rally +77% 7d
+
+  - symbol: WIF
+    coingeckoId: dogwifhat
+    category: meme_sector_rally
+    eventDate: 2025-12-30
+    peakDate: 2026-01-05
+    crashDate: 2026-01-10
+    note: Jan 2026 rally +54% 7d
+
+control_samples:
+  - symbol: DOGE
+    coingeckoId: dogecoin
+    category: established_meme
+    note: Control — established meme, no 7d >80% in window
+
+  - symbol: SHIB
+    coingeckoId: shiba-inu
+    category: established_meme
+    note: Control — established meme, muted volatility
+
+  - symbol: FLOKI
+    coingeckoId: floki
+    category: meme_no_breakout
+    note: Control — meme coin without breakout in window
+
+  - symbol: AEVO
+    coingeckoId: aevo
+    category: defi_no_breakout
+    note: Control — DeFi token without major breakout
+
+  - symbol: PEOPLE
+    coingeckoId: constitutiondao
+    category: meme_no_breakout
+    note: Control — meme-adjacent, low volatility
+
+  - symbol: ETH
+    coingeckoId: ethereum
+    category: benchmark
+    note: Control — benchmark, no 80% 7d moves
+
+  - symbol: BTC
+    coingeckoId: bitcoin
+    category: benchmark
+    note: Control — benchmark, no 80% 7d moves
+
+  - symbol: SOL
+    coingeckoId: solana
+    category: l1_established
+    note: Control — L1, organic growth, no 80% 7d
+
+  - symbol: ARB
+    coingeckoId: arbitrum
+    category: l2_no_breakout
+    note: Control — L2 token without major breakout
+
+  - symbol: OP
+    coingeckoId: optimism
+    category: l2_no_breakout
+    note: Control — L2 token without major breakout
+
+data_sources:
+  primary:
+    name: CoinGecko
+    tier: free
+    available_fields:
+      - price
+      - market_cap
+      - total_volume
+      - circulating_supply
+    limitations:
+      - daily granularity only
+      - no intraday data
+      - market_cap methodology can change
+
+  unavailable:
+    - name: DexScreener
+      reason: HTTP 403 — automated access blocked
+    - name: Etherscan
+      reason: HTTP 403 — automated access blocked
+    - name: BscScan
+      reason: HTTP 403 — automated access blocked
+    - name: Social APIs
+      reason: Not configured — no API keys
+    - name: Multi-exchange OHLCV
+      reason: Not configured — no exchange API keys
+
+validation_config:
+  min_data_days: 30
+  max_lookback_days: 365
+  forward_window_days: 7
+  min_positive_events: 3
+  min_control_samples: 5

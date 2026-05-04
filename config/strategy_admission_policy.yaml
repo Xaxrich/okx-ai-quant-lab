@@ -1,0 +1,20 @@
+# Strategy Admission Policy
+# Criteria for admitting a strategy from RESEARCH_ONLY to DEMO execution
+
+admission_criteria:
+  min_test_windows: 8
+  min_positive_windows_ratio: 0.6
+  max_drawdown: 0.15
+  min_profit_factor: 1.2
+  min_trade_count: 30
+  max_single_window_return_share: 0.5
+  min_parameter_stability_score: 0.6
+  live_trading: false
+
+levels:
+  - name: ADMITTED_TO_DEMO
+    description: Meets all criteria, eligible for demo execution
+  - name: RESEARCH_ONLY
+    description: Meets some criteria, needs further research
+  - name: REJECTED
+    description: Fails core criteria, not eligible for any execution

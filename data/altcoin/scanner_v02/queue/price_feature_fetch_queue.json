@@ -1,0 +1,242 @@
+[
+  {
+    "token": "WIF",
+    "coingecko_id": "dogwifhat",
+    "priority": "P0",
+    "reason": "expired",
+    "attempt_count": 0,
+    "last_attempt_at": "2026-05-04T07:22:28.379Z",
+    "status": "PENDING",
+    "error": ""
+  },
+  {
+    "token": "FLOKI",
+    "coingecko_id": "floki",
+    "priority": "P0",
+    "reason": "expired",
+    "attempt_count": 0,
+    "last_attempt_at": "2026-05-04T07:22:28.379Z",
+    "status": "PENDING",
+    "error": ""
+  },
+  {
+    "token": "DOGE",
+    "coingecko_id": "dogecoin",
+    "priority": "P0",
+    "reason": "no_cache",
+    "attempt_count": 0,
+    "last_attempt_at": "2026-05-04T07:22:28.379Z",
+    "status": "PENDING",
+    "error": ""
+  },
+  {
+    "token": "SHIB",
+    "coingecko_id": "shiba-inu",
+    "priority": "P0",
+    "reason": "no_cache",
+    "attempt_count": 0,
+    "last_attempt_at": "2026-05-04T07:22:28.379Z",
+    "status": "PENDING",
+    "error": ""
+  },
+  {
+    "token": "POPCAT",
+    "coingecko_id": "popcat",
+    "priority": "P0",
+    "reason": "no_cache",
+    "attempt_count": 0,
+    "last_attempt_at": "2026-05-04T07:22:28.379Z",
+    "status": "PENDING",
+    "error": ""
+  },
+  {
+    "token": "TURBO",
+    "coingecko_id": "turbo",
+    "priority": "P0",
+    "reason": "no_cache",
+    "attempt_count": 0,
+    "last_attempt_at": "2026-05-04T07:22:28.379Z",
+    "status": "PENDING",
+    "error": ""
+  },
+  {
+    "token": "FET",
+    "coingecko_id": "fetch-ai",
+    "priority": "P0",
+    "reason": "no_cache",
+    "attempt_count": 0,
+    "last_attempt_at": "2026-05-04T07:22:28.379Z",
+    "status": "PENDING",
+    "error": ""
+  },
+  {
+    "token": "RNDR",
+    "coingecko_id": "render-token",
+    "priority": "P0",
+    "reason": "no_cache",
+    "attempt_count": 0,
+    "last_attempt_at": "2026-05-04T07:22:28.379Z",
+    "status": "PENDING",
+    "error": ""
+  },
+  {
+    "token": "TAO",
+    "coingecko_id": "bittensor",
+    "priority": "P0",
+    "reason": "no_cache",
+    "attempt_count": 0,
+    "last_attempt_at": "2026-05-04T07:22:28.379Z",
+    "status": "PENDING",
+    "error": ""
+  },
+  {
+    "token": "VIRTUAL",
+    "coingecko_id": "virtual-protocol",
+    "priority": "P0",
+    "reason": "no_cache",
+    "attempt_count": 0,
+    "last_attempt_at": "2026-05-04T07:22:28.379Z",
+    "status": "PENDING",
+    "error": ""
+  },
+  {
+    "token": "PENDLE",
+    "coingecko_id": "pendle",
+    "priority": "P0",
+    "reason": "no_cache",
+    "attempt_count": 0,
+    "last_attempt_at": "2026-05-04T07:22:28.379Z",
+    "status": "PENDING",
+    "error": ""
+  },
+  {
+    "token": "ONDO",
+    "coingecko_id": "ondo-finance",
+    "priority": "P0",
+    "reason": "no_cache",
+    "attempt_count": 0,
+    "last_attempt_at": "2026-05-04T07:22:28.379Z",
+    "status": "PENDING",
+    "error": ""
+  },
+  {
+    "token": "ENA",
+    "coingecko_id": "ethena",
+    "priority": "P0",
+    "reason": "no_cache",
+    "attempt_count": 0,
+    "last_attempt_at": "2026-05-04T07:22:28.379Z",
+    "status": "PENDING",
+    "error": ""
+  },
+  {
+    "token": "JUP",
+    "coingecko_id": "jupiter-exchange-solana",
+    "priority": "P0",
+    "reason": "no_cache",
+    "attempt_count": 0,
+    "last_attempt_at": "2026-05-04T07:22:28.379Z",
+    "status": "PENDING",
+    "error": ""
+  },
+  {
+    "token": "PYTH",
+    "coingecko_id": "pyth-network",
+    "priority": "P0",
+    "reason": "no_cache",
+    "attempt_count": 0,
+    "last_attempt_at": "2026-05-04T07:22:28.379Z",
+    "status": "PENDING",
+    "error": ""
+  },
+  {
+    "token": "SEI",
+    "coingecko_id": "sei-network",
+    "priority": "P0",
+    "reason": "no_cache",
+    "attempt_count": 0,
+    "last_attempt_at": "2026-05-04T07:22:28.379Z",
+    "status": "PENDING",
+    "error": ""
+  },
+  {
+    "token": "SUI",
+    "coingecko_id": "sui",
+    "priority": "P0",
+    "reason": "no_cache",
+    "attempt_count": 0,
+    "last_attempt_at": "2026-05-04T07:22:28.379Z",
+    "status": "PENDING",
+    "error": ""
+  },
+  {
+    "token": "TIA",
+    "coingecko_id": "celestia",
+    "priority": "P0",
+    "reason": "no_cache",
+    "attempt_count": 0,
+    "last_attempt_at": "2026-05-04T07:22:28.379Z",
+    "status": "PENDING",
+    "error": ""
+  },
+  {
+    "token": "BTC",
+    "coingecko_id": "bitcoin",
+    "priority": "P0",
+    "reason": "no_cache",
+    "attempt_count": 0,
+    "last_attempt_at": "2026-05-04T07:22:28.379Z",
+    "status": "PENDING",
+    "error": ""
+  },
+  {
+    "token": "ETH",
+    "coingecko_id": "ethereum",
+    "priority": "P0",
+    "reason": "no_cache",
+    "attempt_count": 0,
+    "last_attempt_at": "2026-05-04T07:22:28.379Z",
+    "status": "PENDING",
+    "error": ""
+  },
+  {
+    "token": "SOL",
+    "coingecko_id": "solana",
+    "priority": "P0",
+    "reason": "no_cache",
+    "attempt_count": 0,
+    "last_attempt_at": "2026-05-04T07:22:28.379Z",
+    "status": "PENDING",
+    "error": ""
+  },
+  {
+    "token": "ARB",
+    "coingecko_id": "arbitrum",
+    "priority": "P0",
+    "reason": "no_cache",
+    "attempt_count": 0,
+    "last_attempt_at": "2026-05-04T07:22:28.379Z",
+    "status": "PENDING",
+    "error": ""
+  },
+  {
+    "token": "OP",
+    "coingecko_id": "optimism",
+    "priority": "P0",
+    "reason": "no_cache",
+    "attempt_count": 0,
+    "last_attempt_at": "2026-05-04T07:22:28.379Z",
+    "status": "PENDING",
+    "error": ""
+  },
+  {
+    "token": "PEOPLE",
+    "coingecko_id": "constitutiondao",
+    "priority": "P0",
+    "reason": "no_cache",
+    "attempt_count": 0,
+    "last_attempt_at": "2026-05-04T07:22:28.379Z",
+    "status": "PENDING",
+    "error": ""
+  }
+]

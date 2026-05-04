@@ -1,0 +1,14 @@
+mode: live
+allowLiveTrading: false
+maxOrderNotionalUSDT: 10
+maxDailyLossUSDT: 10
+maxDailyTrades: 3
+allowedInstruments:
+  - BTC-USDT
+  - ETH-USDT
+blockedInstrumentTypes:
+  - SWAP
+  - FUTURES
+  - OPTION
+requireHumanApproval: true
+dryRunByDefault: true

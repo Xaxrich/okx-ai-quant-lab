@@ -1,0 +1,50 @@
+# Scanner Universe v02 — 28 tokens across 5 categories
+
+tokens:
+  # ── Current focus ──
+  - symbol: BSB
+  - symbol: LAB
+
+  # ── Meme / High volatility ──
+  - symbol: PEPE
+  - symbol: WIF
+  - symbol: BONK
+  - symbol: FLOKI
+  - symbol: DOGE
+  - symbol: SHIB
+  - symbol: POPCAT
+  - symbol: TURBO
+
+  # ── AI / Narrative ──
+  - symbol: FET
+  - symbol: RNDR
+  - symbol: TAO
+  - symbol: VIRTUAL
+
+  # ── DeFi / RWA / Infra ──
+  - symbol: PENDLE
+  - symbol: ONDO
+  - symbol: ENA
+  - symbol: JUP
+  - symbol: PYTH
+  - symbol: SEI
+  - symbol: SUI
+  - symbol: TIA
+
+  # ── Control / Benchmarks ──
+  - symbol: BTC
+  - symbol: ETH
+  - symbol: SOL
+  - symbol: ARB
+  - symbol: OP
+  - symbol: PEOPLE
+
+scanning:
+  enabled: true
+  max_tokens_per_run: 30
+  rate_limit_delay_ms: 2000
+  data_sources:
+    coingecko: true
+    coinmarketcap: true
+    dexscreener: true
+    etherscan: true
