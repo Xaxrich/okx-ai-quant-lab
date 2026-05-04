@@ -1,0 +1,7 @@
+endpoint,token,status,rows,usable,notes
+supported_coins,ALL,OK,1158,true,
+coins_markets,ALL,OK,0,false,
+agg_oi_history,PEPE,OK,30,true,
+exchange_oi_list,PEPE,OK,16,true,
+oi_weighted_funding,PEPE,OK,30,true,
+aggregated_liquidation,PEPE,OK,0,false,
