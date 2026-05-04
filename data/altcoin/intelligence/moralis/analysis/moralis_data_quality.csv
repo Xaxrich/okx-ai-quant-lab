@@ -1,5 +1,9 @@
 token,group,chain,holders_available,transfers_available,entity_label_coverage,readiness,limitations
-BSB,P0,eth,false,true,54%,MORALIS_TRANSFER_ONLY,
-LAB,P0,bsc,false,true,23%,MORALIS_TRANSFER_ONLY,
-PEPE,CONTROL,eth,false,true,48%,MORALIS_TRANSFER_ONLY,
-FLOKI,CONTROL,eth,false,true,55%,MORALIS_TRANSFER_ONLY,
+BSB,P0,eth,false,true,55%,MORALIS_TRANSFER_ONLY,
+LAB,P0,bsc,false,true,6%,MORALIS_PARTIAL,
+UB,P0,bsc,false,true,1%,MORALIS_PARTIAL,
+AI,P0,eth,false,false,0%,TOKEN_IDENTITY_INCOMPLETE,Missing contract
+PEPE,CONTROL,eth,false,true,53%,MORALIS_TRANSFER_ONLY,
+FLOKI,CONTROL,eth,false,true,54%,MORALIS_TRANSFER_ONLY,
+BONK,CONTROL,solana,false,false,0%,MORALIS_CHAIN_NOT_SUPPORTED,Solana
+WIF,CONTROL,solana,false,false,0%,MORALIS_CHAIN_NOT_SUPPORTED,Solana

@@ -12,9 +12,15 @@ interface TokenInfo { sym: string; chain: string; contract: string; group: strin
 const TOKENS: TokenInfo[] = [
   { sym: "BSB", chain: "eth", contract: "0xDB6Ba5D510F114F9b2eA08BEa7d30e32eEe33411", group: "P0", cgId: "block-street" },
   { sym: "LAB", chain: "bsc", contract: "0x7ec43Cf65F1663F820427C62A5780b8f2E25593A", group: "P0", cgId: "lab" },
+  { sym: "UB", chain: "bsc", contract: "0x40b8129b786d766267a7a118cf8c07e31cdb6fde", group: "P0", cgId: "unibase" },
+  { sym: "AI", chain: "eth", contract: "", group: "P0", cgId: "gensyn" },
   { sym: "PEPE", chain: "eth", contract: "0x6982508145454ce325ddbe47a25d4ec3d2311933", group: "CONTROL", cgId: "pepe" },
   { sym: "FLOKI", chain: "eth", contract: "0xcf0c122c6b73ff809c693db761e7baebe62b6a2e", group: "CONTROL", cgId: "floki" },
+  { sym: "BONK", chain: "solana", contract: "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263", group: "CONTROL", cgId: "bonk" },
+  { sym: "WIF", chain: "solana", contract: "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm", group: "CONTROL", cgId: "dogwifcoin" },
 ];
+const SOLANA_TOKENS = new Set(["BONK", "WIF"]);
+const MISSING_CONTRACT = new Set(["AI"]);
 
 async function moralisGet(path: string): Promise<any> {
   if (!MORALIS_KEY) return { status: "NOT_CONFIGURED" };
@@ -62,14 +68,19 @@ async function main() {
   for (const token of TOKENS) {
     console.log(`${token.sym} (${token.chain}, ${token.group}):`);
 
+    // Skip Solana (Moralis ERC20 endpoint is EVM-only) and tokens missing contract
+    if (SOLANA_TOKENS.has(token.sym)) { console.log(`  SKIP: Solana not supported by Moralis ERC20 endpoint\n`); qualityRows.push([token.sym, token.group, token.chain, "false", "false", "0%", "MORALIS_CHAIN_NOT_SUPPORTED", "Solana"]); continue; }
+    if (MISSING_CONTRACT.has(token.sym)) { console.log(`  SKIP: No contract address\n`); qualityRows.push([token.sym, token.group, token.chain, "false", "false", "0%", "TOKEN_IDENTITY_INCOMPLETE", "Missing contract"]); continue; }
+
     // 1. Holders
     const holdersR = await moralisGet(`/erc20/${token.contract}/holders?chain=${token.chain}&limit=50`);
-    const holdersAvail = holdersR.status === "OK" && holdersR.data?.result?.length > 0;
+    const holderResult = holdersR.data?.result || holdersR.data || [];
+    const holdersAvail = holdersR.status === "OK" && Array.isArray(holderResult) && holderResult.length > 0;
     let top10Share = 0, labeledCount = 0;
     if (holdersAvail) {
-      const holders = holdersR.data.result;
-      const totalBalance = holders.reduce((s: number, h: any) => s + parseFloat(h.balance || "0"), 0);
-      const top10 = holders.slice(0, 10).reduce((s: number, h: any) => s + parseFloat(h.balance || "0"), 0);
+      const holders = holderResult;
+      const totalBalance = holders.reduce((s: number, h: any) => s + parseFloat(h.balance_formatted || h.balance || "0"), 0);
+      const top10 = holders.slice(0, 10).reduce((s: number, h: any) => s + parseFloat(h.balance_formatted || h.balance || "0"), 0);
       top10Share = totalBalance > 0 ? top10 / totalBalance : 0;
       labeledCount = holders.filter((h: any) => h.entity || h.label).length;
       console.log(`  Holders: ${holders.length} | top10=${(top10Share*100).toFixed(0)}% | labeled=${labeledCount}`);

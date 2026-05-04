@@ -1,6 +1,6 @@
 # Moralis Holder-Transfer Lite Report
 
-Generated: 2026-05-04T11:57:32.587Z
+Generated: 2026-05-04T12:07:14.542Z
 
 ## 1. Status
 
@@ -10,10 +10,14 @@ Generated: 2026-05-04T11:57:32.587Z
 
 | Token | Group | Holders | Transfers | Entity Label Cov | Readiness |
 |-------|:---:|:---:|:---:|:---:|------|
-| BSB | P0 | ✗ | ✓ | 54% | MORALIS_TRANSFER_ONLY |
-| LAB | P0 | ✗ | ✓ | 23% | MORALIS_TRANSFER_ONLY |
-| PEPE | CONTROL | ✗ | ✓ | 48% | MORALIS_TRANSFER_ONLY |
-| FLOKI | CONTROL | ✗ | ✓ | 55% | MORALIS_TRANSFER_ONLY |
+| BSB | P0 | ✗ | ✓ | 55% | MORALIS_TRANSFER_ONLY |
+| LAB | P0 | ✗ | ✓ | 6% | MORALIS_PARTIAL |
+| UB | P0 | ✗ | ✓ | 1% | MORALIS_PARTIAL |
+| AI | P0 | ✗ | ✗ | 0% | TOKEN_IDENTITY_INCOMPLETE |
+| PEPE | CONTROL | ✗ | ✓ | 53% | MORALIS_TRANSFER_ONLY |
+| FLOKI | CONTROL | ✗ | ✓ | 54% | MORALIS_TRANSFER_ONLY |
+| BONK | CONTROL | ✗ | ✗ | 0% | MORALIS_CHAIN_NOT_SUPPORTED |
+| WIF | CONTROL | ✗ | ✗ | 0% | MORALIS_CHAIN_NOT_SUPPORTED |
 
 ## 3. What This Data Supports
 
