@@ -1,0 +1,5 @@
+token,group,chain,identity,holder_metrics,hist_holders,transfers,entity_lite,readiness
+BSB,P0,eth,OK,OK,FAILED,300 rows,50% cov, 8 CEX,MORALIS_ETH_TRANSFER_READY
+LAB,P0,bsc,OK,OK,FAILED,300 rows,9% cov, 13 CEX,MORALIS_TRANSFER_BASIC
+PEPE,CONTROL,eth,OK,OK,FAILED,300 rows,48% cov, 67 CEX,MORALIS_ETH_TRANSFER_READY
+FLOKI,CONTROL,eth,OK,OK,FAILED,300 rows,57% cov, 45 CEX,MORALIS_ETH_TRANSFER_READY
