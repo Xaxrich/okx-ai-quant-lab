@@ -1,0 +1,635 @@
+[
+  {
+    "endpoint_name": "aggregated_oi",
+    "token": "PEPE",
+    "request_path": "/api/futures/open-interest/aggregated-history",
+    "status": "OK",
+    "row_count": 3,
+    "response_type": "object",
+    "top_level_keys": [
+      "code"
+    ],
+    "data_keys": [],
+    "first_row_keys": [
+      "time",
+      "open",
+      "high",
+      "low",
+      "close"
+    ],
+    "first_row_sample": {
+      "time": 1777680000000,
+      "open": "207639502",
+      "high": "221984832",
+      "low": "199815429",
+      "close": "210367738"
+    },
+    "timestamp_candidates": [
+      "time"
+    ],
+    "numeric_candidates": [
+      "time=1777680000000.00",
+      "open=207639502",
+      "high=221984832",
+      "low=199815429",
+      "close=210367738"
+    ],
+    "parser_ready": true,
+    "parser_recommendation": "Use timestamp from: time. Numeric fields: time=1777680000000.00, open=207639502, high=221984832, low=199815429, close=210367738",
+    "limitations": []
+  },
+  {
+    "endpoint_name": "oi_weighted_funding",
+    "token": "PEPE",
+    "request_path": "/api/futures/funding-rate/oi-weight-history",
+    "status": "OK",
+    "row_count": 3,
+    "response_type": "object",
+    "top_level_keys": [
+      "code"
+    ],
+    "data_keys": [],
+    "first_row_keys": [
+      "time",
+      "open",
+      "high",
+      "low",
+      "close"
+    ],
+    "first_row_sample": {
+      "time": 1777680000000,
+      "open": "0.002871",
+      "high": "0.012232",
+      "low": "-0.018532",
+      "close": "0.010062"
+    },
+    "timestamp_candidates": [
+      "time"
+    ],
+    "numeric_candidates": [
+      "time=1777680000000.00"
+    ],
+    "parser_ready": true,
+    "parser_recommendation": "Use timestamp from: time. Numeric fields: time=1777680000000.00",
+    "limitations": []
+  },
+  {
+    "endpoint_name": "vol_weighted_funding",
+    "token": "PEPE",
+    "request_path": "/api/futures/funding-rate/vol-weight-history",
+    "status": "OK",
+    "row_count": 3,
+    "response_type": "object",
+    "top_level_keys": [
+      "code"
+    ],
+    "data_keys": [],
+    "first_row_keys": [
+      "time",
+      "open",
+      "high",
+      "low",
+      "close"
+    ],
+    "first_row_sample": {
+      "time": 1777680000000,
+      "open": "0.00919",
+      "high": "0.010289",
+      "low": "-0.011795",
+      "close": "0.010019"
+    },
+    "timestamp_candidates": [
+      "time"
+    ],
+    "numeric_candidates": [
+      "time=1777680000000.00"
+    ],
+    "parser_ready": true,
+    "parser_recommendation": "Use timestamp from: time. Numeric fields: time=1777680000000.00",
+    "limitations": []
+  },
+  {
+    "endpoint_name": "liquidation",
+    "token": "PEPE",
+    "request_path": "/api/futures/liquidation/aggregated-history",
+    "status": "OK",
+    "row_count": 0,
+    "response_type": "undefined",
+    "top_level_keys": [
+      "code",
+      "msg"
+    ],
+    "data_keys": [],
+    "first_row_keys": [],
+    "first_row_sample": null,
+    "timestamp_candidates": [],
+    "numeric_candidates": [],
+    "parser_ready": false,
+    "parser_recommendation": "",
+    "limitations": []
+  },
+  {
+    "endpoint_name": "aggregated_oi",
+    "token": "BSB",
+    "request_path": "/api/futures/open-interest/aggregated-history",
+    "status": "OK",
+    "row_count": 3,
+    "response_type": "object",
+    "top_level_keys": [
+      "code"
+    ],
+    "data_keys": [],
+    "first_row_keys": [
+      "time",
+      "open",
+      "high",
+      "low",
+      "close"
+    ],
+    "first_row_sample": {
+      "time": 1777680000000,
+      "open": "42076528",
+      "high": "57333420",
+      "low": "40688834",
+      "close": "47306515"
+    },
+    "timestamp_candidates": [
+      "time"
+    ],
+    "numeric_candidates": [
+      "time=1777680000000.00"
+    ],
+    "parser_ready": true,
+    "parser_recommendation": "Use timestamp from: time. Numeric fields: time=1777680000000.00",
+    "limitations": []
+  },
+  {
+    "endpoint_name": "oi_weighted_funding",
+    "token": "BSB",
+    "request_path": "/api/futures/funding-rate/oi-weight-history",
+    "status": "OK",
+    "row_count": 3,
+    "response_type": "object",
+    "top_level_keys": [
+      "code"
+    ],
+    "data_keys": [],
+    "first_row_keys": [
+      "time",
+      "open",
+      "high",
+      "low",
+      "close"
+    ],
+    "first_row_sample": {
+      "time": 1777680000000,
+      "open": "0.037219",
+      "high": "0.098836",
+      "low": "0.003737",
+      "close": "0.029415"
+    },
+    "timestamp_candidates": [
+      "time"
+    ],
+    "numeric_candidates": [
+      "time=1777680000000.00"
+    ],
+    "parser_ready": true,
+    "parser_recommendation": "Use timestamp from: time. Numeric fields: time=1777680000000.00",
+    "limitations": []
+  },
+  {
+    "endpoint_name": "vol_weighted_funding",
+    "token": "BSB",
+    "request_path": "/api/futures/funding-rate/vol-weight-history",
+    "status": "OK",
+    "row_count": 3,
+    "response_type": "object",
+    "top_level_keys": [
+      "code"
+    ],
+    "data_keys": [],
+    "first_row_keys": [
+      "time",
+      "open",
+      "high",
+      "low",
+      "close"
+    ],
+    "first_row_sample": {
+      "time": 1777680000000,
+      "open": "0.040139",
+      "high": "0.090183",
+      "low": "0.006313",
+      "close": "0.031058"
+    },
+    "timestamp_candidates": [
+      "time"
+    ],
+    "numeric_candidates": [
+      "time=1777680000000.00"
+    ],
+    "parser_ready": true,
+    "parser_recommendation": "Use timestamp from: time. Numeric fields: time=1777680000000.00",
+    "limitations": []
+  },
+  {
+    "endpoint_name": "liquidation",
+    "token": "BSB",
+    "request_path": "/api/futures/liquidation/aggregated-history",
+    "status": "OK",
+    "row_count": 0,
+    "response_type": "undefined",
+    "top_level_keys": [
+      "code",
+      "msg"
+    ],
+    "data_keys": [],
+    "first_row_keys": [],
+    "first_row_sample": null,
+    "timestamp_candidates": [],
+    "numeric_candidates": [],
+    "parser_ready": false,
+    "parser_recommendation": "",
+    "limitations": []
+  },
+  {
+    "endpoint_name": "aggregated_oi",
+    "token": "LAB",
+    "request_path": "/api/futures/open-interest/aggregated-history",
+    "status": "OK",
+    "row_count": 3,
+    "response_type": "object",
+    "top_level_keys": [
+      "code"
+    ],
+    "data_keys": [],
+    "first_row_keys": [
+      "time",
+      "open",
+      "high",
+      "low",
+      "close"
+    ],
+    "first_row_sample": {
+      "time": 1777680000000,
+      "open": "148268723",
+      "high": "632090472",
+      "low": "134976620",
+      "close": "266409387"
+    },
+    "timestamp_candidates": [
+      "time"
+    ],
+    "numeric_candidates": [
+      "time=1777680000000.00",
+      "open=148268723",
+      "high=632090472",
+      "low=134976620",
+      "close=266409387"
+    ],
+    "parser_ready": true,
+    "parser_recommendation": "Use timestamp from: time. Numeric fields: time=1777680000000.00, open=148268723, high=632090472, low=134976620, close=266409387",
+    "limitations": []
+  },
+  {
+    "endpoint_name": "oi_weighted_funding",
+    "token": "LAB",
+    "request_path": "/api/futures/funding-rate/oi-weight-history",
+    "status": "OK",
+    "row_count": 3,
+    "response_type": "object",
+    "top_level_keys": [
+      "code"
+    ],
+    "data_keys": [],
+    "first_row_keys": [
+      "time",
+      "open",
+      "high",
+      "low",
+      "close"
+    ],
+    "first_row_sample": {
+      "time": 1777680000000,
+      "open": "0.163455",
+      "high": "0.830641",
+      "low": "0.145821",
+      "close": "0.348946"
+    },
+    "timestamp_candidates": [
+      "time"
+    ],
+    "numeric_candidates": [
+      "time=1777680000000.00"
+    ],
+    "parser_ready": true,
+    "parser_recommendation": "Use timestamp from: time. Numeric fields: time=1777680000000.00",
+    "limitations": []
+  },
+  {
+    "endpoint_name": "vol_weighted_funding",
+    "token": "LAB",
+    "request_path": "/api/futures/funding-rate/vol-weight-history",
+    "status": "OK",
+    "row_count": 3,
+    "response_type": "object",
+    "top_level_keys": [
+      "code"
+    ],
+    "data_keys": [],
+    "first_row_keys": [
+      "time",
+      "open",
+      "high",
+      "low",
+      "close"
+    ],
+    "first_row_sample": {
+      "time": 1777680000000,
+      "open": "0.113109",
+      "high": "0.68936",
+      "low": "0.113109",
+      "close": "0.118475"
+    },
+    "timestamp_candidates": [
+      "time"
+    ],
+    "numeric_candidates": [
+      "time=1777680000000.00"
+    ],
+    "parser_ready": true,
+    "parser_recommendation": "Use timestamp from: time. Numeric fields: time=1777680000000.00",
+    "limitations": []
+  },
+  {
+    "endpoint_name": "liquidation",
+    "token": "LAB",
+    "request_path": "/api/futures/liquidation/aggregated-history",
+    "status": "OK",
+    "row_count": 0,
+    "response_type": "undefined",
+    "top_level_keys": [
+      "code",
+      "msg"
+    ],
+    "data_keys": [],
+    "first_row_keys": [],
+    "first_row_sample": null,
+    "timestamp_candidates": [],
+    "numeric_candidates": [],
+    "parser_ready": false,
+    "parser_recommendation": "",
+    "limitations": []
+  },
+  {
+    "endpoint_name": "aggregated_oi",
+    "token": "UB",
+    "request_path": "/api/futures/open-interest/aggregated-history",
+    "status": "OK",
+    "row_count": 3,
+    "response_type": "object",
+    "top_level_keys": [
+      "code"
+    ],
+    "data_keys": [],
+    "first_row_keys": [
+      "time",
+      "open",
+      "high",
+      "low",
+      "close"
+    ],
+    "first_row_sample": {
+      "time": 1777680000000,
+      "open": "74236442",
+      "high": "98631443",
+      "low": "60993754",
+      "close": "62051394"
+    },
+    "timestamp_candidates": [
+      "time"
+    ],
+    "numeric_candidates": [
+      "time=1777680000000.00"
+    ],
+    "parser_ready": true,
+    "parser_recommendation": "Use timestamp from: time. Numeric fields: time=1777680000000.00",
+    "limitations": []
+  },
+  {
+    "endpoint_name": "oi_weighted_funding",
+    "token": "UB",
+    "request_path": "/api/futures/funding-rate/oi-weight-history",
+    "status": "OK",
+    "row_count": 3,
+    "response_type": "object",
+    "top_level_keys": [
+      "code"
+    ],
+    "data_keys": [],
+    "first_row_keys": [
+      "time",
+      "open",
+      "high",
+      "low",
+      "close"
+    ],
+    "first_row_sample": {
+      "time": 1777680000000,
+      "open": "0.009167",
+      "high": "0.049715",
+      "low": "-0.100635",
+      "close": "-0.014115"
+    },
+    "timestamp_candidates": [
+      "time"
+    ],
+    "numeric_candidates": [
+      "time=1777680000000.00"
+    ],
+    "parser_ready": true,
+    "parser_recommendation": "Use timestamp from: time. Numeric fields: time=1777680000000.00",
+    "limitations": []
+  },
+  {
+    "endpoint_name": "vol_weighted_funding",
+    "token": "UB",
+    "request_path": "/api/futures/funding-rate/vol-weight-history",
+    "status": "OK",
+    "row_count": 3,
+    "response_type": "object",
+    "top_level_keys": [
+      "code"
+    ],
+    "data_keys": [],
+    "first_row_keys": [
+      "time",
+      "open",
+      "high",
+      "low",
+      "close"
+    ],
+    "first_row_sample": {
+      "time": 1777680000000,
+      "open": "0.009769",
+      "high": "0.058409",
+      "low": "-0.118852",
+      "close": "-0.012155"
+    },
+    "timestamp_candidates": [
+      "time"
+    ],
+    "numeric_candidates": [
+      "time=1777680000000.00"
+    ],
+    "parser_ready": true,
+    "parser_recommendation": "Use timestamp from: time. Numeric fields: time=1777680000000.00",
+    "limitations": []
+  },
+  {
+    "endpoint_name": "liquidation",
+    "token": "UB",
+    "request_path": "/api/futures/liquidation/aggregated-history",
+    "status": "OK",
+    "row_count": 0,
+    "response_type": "undefined",
+    "top_level_keys": [
+      "code",
+      "msg"
+    ],
+    "data_keys": [],
+    "first_row_keys": [],
+    "first_row_sample": null,
+    "timestamp_candidates": [],
+    "numeric_candidates": [],
+    "parser_ready": false,
+    "parser_recommendation": "",
+    "limitations": []
+  },
+  {
+    "endpoint_name": "aggregated_oi",
+    "token": "AI",
+    "request_path": "/api/futures/open-interest/aggregated-history",
+    "status": "OK",
+    "row_count": 3,
+    "response_type": "object",
+    "top_level_keys": [
+      "code"
+    ],
+    "data_keys": [],
+    "first_row_keys": [
+      "time",
+      "open",
+      "high",
+      "low",
+      "close"
+    ],
+    "first_row_sample": {
+      "time": 1777680000000,
+      "open": "1827836",
+      "high": "2025242",
+      "low": "1618335",
+      "close": "1690029"
+    },
+    "timestamp_candidates": [
+      "time"
+    ],
+    "numeric_candidates": [
+      "time=1777680000000.00"
+    ],
+    "parser_ready": true,
+    "parser_recommendation": "Use timestamp from: time. Numeric fields: time=1777680000000.00",
+    "limitations": []
+  },
+  {
+    "endpoint_name": "oi_weighted_funding",
+    "token": "AI",
+    "request_path": "/api/futures/funding-rate/oi-weight-history",
+    "status": "OK",
+    "row_count": 3,
+    "response_type": "object",
+    "top_level_keys": [
+      "code"
+    ],
+    "data_keys": [],
+    "first_row_keys": [
+      "time",
+      "open",
+      "high",
+      "low",
+      "close"
+    ],
+    "first_row_sample": {
+      "time": 1777680000000,
+      "open": "0.03539",
+      "high": "0.094183",
+      "low": "-0.070743",
+      "close": "0.093333"
+    },
+    "timestamp_candidates": [
+      "time"
+    ],
+    "numeric_candidates": [
+      "time=1777680000000.00"
+    ],
+    "parser_ready": true,
+    "parser_recommendation": "Use timestamp from: time. Numeric fields: time=1777680000000.00",
+    "limitations": []
+  },
+  {
+    "endpoint_name": "vol_weighted_funding",
+    "token": "AI",
+    "request_path": "/api/futures/funding-rate/vol-weight-history",
+    "status": "OK",
+    "row_count": 3,
+    "response_type": "object",
+    "top_level_keys": [
+      "code"
+    ],
+    "data_keys": [],
+    "first_row_keys": [
+      "time",
+      "open",
+      "high",
+      "low",
+      "close"
+    ],
+    "first_row_sample": {
+      "time": 1777680000000,
+      "open": "0.042838",
+      "high": "0.108297",
+      "low": "-0.008964",
+      "close": "0.106867"
+    },
+    "timestamp_candidates": [
+      "time"
+    ],
+    "numeric_candidates": [
+      "time=1777680000000.00"
+    ],
+    "parser_ready": true,
+    "parser_recommendation": "Use timestamp from: time. Numeric fields: time=1777680000000.00",
+    "limitations": []
+  },
+  {
+    "endpoint_name": "liquidation",
+    "token": "AI",
+    "request_path": "/api/futures/liquidation/aggregated-history",
+    "status": "OK",
+    "row_count": 0,
+    "response_type": "undefined",
+    "top_level_keys": [
+      "code",
+      "msg"
+    ],
+    "data_keys": [],
+    "first_row_keys": [],
+    "first_row_sample": null,
+    "timestamp_candidates": [],
+    "numeric_candidates": [],
+    "parser_ready": false,
+    "parser_recommendation": "",
+    "limitations": []
+  }
+]

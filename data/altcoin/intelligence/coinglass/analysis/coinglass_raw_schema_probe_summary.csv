@@ -1,0 +1,21 @@
+endpoint,token,status,row_count,ts_field,numeric_fields,parser_ready
+aggregated_oi,PEPE,OK,3,time,"time=1777680000000.00; open=207639502; high=221984832",true
+oi_weighted_funding,PEPE,OK,3,time,"time=1777680000000.00",true
+vol_weighted_funding,PEPE,OK,3,time,"time=1777680000000.00",true
+liquidation,PEPE,OK,0,?,"",false
+aggregated_oi,BSB,OK,3,time,"time=1777680000000.00",true
+oi_weighted_funding,BSB,OK,3,time,"time=1777680000000.00",true
+vol_weighted_funding,BSB,OK,3,time,"time=1777680000000.00",true
+liquidation,BSB,OK,0,?,"",false
+aggregated_oi,LAB,OK,3,time,"time=1777680000000.00; open=148268723; high=632090472",true
+oi_weighted_funding,LAB,OK,3,time,"time=1777680000000.00",true
+vol_weighted_funding,LAB,OK,3,time,"time=1777680000000.00",true
+liquidation,LAB,OK,0,?,"",false
+aggregated_oi,UB,OK,3,time,"time=1777680000000.00",true
+oi_weighted_funding,UB,OK,3,time,"time=1777680000000.00",true
+vol_weighted_funding,UB,OK,3,time,"time=1777680000000.00",true
+liquidation,UB,OK,0,?,"",false
+aggregated_oi,AI,OK,3,time,"time=1777680000000.00",true
+oi_weighted_funding,AI,OK,3,time,"time=1777680000000.00",true
+vol_weighted_funding,AI,OK,3,time,"time=1777680000000.00",true
+liquidation,AI,OK,0,?,"",false

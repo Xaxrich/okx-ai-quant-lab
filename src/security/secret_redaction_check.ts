@@ -10,6 +10,9 @@ const KEYS: { name: string; value: string }[] = [
   { name: "COINGLASS_API_KEY", value: process.env.COINGLASS_API_KEY || "" },
   { name: "MORALIS_API_KEY", value: process.env.MORALIS_API_KEY || "" },
   { name: "ARKHAM_API_KEY", value: process.env.ARKHAM_API_KEY || "" },
+  { name: "OKX_API_KEY", value: process.env.OKX_API_KEY || "" },
+  { name: "OKX_SECRET_KEY", value: process.env.OKX_SECRET_KEY || "" },
+  { name: "OKX_PASSPHRASE", value: process.env.OKX_PASSPHRASE || "" },
 ];
 
 const nonEmptyKeys = KEYS.filter(k => k.value.length > 0);

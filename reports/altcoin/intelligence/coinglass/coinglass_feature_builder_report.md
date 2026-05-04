@@ -1,16 +1,16 @@
 # CoinGlass Feature Builder Report
 
-Generated: 2026-05-04T13:34:37.533Z
+Generated: 2026-05-04T13:54:38.372Z
 
 ## 1. Status
 
-**COINGLASS_FEATURES_NOT_READY**
-Readiness: OI data=false, Funding data=false, Liquidation data=false, Ready tokens=0/12
+**COINGLASS_FEATURES_READY_FOR_DERIVATIVES_V2**
+Readiness: OI data=true, Funding data=true, Liquidation data=true, Ready tokens=10/12
 
 ## 2. Token Coverage
 
-Tokens: 0/12 with feature-ready data
-Total feature rows: 0
+Tokens: 10/12 with feature-ready data
+Total feature rows: 872
 Fields: OI (change 1d/7d, z-score), Funding (OI-weighted, z-score, overheated), Liquidation (total, imbalance, z-score)
 
 ## 3. What CoinGlass Adds vs OKX
