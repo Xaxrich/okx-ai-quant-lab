@@ -1,0 +1,22 @@
+symbol,coingecko_id,max_7d_return,min_price_7d,max_price_7d,peak_date,post_peak_dd,okx_swap,okx_inst_id,perp_sources,data_quality,include,reason
+BSB,block-street,252.6%,0.32023779727701107,1.1291566890626334,2026-05-04,-8.8%,true,BSB-USDT-SWAP,OKX,HIGH,true,7d return 253%
+LAB,lab,463.9%,0.5963124590904089,3.362770094670758,2026-05-02,-75.3%,true,LAB-USDT-SWAP,OKX,HIGH,true,7d return 464%
+FLOKI,floki,7.1%,0.00003155794519362937,0.00003379015650906956,2026-04-29,-6.6%,true,FLOKI-USDT-SWAP,OKX,HIGH,true,OKX swap available — structural monitoring candidate
+BONK,bonk,7.1%,0.000006059908908929444,0.000006489223539247146,2026-04-29,-6.6%,true,BONK-USDT-SWAP,OKX,HIGH,true,OKX swap available — structural monitoring candidate
+PEPE,pepe,9.4%,0.0000037765775204294882,0.000004131126556240851,2026-04-29,-7.9%,true,PEPE-USDT-SWAP,OKX,HIGH,true,OKX swap available — structural monitoring candidate
+WIF,dogwifcoin,12.2%,0.17432891637085715,0.1955940223841994,2026-05-01,-4.9%,true,WIF-USDT-SWAP,OKX,HIGH,true,OKX swap available — structural monitoring candidate
+POPCAT,popcat,14.4%,0.05565071982329077,0.06368064715302107,2026-04-28,-12.6%,true,POPCAT-USDT-SWAP,OKX,HIGH,true,OKX swap available — structural monitoring candidate
+TURBO,turbo,12.7%,0.001117890397543991,0.001260379341346466,2026-05-04,-2.1%,true,TURBO-USDT-SWAP,OKX,HIGH,true,OKX swap available — structural monitoring candidate
+VIRTUAL,virtual-protocol,14.8%,0.6762011517781698,0.7766100219213787,2026-05-04,-0.9%,true,VIRTUAL-USDT-SWAP,OKX,HIGH,true,OKX swap available — structural monitoring candidate
+FET,fetch-ai,8.9%,0.1940497435601351,0.21124426411408107,2026-05-03,-3.1%,false,,unverified,HIGH,false,Below threshold
+PENDLE,pendle,36.1%,1.2462480848112034,1.6963767232779685,2026-05-04,0.0%,true,PENDLE-USDT-SWAP,OKX,HIGH,true,Moderate 7d return 36%
+ONDO,ondo-finance,21.4%,0.25809928965654816,0.3133287179567668,2026-05-04,-1.8%,true,ONDO-USDT-SWAP,OKX,HIGH,true,OKX swap available — structural monitoring candidate
+ENA,ethena,9.4%,0.10014039483676196,0.10959176775451429,2026-04-29,-8.6%,true,ENA-USDT-SWAP,OKX,HIGH,true,OKX swap available — structural monitoring candidate
+JUP,jupiter-exchange-solana,10.3%,0.17649155452243195,0.19470650126737252,2026-04-28,-9.4%,true,JUP-USDT-SWAP,OKX,HIGH,true,OKX swap available — structural monitoring candidate
+RNDR,render-token,12.1%,1.6697973844497092,1.871322926272292,2026-05-04,-0.3%,false,,unverified,HIGH,false,Below threshold
+SUI,sui,5.5%,0.897119246903292,0.9467357630767133,2026-05-04,-0.7%,true,SUI-USDT-SWAP,OKX,HIGH,true,OKX swap available — structural monitoring candidate
+TIA,celestia,10.6%,0.3435501246466397,0.38011585497395806,2026-04-29,-9.2%,true,TIA-USDT-SWAP,OKX,HIGH,true,OKX swap available — structural monitoring candidate
+SEI,sei-network,7.0%,0.0570007541907413,0.06098364353697076,2026-04-27,-6.5%,true,SEI-USDT-SWAP,OKX,HIGH,true,OKX swap available — structural monitoring candidate
+TAO,bittensor,19.3%,245.93939973974352,293.4257217979373,2026-05-04,-2.0%,true,TAO-USDT-SWAP,OKX,HIGH,true,OKX swap available — structural monitoring candidate
+DOGE,dogecoin,16.6%,0.09715606212238462,0.11324288404769661,2026-05-04,-1.0%,true,DOGE-USDT-SWAP,OKX,HIGH,true,OKX swap available — structural monitoring candidate
+SHIB,shiba-inu,6.7%,0.0000060620672892137955,0.000006470832687911933,2026-04-29,-6.1%,true,SHIB-USDT-SWAP,OKX,HIGH,true,OKX swap available — structural monitoring candidate
