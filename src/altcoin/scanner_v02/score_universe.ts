@@ -307,10 +307,33 @@ async function main() {
     const reg = registry.find(r => r.symbol === s.token)!;
     report.push(`| ${s.token} | ${reg.coingecko_id ? "✅" : "❌"} | ${reg.cmc_id ? "✅" : "❌"} | ${reg.contract_address.length > 5 ? "✅" : "❌"} | ${s.totalDexLiquidityUsd ? "✅" : "❌"} | ${s.supplyScope !== "INSUFFICIENT_SUPPLY_SCOPE" ? "✅" : "❌"} | ${s.dataQualityScore} |`);
   }
-  report.push("", "## 5. Scanner Status", "", "**LIMITED_SNAPSHOT_SCANNER**", "",
-    `- ${scores.length} tokens configured. DEX data: ${dexMap.size}. Supply data: ${supplyMap.size}.`,
+  // ── Derivatives Research Layer (read-only, does NOT affect scores) ──
+  const derivPath = join(import.meta.dirname, "..", "..", "..", "data", "altcoin", "intelligence", "derivatives", "analysis", "okx_derivatives_event_level_analysis.csv");
+  if (existsSync(derivPath)) {
+    report.push("", "## 6. Derivatives Research Layer (READ-ONLY)", "",
+      "**This section does NOT affect the main score or label. Derivatives signals are research-only.**",
+      "", "| Token | OI Days | Research Label | Confidence | Key Evidence |",
+      "|-------|:---:|------|:---:|------|");
+    const dLines = readFileSync(derivPath, "utf-8").split("\n").slice(1);
+    for (const line of dLines) {
+      const p = line.split(",");
+      if (p.length < 8) continue;
+      report.push(`| ${p[0]} | ${p[1] || "?"} | ${p[7] || "?"} | ${p[8] || "?"} | OI confirm=${p[2] || "0"}d overheat=${p[4] || "0"}d |`);
+    }
+    report.push("", "**Interpretation guide:**",
+      "- OI_CONFIRMATION_ONLY = OI rose with price, confirming trend",
+      "- DERIVATIVES_OVERHEATED_LATE = OI/funding extreme near peak — risk proxy",
+      "- NO_DERIVATIVES_SIGNAL = no significant OI anomaly detected",
+      "- These signals do NOT confirm 'whale positioning' or 'smart money accumulation'",
+      "- OKX is a single exchange. Multi-exchange OI may differ.",
+      "- No long/short or taker volume data available for direction confirmation.",
+    "");
+  }
+  report.push("", "## 5. Scanner Status", "",
+    "**LIMITED_SNAPSHOT_SCANNER**",
+    "", `- ${scores.length} tokens scored. DEX: ${dexMap.size}. Supply: ${supplyMap.size}.`,
     "- No historical DEX/supply tracking. No on-chain holder data. No social data.",
-    "", "## 6. Disclaimer", "", "RESEARCH ONLY. No trading recommendations. Labels are risk indicators, not predictions.");
+    "", "## 7. Disclaimer", "", "RESEARCH ONLY. No trading recommendations. Labels are risk indicators, not predictions.");
 
   writeFileSync(join(REPORTS_DIR, "scanner_universe_report.md"), report.join("\n"));
 

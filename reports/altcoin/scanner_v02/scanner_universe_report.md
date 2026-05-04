@@ -1,6 +1,6 @@
 # Scanner Universe Report
 
-Generated: 2026-05-04T08:21:56.964Z
+Generated: 2026-05-04T09:41:44.889Z
 Tokens: 28
 
 ## 1. Summary
@@ -99,13 +99,35 @@ Tokens: 28
 | OP | ✅ | ✅ | ✅ | ✅ | ✅ | 0.76 |
 | PEOPLE | ✅ | ✅ | ✅ | ✅ | ✅ | 0.76 |
 
+## 6. Derivatives Research Layer (READ-ONLY)
+
+**This section does NOT affect the main score or label. Derivatives signals are research-only.**
+
+| Token | OI Days | Research Label | Confidence | Key Evidence |
+|-------|:---:|------|:---:|------|
+| BSB | 2026-04-25 | DERIVATIVES_OVERHEATED_LATE | LOW | OI confirm=0d overheat=3d |
+| LAB | 2026-04-23 | DERIVATIVES_CONFIRMATION_ONLY | LOW | OI confirm=0d overheat=0d |
+| PEPE | 2026-01-03 | NO_DERIVATIVES_SIGNAL | LOW | OI confirm=0d overheat=0d |
+| WIF | 2026-01-05 | NO_DERIVATIVES_SIGNAL | LOW | OI confirm=0d overheat=0d |
+| BONK | 2026-07-15 | NO_DERIVATIVES_SIGNAL | LOW | OI confirm=0d overheat=0d |
+| FLOKI | 2026-03-01 | DERIVATIVES_OVERHEATED_LATE | LOW | OI confirm=-9d overheat=4d |
+
+**Interpretation guide:**
+- OI_CONFIRMATION_ONLY = OI rose with price, confirming trend
+- DERIVATIVES_OVERHEATED_LATE = OI/funding extreme near peak — risk proxy
+- NO_DERIVATIVES_SIGNAL = no significant OI anomaly detected
+- These signals do NOT confirm 'whale positioning' or 'smart money accumulation'
+- OKX is a single exchange. Multi-exchange OI may differ.
+- No long/short or taker volume data available for direction confirmation.
+
+
 ## 5. Scanner Status
 
 **LIMITED_SNAPSHOT_SCANNER**
 
-- 28 tokens configured. DEX data: 28. Supply data: 28.
+- 28 tokens scored. DEX: 28. Supply: 28.
 - No historical DEX/supply tracking. No on-chain holder data. No social data.
 
-## 6. Disclaimer
+## 7. Disclaimer
 
 RESEARCH ONLY. No trading recommendations. Labels are risk indicators, not predictions.
