@@ -25,7 +25,6 @@
     "scanner:compute-features": "tsx src/altcoin/scanner_validation/compute_scanner_features.ts",
     "scanner:apply-rules": "tsx src/altcoin/scanner_validation/apply_scanner_rules.ts",
     "scanner:evaluate": "tsx src/altcoin/scanner_validation/evaluate_rule_performance.ts",
-    "scanner:report": "tsx src/altcoin/scanner_validation/generate_validation_report.ts",
     "scanner:reconcile": "tsx src/altcoin/scanner_reconciliation/reconcile_bsb_lab_data.ts",
     "scanner:threshold-sweep": "tsx src/altcoin/scanner_reconciliation/threshold_sweep.ts",
     "scanner:mvp": "tsx src/altcoin/scanner_mvp/scanner_mvp.ts",
@@ -33,15 +32,13 @@
     "scanner:fetch-integrated": "tsx src/altcoin/scanner_mvp/integrated_data_fetcher.ts",
     "security:check-secrets": "tsx src/security/secret_redaction_check.ts",
     "scanner:v02": "tsx src/altcoin/scanner_v02/scanner_v02.ts",
-    "scanner:v02:historical-replay": "tsx src/altcoin/scanner_v02/historical_replay.ts",
-    "scanner:v02:qa-report": "tsx src/altcoin/scanner_v02/generate_qa_report.ts",
     "scanner:v02:multichain-supply": "tsx src/altcoin/scanner_v02/reconcile_multichain_supply.ts",
     "scanner:v02:dex-aggregate": "tsx src/altcoin/scanner_v02/aggregate_dex_pairs.ts",
     "scanner:v02:score-tokens": "tsx src/altcoin/scanner_v02/score_tokens.ts",
-    "scanner:v02:integrated-report": "tsx src/altcoin/scanner_v02/score_tokens.ts",
     "scanner:v02:batch-fetch": "tsx src/altcoin/scanner_v02/batch_fetch_universe_data.ts",
     "scanner:v02:universe-report": "tsx src/altcoin/scanner_v02/score_universe.ts",
-    "scanner:v02:build-registry": "tsx src/altcoin/scanner_v02/build_token_metadata_registry.ts"
+    "scanner:v02:build-registry": "tsx src/altcoin/scanner_v02/build_token_metadata_registry.ts",
+    "scanner:v02:fetch-missing-price": "tsx src/altcoin/scanner_v02/price_features/fetch_missing_price_features.ts"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
