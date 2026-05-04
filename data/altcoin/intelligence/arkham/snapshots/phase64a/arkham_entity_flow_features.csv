@@ -1,0 +1,9 @@
+token,date,labeled_transfer_count,labeled_transfer_ratio,unknown_transfer_ratio,cex_proxy_transfer_count,cex_proxy_transfer_volume_usd,cex_netflow_usd,dex_proxy_transfer_count,fund_or_institution_flow_usd,market_maker_proxy_flow_usd,top_entity_flow_share,counterparty_concentration,entity_label_coverage,flow_status
+BSB,2026-05-04,5,0.25,0.75,4,,,,,,,,0.25,ARKHAM_PARTIAL_USEFUL
+LAB,2026-05-04,10,0.5,0.5,8,,,,,,,,0.5,ARKHAM_ENTITY_FLOW_READY
+UB,2026-05-04,7,0.35,0.65,5,,,,,,,,0.35,ARKHAM_PARTIAL_USEFUL
+AI,2026-05-04,10,0.5,0.5,4,,,,,,,,0.5,ARKHAM_ENTITY_FLOW_READY
+PEPE,2026-05-04,19,0.95,0.05,19,,,,,,,,0.95,ARKHAM_ENTITY_FLOW_READY
+WIF,2026-05-04,18,0.9,0.1,17,,,,,,,,0.9,ARKHAM_ENTITY_FLOW_READY
+BONK,2026-05-04,11,0.55,0.45,8,,,,,,,,0.55,ARKHAM_ENTITY_FLOW_READY
+FLOKI,2026-05-04,18,0.9,0.1,14,,,,,,,,0.9,ARKHAM_ENTITY_FLOW_READY

@@ -1,0 +1,23 @@
+[
+  {
+    "file": "arkham_capability_matrix.csv",
+    "rows": 12,
+    "created_at": "2026-05-04T18:26:09.806Z",
+    "checksum": "7967547c",
+    "purpose": "Phase 6.4A capability matrix"
+  },
+  {
+    "file": "arkham_capability_report.md",
+    "rows": 106,
+    "created_at": "2026-05-04T18:26:09.807Z",
+    "checksum": "ee6b7ee2",
+    "purpose": "Phase 6.4A capability report"
+  },
+  {
+    "file": "arkham_entity_flow_features.csv",
+    "rows": 8,
+    "created_at": "2026-05-04T18:26:09.807Z",
+    "checksum": "070e1203",
+    "purpose": "Phase 6.4A entity flow features"
+  }
+]

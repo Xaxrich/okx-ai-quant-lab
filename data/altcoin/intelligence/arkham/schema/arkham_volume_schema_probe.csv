@@ -1,0 +1,10 @@
+token,endpoint_variant,params,status,rows,first_row_keys,parser_ready,limitations
+LAB,pricing_id,,OK,0,,false,
+LAB,pricing_id_gran,granularity=1d,OK,203,inUSD; outUSD; inValue; outValue; time,true,
+LAB,chain_address_gran,granularity=1d,OK,203,inUSD; outUSD; inValue; outValue; time,true,
+BSB,pricing_id,,OK,0,,false,
+BSB,pricing_id_gran,granularity=1d,OK,62,inUSD; outUSD; inValue; outValue; time,true,
+BSB,chain_address_gran,granularity=1d,OK,62,inUSD; outUSD; inValue; outValue; time,true,
+PEPE,pricing_id,,OK,0,,false,
+PEPE,pricing_id_gran,granularity=1d,OK,1112,inUSD; outUSD; inValue; outValue; time,true,
+PEPE,chain_address_gran,granularity=1d,OK,1112,inUSD; outUSD; inValue; outValue; time,true,

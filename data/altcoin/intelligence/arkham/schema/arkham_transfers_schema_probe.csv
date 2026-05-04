@@ -1,0 +1,8 @@
+token,endpoint_variant,params,status,rows,has_from_entity,has_to_entity,has_amount_usd,parser_ready,limitations
+LAB,transfers_basic,chains=bsc&tokens=0x7ec43Cf65F1663F820427C62A5780b8f2E25593A&limit=3&flow=all,OK,3,false,false,false,false,
+LAB,histogram_simple,chains=bsc&tokens=0x7ec43Cf65F1663F820427C62A5780b8f2E25593A&limit=5,ARKHAM_DATA_EMPTY,0,false,false,false,false,ARKHAM_DATA_EMPTY
+BSB,transfers_basic,chains=ethereum&tokens=0xDB6Ba5D510F114F9b2eA08BEa7d30e32eEe33411&limit=3&flow=a,OK,3,false,false,false,false,
+BSB,histogram_simple,chains=ethereum&tokens=0xDB6Ba5D510F114F9b2eA08BEa7d30e32eEe33411&limit=5,ARKHAM_DATA_EMPTY,0,false,false,false,false,ARKHAM_DATA_EMPTY
+PEPE,transfers_basic,chains=ethereum&tokens=0x6982508145454ce325ddbe47a25d4ec3d2311933&limit=3&flow=a,OK,3,false,false,false,false,
+PEPE,histogram_simple,chains=ethereum&tokens=0x6982508145454ce325ddbe47a25d4ec3d2311933&limit=5,ARKHAM_DATA_EMPTY,0,false,false,false,false,ARKHAM_DATA_EMPTY
+SUMMARY,,,,,,,,,TRANSFER_ENTITY_SCHEMA_UNRESOLVED: No entity field could be parsed from transfer responses
