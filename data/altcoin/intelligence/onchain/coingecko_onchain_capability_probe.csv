@@ -1,0 +1,7 @@
+token,chain,network_id,pools_found,primary_pool,ohlcv_day,ohlcv_hour,trades,top_holders,top_holders_count,ohlcv_rows,earliest,latest
+BSB,ethereum,eth,20,0x2e0822dddc,false,true,true,false,0,undefined,,
+LAB,bsc,bsc,20,0xd9434e63fe,false,true,true,false,0,undefined,,
+PEPE,ethereum,eth,20,0xa43fe16908,false,true,true,false,0,undefined,,
+FLOKI,ethereum,eth,20,0xca7c2771d2,false,true,true,false,0,undefined,,
+PENDLE,ethereum,eth,20,0x96b95de704,false,true,true,false,0,undefined,,
+ONDO,ethereum,eth,20,0x7b1e5d984a,false,true,true,false,0,undefined,,
