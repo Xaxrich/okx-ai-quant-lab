@@ -7,6 +7,9 @@ const KEYS: { name: string; value: string }[] = [
   { name: "COINGECKO_PRO_API_KEY", value: process.env.COINGECKO_PRO_API_KEY || "" },
   { name: "COINGECKO_DEMO_API_KEY", value: process.env.COINGECKO_DEMO_API_KEY || "" },
   { name: "BSCSCAN_API_KEY", value: process.env.BSCSCAN_API_KEY || "" },
+  { name: "COINGLASS_API_KEY", value: process.env.COINGLASS_API_KEY || "" },
+  { name: "MORALIS_API_KEY", value: process.env.MORALIS_API_KEY || "" },
+  { name: "ARKHAM_API_KEY", value: process.env.ARKHAM_API_KEY || "" },
 ];
 
 const nonEmptyKeys = KEYS.filter(k => k.value.length > 0);

@@ -28,6 +28,10 @@
     "intelligence:coingecko:pool-debug": "tsx src/altcoin/intelligence/coingecko/coingecko_pool_ohlcv_debug.ts",
     "intelligence:derivatives:features": "tsx src/altcoin/intelligence/derivatives/oi_lead_lag_analysis.ts",
     "intelligence:derivatives:report": "tsx src/altcoin/intelligence/derivatives/oi_lead_lag_analysis.ts",
+    "intelligence:coinglass:probe": "tsx src/altcoin/intelligence/coinglass/coinglass_capability_probe.ts",
+    "intelligence:coinglass:features": "tsx src/altcoin/intelligence/coinglass/coinglass_feature_builder.ts",
+    "intelligence:coinglass:report": "tsx src/altcoin/intelligence/coinglass/coinglass_feature_builder.ts",
+    "intelligence:metric-loop": "tsx src/altcoin/intelligence/metric_loop/metric_loop_runner.ts",
 
     "fetch:data": "npm run okx:fetch-data",
     "backtest": "npm run okx:backtest",

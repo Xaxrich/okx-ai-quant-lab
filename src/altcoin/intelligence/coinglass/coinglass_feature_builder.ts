@@ -1,5 +1,6 @@
-import { writeFileSync, mkdirSync, existsSync } from "fs";
+import { writeFileSync, mkdirSync, existsSync, readFileSync } from "fs";
 import { join } from "path";
+import { normalizeCoinGlassTimestamp } from "./coinglass_time.js";
 
 const CG_KEY = process.env.COINGLASS_API_KEY || "";
 const CG_BASE = "https://open-api-v4.coinglass.com";
@@ -33,27 +34,47 @@ const TOKENS = [
   { sym: "DOGE", group: "CONTROL" }, { sym: "TAO", group: "CONTROL" },
 ];
 
-async function fetchOiHistory(sym: string): Promise<{ date: string; oi: number }[]> {
+function safeExtract(obj: any, candidates: string[]): { value: number | null; status: string } {
+  for (const c of candidates) {
+    if (c in obj && obj[c] !== null && obj[c] !== undefined) {
+      const v = parseFloat(obj[c]);
+      if (!isNaN(v)) return { value: v, status: "OK" };
+      return { value: null, status: "FIELD_PARSE_FAILED" };
+    }
+  }
+  return { value: null, status: "FIELD_MISSING" };
+}
+
+async function fetchOiHistory(sym: string): Promise<{ date: string | null; oi: number | null; parseStatus: string }[]> {
   const r = await cgGet(`/api/futures/open-interest/aggregated-history?symbol=${sym}&interval=1d&limit=90&unit=usd`);
   if (r.status !== "OK" || !r.data?.data) return [];
-  return r.data.data.map((d: any) => ({ date: new Date(parseInt(d.time || d.t) * 1000).toISOString().slice(0, 10), oi: parseFloat(d.aggregatedOpenInterestUsd || d.aggregated_open_interest_usd || d.openInterestUsd || "0") }));
+  return r.data.data.map((d: any) => {
+    const date = normalizeCoinGlassTimestamp(d.time ?? d.t ?? d.timestamp);
+    const oi = safeExtract(d, ["aggregatedOpenInterestUsd","aggregated_open_interest_usd","openInterestUsd","open_interest_usd","oiUsd","oi_usd"]);
+    return { date, oi: oi.value, parseStatus: oi.status };
+  });
 }
 
-async function fetchFundingHistory(sym: string): Promise<{ date: string; rate: number }[]> {
+async function fetchFundingHistory(sym: string): Promise<{ date: string | null; rate: number | null; parseStatus: string }[]> {
   const r = await cgGet(`/api/futures/funding-rate/oi-weight-history?symbol=${sym}&interval=1d&limit=90`);
   if (r.status !== "OK" || !r.data?.data) return [];
-  return r.data.data.map((d: any) => ({ date: new Date(parseInt(d.time || d.t) * 1000).toISOString().slice(0, 10), rate: parseFloat(d.oiWeightedFundingRate || d.oi_weighted_funding_rate || "0") }));
+  return r.data.data.map((d: any) => {
+    const date = normalizeCoinGlassTimestamp(d.time ?? d.t ?? d.timestamp);
+    const rate = safeExtract(d, ["oiWeightedFundingRate","oi_weighted_funding_rate","fundingRate","funding_rate","rate"]);
+    return { date, rate: rate.value, parseStatus: rate.status };
+  });
 }
 
-async function fetchLiquidationHistory(sym: string): Promise<{ date: string; longLiq: number; shortLiq: number; totalLiq: number }[]> {
+async function fetchLiquidationHistory(sym: string): Promise<{ date: string | null; longLiq: number | null; shortLiq: number | null; totalLiq: number | null; parseStatus: string }[]> {
   const r = await cgGet(`/api/futures/liquidation/aggregated-history?symbol=${sym}&interval=1d&limit=90&exchangeList=Binance,OKX,Bybit`);
   if (r.status !== "OK" || !r.data?.data) return [];
-  return r.data.data.map((d: any) => ({
-    date: new Date(parseInt(d.time || d.t) * 1000).toISOString().slice(0, 10),
-    longLiq: parseFloat(d.longLiquidationUsd || d.long_liquidation_usd || d.longVolUsd || "0"),
-    shortLiq: parseFloat(d.shortLiquidationUsd || d.short_liquidation_usd || d.shortVolUsd || "0"),
-    totalLiq: parseFloat(d.totalLiquidationUsd || d.total_liquidation_usd || d.volUsd || "0"),
-  }));
+  return r.data.data.map((d: any) => {
+    const date = normalizeCoinGlassTimestamp(d.time ?? d.t ?? d.timestamp);
+    const long = safeExtract(d, ["longLiquidationUsd","long_liquidation_usd","longVolUsd"]);
+    const short = safeExtract(d, ["shortLiquidationUsd","short_liquidation_usd","shortVolUsd"]);
+    const total = safeExtract(d, ["totalLiquidationUsd","total_liquidation_usd","volUsd"]);
+    return { date, longLiq: long.value, shortLiq: short.value, totalLiq: total.value, parseStatus: long.status === "OK" ? "OK" : long.status };
+  });
 }
 
 async function main() {
@@ -78,28 +99,43 @@ async function main() {
     const liqHist = await fetchLiquidationHistory(sym);
     console.log(`  OI: ${oiHist.length} | Funding: ${fundHist.length} | Liq: ${liqHist.length}`);
 
-    if (oiHist.length < 14) {
-      readinessRows.push(`${sym},${token.group},${sym},${oiHist.length},${fundHist.length},${liqHist.length},COINGLASS_SHORT_HISTORY,<14 OI rows`);
+    // Filter: valid dates + non-null OI values
+    const validOi = oiHist.filter(d => d.date !== null && d.oi !== null);
+    const invalidDates = oiHist.filter(d => d.date === null).length;
+    const nullOi = oiHist.filter(d => d.oi === null).length;
+
+    if (invalidDates > 0) {
+      readinessRows.push(`${sym},${token.group},${sym},${oiHist.length},${fundHist.length},${liqHist.length},COINGLASS_PARSE_FAILED,${invalidDates} invalid timestamps`);
+      console.log(`  PARSE FAILED: ${invalidDates} invalid timestamps\n`);
+      continue;
+    }
+    if (validOi.length < 14) {
+      readinessRows.push(`${sym},${token.group},${sym},${oiHist.length},${fundHist.length},${liqHist.length},COINGLASS_SHORT_HISTORY,<14 valid OI rows`);
       console.log(`  SHORT_HISTORY\n`);
+      continue;
+    }
+    if (nullOi > oiHist.length * 0.5) {
+      readinessRows.push(`${sym},${token.group},${sym},${oiHist.length},${fundHist.length},${liqHist.length},COINGLASS_PARSE_FAILED,${nullOi}/${oiHist.length} OI null`);
+      console.log(`  PARSE FAILED: OI mostly null\n`);
       continue;
     }
 
     // Compute daily features
-    const oiValues = oiHist.map(d => d.oi);
+    const oiValues = validOi.map(d => d.oi!);
     const oiMean = oiValues.reduce((a, b) => a + b, 0) / oiValues.length;
     const oiStd = Math.sqrt(oiValues.reduce((s, v) => s + (v - oiMean) ** 2, 0) / oiValues.length);
-    const fundValues = fundHist.map(d => d.rate);
-    const fundMean = fundValues.length > 0 ? fundValues.reduce((a, b) => a + b, 0) / fundValues.length : 0;
-    const fundStd = fundValues.length > 0 ? Math.sqrt(fundValues.reduce((s, v) => s + (v - fundMean) ** 2, 0) / fundValues.length) : 1;
-    const liqValues = liqHist.map(d => d.totalLiq);
-    const liqMean = liqValues.length > 0 ? liqValues.reduce((a, b) => a + b, 0) / liqValues.length : 0;
-    const liqStd = liqValues.length > 0 ? Math.sqrt(liqValues.reduce((s, v) => s + (v - liqMean) ** 2, 0) / liqValues.length) : 1;
+    const fundValues = fundHist.map(d => d.rate).filter(r => r !== null) as number[];
+    const fundMean = fundValues.length > 0 ? fundValues.reduce((a: number, b: number) => a + b, 0) / fundValues.length : 0;
+    const fundStd = fundValues.length > 0 ? Math.sqrt(fundValues.reduce((s: number, v: number) => s + (v - fundMean) ** 2, 0) / fundValues.length) : 1;
+    const liqValues = liqHist.map(d => d.totalLiq).filter(r => r !== null) as number[];
+    const liqMean = liqValues.length > 0 ? liqValues.reduce((a: number, b: number) => a + b, 0) / liqValues.length : 0;
+    const liqStd = liqValues.length > 0 ? Math.sqrt(liqValues.reduce((s: number, v: number) => s + (v - liqMean) ** 2, 0) / liqValues.length) : 1;
 
-    for (let i = 0; i < oiHist.length; i++) {
-      const date = oiHist[i].date;
-      const oi = oiHist[i].oi;
-      const oiChg1d = i >= 1 ? oi - oiHist[i - 1].oi : null;
-      const oiChg7d = i >= 7 ? oi - oiHist[i - 7].oi : null;
+    for (let i = 0; i < validOi.length; i++) {
+      const date = validOi[i].date!;
+      const oi = validOi[i].oi!;
+      const oiChg1d = i >= 1 ? oi - validOi[i - 1].oi! : null;
+      const oiChg7d = i >= 7 ? oi - validOi[i - 7].oi! : null;
       const oiZ = oiStd > 0 ? (oi - oiMean) / oiStd : null;
 
       const fundRow = fundHist.find(f => f.date === date);
@@ -110,7 +146,8 @@ async function main() {
       const liqRow = liqHist.find(l => l.date === date);
       const liqVol = liqRow?.totalLiq ?? null;
       const liqZ = liqVol !== null && liqStd > 0 ? (liqVol - liqMean) / liqStd : null;
-      const liqImb = liqRow ? ((liqRow.longLiq - liqRow.shortLiq) / Math.max(liqRow.totalLiq, 1)) : null;
+      const liqImb = liqRow && liqRow.longLiq !== null && liqRow.shortLiq !== null && liqRow.totalLiq !== null && liqRow.totalLiq > 0
+        ? parseFloat(((liqRow.longLiq - liqRow.shortLiq) / liqRow.totalLiq).toFixed(3)) : null;
 
       let readiness = "COINGLASS_FEATURE_READY";
       const limits: string[] = [];
@@ -138,28 +175,31 @@ async function main() {
   }
   writeFileSync(join(OUT_DIR, "analysis", "coinglass_feature_readiness.csv"), readinessRows.join("\n"));
 
-  // Update registry
+  // Update registry — subgroup specific, NOT blanket
   const readyTokens = readinessRows.slice(1).filter(r => r.includes("FEATURE_READY")).length;
-  if (readyTokens >= 6 && allFeatures.length > 0) {
-    const { readFileSync } = await import("fs");
-    if (existsSync(REGISTRY_PATH)) {
-      const reg = readFileSync(REGISTRY_PATH, "utf-8").split("\n");
-      const updated = reg.map(line => {
-        if (line.startsWith("CG_OI_") && line.includes("IDEA")) return line.replace("IDEA", "COMPUTABLE");
-        if (line.startsWith("CG_FR_") && line.includes("IDEA")) return line.replace("IDEA", "COMPUTABLE");
-        if (line.startsWith("CG_LIQ_") && line.includes("IDEA")) return line.replace("IDEA", "COMPUTABLE");
-        return line;
-      });
-      writeFileSync(REGISTRY_PATH, updated.join("\n"));
-      console.log("Registry: CG_OI/CG_FR/CG_LIQ → COMPUTABLE");
-    }
+  const hasOiData = allFeatures.filter(r => r.oiUsd !== null && r.oiUsd > 0).length > 50;
+  const hasFundingData = allFeatures.filter(r => r.fundingOiW !== null).length > 50;
+  const hasLiqData = allFeatures.filter(r => r.liqVol !== null && r.liqVol > 0).length > 10;
+  if (existsSync(REGISTRY_PATH)) {
+    const reg = readFileSync(REGISTRY_PATH, "utf-8").split("\n");
+    const updated = reg.map(line => {
+      if (line.startsWith("CG_OI_") && line.includes("IDEA") && hasOiData) return line.replace("IDEA", "COMPUTABLE");
+      if (line.startsWith("CG_FR_") && line.includes("IDEA") && hasFundingData) return line.replace("IDEA", "COMPUTABLE");
+      if (line.startsWith("CG_LIQ_") && line.includes("IDEA") && hasLiqData) return line.replace("IDEA", "COMPUTABLE");
+      if (line.startsWith("CG_LIQ_") && line.includes("COMPUTABLE") && !hasLiqData) return line.replace("COMPUTABLE", "IDEA");
+      return line;
+    });
+    writeFileSync(REGISTRY_PATH, updated.join("\n"));
+    console.log(`Registry: CG_OI→${hasOiData ? "COMPUTABLE" : "IDEA"}, CG_FR→${hasFundingData ? "COMPUTABLE" : "IDEA"}, CG_LIQ→${hasLiqData ? "COMPUTABLE" : "IDEA"}`);
   }
 
   // Report
+  const allReady = readyTokens >= 6 && hasOiData && hasFundingData;
   const reportLines = [
     "# CoinGlass Feature Builder Report", "", `Generated: ${new Date().toISOString()}`,
     "", "## 1. Status", "",
-    readyTokens >= 6 ? "**COINGLASS_FEATURES_READY_FOR_DERIVATIVES_V2**" : "**COINGLASS_PARTIAL_FEATURES_READY**",
+    allReady ? "**COINGLASS_FEATURES_READY_FOR_DERIVATIVES_V2**" : "**COINGLASS_FEATURES_NOT_READY**",
+    `Readiness: OI data=${hasOiData}, Funding data=${hasFundingData}, Liquidation data=${hasLiqData}, Ready tokens=${readyTokens}/${TOKENS.length}`,
     "", "## 2. Token Coverage", "",
     `Tokens: ${readyTokens}/${TOKENS.length} with feature-ready data`,
     `Total feature rows: ${allFeatures.length}`,
