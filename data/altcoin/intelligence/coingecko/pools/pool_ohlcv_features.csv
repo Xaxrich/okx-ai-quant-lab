@@ -1,0 +1,13 @@
+token,pool_address,timeframe,rows,earliest,latest,status,usable
+BSB,0x2e0822dddc839e6b5c2d4e4a80d73f68931b306795a13d8452681c5e317018d0,day,0,,,ERROR,false
+BSB,0x2e0822dddc839e6b5c2d4e4a80d73f68931b306795a13d8452681c5e317018d0,hour,0,,,ERROR,false
+LAB,0xd9434e63fe78a6e77dafe2abc504121bf8500822f6d3a59eccba577cf0a070f2,day,0,,,ERROR,false
+LAB,0xd9434e63fe78a6e77dafe2abc504121bf8500822f6d3a59eccba577cf0a070f2,hour,0,,,ERROR,false
+PEPE,0xa43fe16908251ee70ef74718545e4fe6c5ccec9f,day,0,,,ERROR,false
+PEPE,0xa43fe16908251ee70ef74718545e4fe6c5ccec9f,hour,0,,,ERROR,false
+WIF,EP2ib6dYdEeqD8MfE2ezHCxX3kP3K2eLKkirfPm5eyMx,day,0,,,ERROR,false
+WIF,EP2ib6dYdEeqD8MfE2ezHCxX3kP3K2eLKkirfPm5eyMx,hour,0,,,ERROR,false
+BONK,6oFWm7KPLfxnwMb3z5xwBoXNSPP3JJyirAPqPSiVcnsp,day,0,,,ERROR,false
+BONK,6oFWm7KPLfxnwMb3z5xwBoXNSPP3JJyirAPqPSiVcnsp,hour,0,,,ERROR,false
+FLOKI,0xca7c2771d248dcbe09eabe0ce57a62e18da178c0,day,0,,,ERROR,false
+FLOKI,0xca7c2771d248dcbe09eabe0ce57a62e18da178c0,hour,0,,,ERROR,false

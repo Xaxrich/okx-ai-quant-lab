@@ -1,0 +1,7 @@
+token,primary_pool_address,network,dex_id,pool_name,reserve_usd,volume_h24,tx_h24,primary_score,liq_share,vol_share,top3_liq_share,top3_vol_share,pool_count,dex_count,confidence
+BSB,0x2e0822dddc839e6b5c2d4e4a80d73f68931b306795a13d8452681c5e317018d0,eth,uniswap-v4-ethereum,BSB / USDT 5%,2125.947,6015.2721666618,126,0.52,0.04,0.44,0.39,0.46,20,1,MEDIUM
+LAB,0xd9434e63fe78a6e77dafe2abc504121bf8500822f6d3a59eccba577cf0a070f2,bsc,pancakeswap-infinity-clmm,LAB / USDT 0.007%,3259298.1082,62899368.7428802,84322,0.9,0.79,0.81,0.81,0.96,20,4,HIGH
+PEPE,0xa43fe16908251ee70ef74718545e4fe6c5ccec9f,eth,uniswap_v2,PEPE / WETH,28176791.7542,550638.992317841,247,0.9,0.91,0.72,0.98,0.99,20,7,HIGH
+WIF,EP2ib6dYdEeqD8MfE2ezHCxX3kP3K2eLKkirfPm5eyMx,solana,raydium,$WIF / SOL,4934062.546,185121.424499629,4149,0.68,0.92,0.28,0.98,0.98,20,4,HIGH
+BONK,6oFWm7KPLfxnwMb3z5xwBoXNSPP3JJyirAPqPSiVcnsp,solana,meteora,Bonk / SOL,439146.2749,837806.621091445,7376,0.65,0.18,0.59,0.65,0.9,20,5,HIGH
+FLOKI,0xca7c2771d248dcbe09eabe0ce57a62e18da178c0,eth,uniswap_v2,FLOKI / WETH,8247696.8273,49483.3327247665,85,0.9,1,1,1,1,20,5,HIGH
