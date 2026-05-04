@@ -1,6 +1,45 @@
-# OKX AI Quant Lab
+# OKX AI Quant Lab + Altcoin Breakout Intelligence System
 
-Local-first, risk-first, audit-first quantitative trading research lab built on OKX Agent TradeKit, OKX CLI, and TypeScript.
+Local-first, risk-first, audit-first quantitative trading research lab + multi-source altcoin breakout intelligence system.
+
+## Current Status (2026-05-04)
+
+The project now has three layers:
+
+1. **OKX Quant Research Lab** — trading infrastructure, backtesting, risk engine, audit logging
+2. **Altcoin Scanner v02** — 28-token universe scoring with supply/DEX/price features
+3. **Altcoin Intelligence Research Layers** — derivatives OI/funding analysis, DEX pool discovery, phase classification (research-only)
+
+## Data Sources
+
+| Source | Purpose | Status |
+|--------|---------|:---:|
+| CoinGecko Pro | Price/mcap/volume 90d history, Onchain DEX pools | Active |
+| CoinMarketCap | Supply cross-verification, CEX/DEX volume split | Active |
+| DexScreener | DEX pairs, liquidity, buy/sell txns | Active |
+| OKX Trading Statistics | OI history, funding rate history | Active |
+| Etherscan V2 | Token transfers, on-chain total supply | Partial (holderlist requires Pro) |
+
+## What This System Cannot Do
+
+- Cannot confirm accumulation or distribution (no holder time-series)
+- Cannot confirm derivatives positioning (no long/short ratio or taker volume)
+- Cannot output trading recommendations (BUY/SELL/LONG/SHORT forbidden)
+- Cannot auto-execute trades (live trading permanently disabled)
+- OI/funding/DEX activity are proxy signals, not facts
+
+## Quick Commands
+
+```bash
+npm run scanner:v02                  # Run universe scanner
+npm run scanner:v02:build-registry    # Build token metadata registry
+npm run scanner:v02:fetch-price       # Fetch missing price features
+npm run intelligence:derivatives:features  # Run OI lead-lag analysis
+npm run intelligence:coingecko:pools  # CoinGecko pool discovery
+npm run okx:demo:preflight           # OKX demo environment check
+npm test                              # Run 101 tests
+npm run security:check-secrets        # Scan for API key leaks
+```
 
 ## Architecture
 

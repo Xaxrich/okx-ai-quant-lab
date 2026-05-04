@@ -11,6 +11,10 @@ data/altcoin/scanner_reconciliation*/
 data/altcoin/scanner_v02/cache/
 data/altcoin/scanner_v02/features/
 data/altcoin/scanner_v02/registry/
+data/altcoin/intelligence/*/raw*/
+data/altcoin/intelligence/*/cache*/
+data/altcoin/intelligence/*/debug*/
+reports/**/daily_snapshot_report_*.md
 .env
 .env.local
 *.log
