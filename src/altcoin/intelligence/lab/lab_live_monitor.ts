@@ -7,7 +7,6 @@ const CG_KEY_PARAM = CG_KEY ? `x_cg_pro_api_key=${CG_KEY}` : "";
 
 const OUT_DIR = join(import.meta.dirname, "..", "..", "..", "..", "data", "altcoin", "intelligence", "lab", "live");
 const REPORTS_DIR = join(import.meta.dirname, "..", "..", "..", "..", "reports", "altcoin", "intelligence", "lab");
-const CG_DIR = join(import.meta.dirname, "..", "..", "..", "..", "data", "altcoin", "intelligence", "coinglass");
 
 const LAB = { sym: "LAB", cgId: "lab", okxInstId: "LAB-USDT-SWAP", chain: "bsc", contract: "0x7ec43Cf65F1663F820427C62A5780b8f2E25593A" };
 
@@ -28,8 +27,6 @@ async function fetchCoinGeckoLive(): Promise<Record<string, any>> {
     result.price_change_1h = m.price_change_percentage_1h_in_currency?.usd || null;
     result.price_change_24h = m.price_change_percentage_24h || null;
     result.price_change_7d = m.price_change_percentage_7d || null;
-    result.high_24h = m.high_24h?.usd || null;
-    result.low_24h = m.low_24h?.usd || null;
     result.circulating_supply = m.circulating_supply || null;
     result.total_supply = m.total_supply || null;
     result.fdv = m.fully_diluted_valuation?.usd || null;
@@ -42,7 +39,7 @@ async function fetchCoinGlassLive(): Promise<Record<string, any>> {
   const CG_API = process.env.COINGLASS_API_KEY;
   if (!CG_API) { result.error = "No CoinGlass key"; return result; }
   try {
-    // OI history (latest rows, 4h interval for recent granularity)
+    // OI history (4h, last 12 for rolling stats)
     const oiR = await fetch(`https://open-api-v4.coinglass.com/api/futures/open-interest/aggregated-history?symbol=${LAB.sym}&interval=4h&limit=12&unit=usd`, { headers: { "CG-API-KEY": CG_API, "Accept": "application/json" } });
     const oiJ = await oiR.json();
     result.oi_ok = oiJ.code === "0";
@@ -59,33 +56,49 @@ async function fetchCoinGlassLive(): Promise<Record<string, any>> {
       }
     }
 
-    // Funding
+    // Funding (4h, last 12)
     const fundR = await fetch(`https://open-api-v4.coinglass.com/api/futures/funding-rate/oi-weight-history?symbol=${LAB.sym}&interval=4h&limit=12`, { headers: { "CG-API-KEY": CG_API, "Accept": "application/json" } });
     const fundJ = await fundR.json();
     result.funding_ok = fundJ.code === "0";
     const fundData = fundJ.data || [];
     if (fundData.length > 0) {
-      result.funding_current = parseFloat(fundData[fundData.length - 1].close || "0");
+      const raw = parseFloat(fundData[fundData.length - 1].close || "0");
+      result.funding_rate_raw = raw;
+      result.funding_rate_decimal = raw;
+      result.funding_rate_percent = raw * 100;
+      result.funding_unit_status = "CONFIRMED_DECIMAL";
+      result.funding_current = raw; // keep backwards compat
       const fundVals = fundData.map((d: any) => parseFloat(d.close || "0")).filter((v: number) => !isNaN(v));
       if (fundVals.length > 0) {
         const fMean = fundVals.reduce((a: number, b: number) => a + b, 0) / fundVals.length;
         const fStd = Math.sqrt(fundVals.reduce((s: number, v: number) => s + (v - fMean) ** 2, 0) / fundVals.length);
-        result.funding_zscore = fStd > 0 ? (result.funding_current - fMean) / fStd : null;
+        result.funding_zscore = fStd > 0 ? (raw - fMean) / fStd : null;
         result.funding_positive_streak = 0;
         for (let i = fundVals.length - 1; i >= 0 && fundVals[i] > 0; i--) result.funding_positive_streak++;
       }
     }
 
-    // Liquidation (4h, recent)
+    // Liquidation (4h, last 6)
     const liqR = await fetch(`https://open-api-v4.coinglass.com/api/futures/liquidation/aggregated-history?symbol=${LAB.sym}&interval=4h&limit=6&exchange_list=Binance,OKX,Bybit`, { headers: { "CG-API-KEY": CG_API, "Accept": "application/json" } });
     const liqJ = await liqR.json();
     result.liquidation_ok = liqJ.code === "0";
     const liqData = liqJ.data || [];
     if (liqData.length > 0) {
-      result.liq_volume_4h = liqData.reduce((s: number, d: any) => s + (parseFloat(d.aggregated_long_liquidation_usd || "0") + parseFloat(d.aggregated_short_liquidation_usd || "0")), 0);
-      result.liq_long_4h = liqData.reduce((s: number, d: any) => s + parseFloat(d.aggregated_long_liquidation_usd || "0"), 0);
-      result.liq_short_4h = liqData.reduce((s: number, d: any) => s + parseFloat(d.aggregated_short_liquidation_usd || "0"), 0);
-      result.liq_imbalance = result.liq_volume_4h > 0 ? (result.liq_long_4h - result.liq_short_4h) / result.liq_volume_4h : null;
+      // FIXED: 4h = latest candle only, 24h = sum of last 6
+      const latest = liqData[liqData.length - 1];
+      const latestLong = parseFloat(latest.aggregated_long_liquidation_usd || "0");
+      const latestShort = parseFloat(latest.aggregated_short_liquidation_usd || "0");
+      result.liquidation_volume_4h = latestLong + latestShort;
+      result.long_liquidation_volume_4h = latestLong;
+      result.short_liquidation_volume_4h = latestShort;
+      result.liquidation_imbalance_4h = result.liquidation_volume_4h > 0 ? (latestLong - latestShort) / result.liquidation_volume_4h : null;
+
+      const sum24Long = liqData.reduce((s: number, d: any) => s + parseFloat(d.aggregated_long_liquidation_usd || "0"), 0);
+      const sum24Short = liqData.reduce((s: number, d: any) => s + parseFloat(d.aggregated_short_liquidation_usd || "0"), 0);
+      result.liquidation_volume_24h = sum24Long + sum24Short;
+      result.long_liquidation_volume_24h = sum24Long;
+      result.short_liquidation_volume_24h = sum24Short;
+      result.liquidation_imbalance_24h = result.liquidation_volume_24h > 0 ? (sum24Long - sum24Short) / result.liquidation_volume_24h : null;
     }
 
     result.ok = result.oi_ok && result.funding_ok;
@@ -96,16 +109,32 @@ async function fetchCoinGlassLive(): Promise<Record<string, any>> {
 async function fetchOkxLive(): Promise<Record<string, any>> {
   const result: Record<string, any> = { ok: false };
   try {
-    // OKX OI
     const oiR = await fetch(`https://www.okx.com/api/v5/public/open-interest?instId=${LAB.okxInstId}`);
     const oiJ = await oiR.json();
     if (oiJ.code === "0" && oiJ.data?.[0]) {
-      result.oi_current = parseFloat(oiJ.data[0].oi || "0");
-      result.oi_ts = oiJ.data[0].ts;
+      const d = oiJ.data[0];
+      result.okx_oi_raw = d.oi || "";
+      result.okx_oi_ccy = d.oiCcy || "";
+      result.okx_oi_usd_direct = d.oiUsd ? parseFloat(d.oiUsd) : null;
+      result.okx_oi_ts = d.ts || "";
+
+      if (result.okx_oi_usd_direct !== null) {
+        result.okx_oi_usd_estimated = result.okx_oi_usd_direct;
+        result.okx_oi_unit = "USD_DIRECT";
+        result.oi_current = result.okx_oi_usd_direct; // for backwards compat
+      } else if (d.oiCcy) {
+        result.okx_oi_unit = "ESTIMATED_FROM_OI_CCY";
+        result.okx_oi_usd_estimated = null; // needs price to estimate
+        result.oi_current = null;
+      } else {
+        result.okx_oi_unit = "RAW_CONTRACT_OR_TOKEN_UNCONFIRMED";
+        result.okx_oi_usd_estimated = null;
+        result.oi_current = null;
+      }
       result.oi_ok = true;
     }
 
-    // OKX funding rate
+    // Funding rate
     const frR = await fetch(`https://www.okx.com/api/v5/public/funding-rate?instId=${LAB.okxInstId}`);
     const frJ = await frR.json();
     if (frJ.code === "0" && frJ.data?.[0]) {
@@ -114,7 +143,7 @@ async function fetchOkxLive(): Promise<Record<string, any>> {
       result.fr_ok = true;
     }
 
-    // Funding rate history (last 3)
+    // Funding rate history
     const frhR = await fetch(`https://www.okx.com/api/v5/public/funding-rate-history?instId=${LAB.okxInstId}&limit=3`);
     const frhJ = await frhR.json();
     if (frhJ.code === "0") {
@@ -132,7 +161,6 @@ async function fetchOkxLive(): Promise<Record<string, any>> {
 function loadLocalArkhamReference(): Record<string, any> {
   const result: Record<string, any> = { ok: false };
   try {
-    // LAB holder entity snapshot
     const holderPath = join(import.meta.dirname, "..", "..", "..", "..", "data", "altcoin", "intelligence", "arkham", "features", "arkham_holder_entity_features.csv");
     if (existsSync(holderPath)) {
       const lines = readFileSync(holderPath, "utf-8").split("\n");
@@ -144,103 +172,108 @@ function loadLocalArkhamReference(): Record<string, any> {
         result.holder_entity_coverage = parseFloat(cols[19] || "0");
       }
     }
-
-    // LAB segmented transfer SEG_D (breakout) data
-    const segPath = join(import.meta.dirname, "..", "..", "..", "..", "data", "altcoin", "intelligence", "arkham", "features", "arkham_segmented_transfer_entity_features.csv");
-    if (existsSync(segPath)) {
-      const lines = readFileSync(segPath, "utf-8").split("\n");
-      const segD = lines.slice(1).find(l => l.startsWith("LAB,") && l.includes("SEG_D"));
-      if (segD) {
-        const cols = segD.split(",");
-        result.seg_transfer_count = parseInt(cols[7] || "0");
-        result.seg_cex_count = parseInt(cols[11] || "0");
-        result.seg_labeled_ratio = parseFloat(cols[9] || "0");
-      }
-    }
     result.ok = Object.keys(result).length > 1;
   } catch { /* local only */ }
   return result;
 }
 
-// ── State Machine ──
+// ── State Machine (with absolute extreme support) ──
 
 interface RiskState { state: string; confidence: string; evidence: string[]; limitations: string[]; }
-type StateId = "INSUFFICIENT" | "NO_SIGNAL" | "DELEVERAGING" | "LIQ_RISK" | "FUNDING_HOT" | "EFF_DECAY" | "CROWDING" | "BREAKOUT";
 
-function classifyState(cg: any, cgl: any, okx: any, dex: any, arkham: any, dqScore: number): { mainState: RiskState; secondaryStates: RiskState[] } {
+function classifyState(cg: any, cgl: any, okx: any, dex: any, arkham: any, coreDq: number): { mainState: RiskState; secondaryStates: RiskState[] } {
   const secondary: RiskState[] = [];
 
-  if (dqScore < 0.7) {
-    return { mainState: { state: "LAB_DATA_INSUFFICIENT", confidence: "HIGH", evidence: [`data_quality_score=${dqScore.toFixed(2)}`], limitations: ["Below 0.7 threshold"] }, secondaryStates: [] };
+  if (coreDq < 0.7) {
+    return { mainState: { state: "LAB_DATA_INSUFFICIENT", confidence: "HIGH", evidence: [`core_data_quality=${coreDq.toFixed(2)}`], limitations: ["Below 0.7 threshold"] }, secondaryStates: [] };
   }
 
+  // Core signals
   const priceUp = (cg.price_change_24h || 0) > 5;
   const priceExtreme = (cg.price_change_24h || 0) > 30;
   const volElevated = cg.market_cap > 0 ? (cg.volume_24h || 0) / cg.market_cap > 0.3 : false;
   const oiRising24h = (cgl.oi_change_24h || 0) > 0;
   const oiZscoreHigh = (cgl.oi_zscore || 0) > 2;
-  const fundingHigh = (cgl.funding_zscore || 0) > 2;
-  const fundingPositive = (cgl.funding_positive_streak || 0) >= 3;
-  const liqElevated = (cgl.liq_volume_4h || 0) > 100000;
-  const liqImbalanced = Math.abs(cgl.liq_imbalance || 0) > 0.5;
-  const oiDeclining = (cgl.oi_change_4h || 0) < 0 && (cgl.oi_change_24h || 0) < 0;
-  const okxConfirm = okx.ok && okx.oi_ok && (cgl.oi_current > 0 ? Math.abs((okx.oi_current || 0) / cgl.oi_current - 1) < 0.3 : false);
-  const effDecay = priceUp && volElevated && (cg.price_change_1h || 0) < (cg.price_change_24h || 0) / 24 * 1.5;
+  const oiToMcap = cg.market_cap > 0 && cgl.oi_current ? cgl.oi_current / cg.market_cap : 0;
+  const oiToMcapExtreme = oiToMcap >= 1.0;
+  const oiChange24hRatio = cgl.oi_current > 0 ? (cgl.oi_change_24h || 0) / (cgl.oi_current - (cgl.oi_change_24h || 0)) : 0;
+  const oiChange24hExtreme = oiChange24hRatio >= 0.30;
 
-  // Check each state with 2-layer evidence
+  // Funding
+  const fundingPct = cgl.funding_rate_percent || 0;
+  const fundingAbsExtreme = cgl.funding_unit_status === "CONFIRMED_DECIMAL" ? fundingPct >= 5 : (cgl.funding_rate_raw || 0) >= 0.05;
+  const fundingZscoreHigh = (cgl.funding_zscore || 0) > 2;
+  const fundingStreakExtreme = (cgl.funding_positive_streak || 0) >= 6;
+  const fundingUnitConfirmed = cgl.funding_unit_status === "CONFIRMED_DECIMAL";
 
-  // Deleveraging: OI decline + liquidation spike
-  if (oiDeclining && liqElevated) {
-    secondary.push({ state: "LAB_DELEVERAGING_OBSERVED", confidence: liqImbalanced ? "HIGH" : "MEDIUM", evidence: [`OI change 4h=${cgl.oi_change_4h?.toFixed(0) || "?"} 24h=${cgl.oi_change_24h?.toFixed(0) || "?"}`, `Liq volume 4h=$${(cgl.liq_volume_4h || 0).toFixed(0)}`, `Liq imbalance=${(cgl.liq_imbalance || 0).toFixed(2)}`], limitations: ["Cannot confirm deleveraging direction"] });
+  // Liquidation
+  const liq4hToOi = cgl.oi_current > 0 ? (cgl.liquidation_volume_4h || 0) / cgl.oi_current : 0;
+  const liq24hToOi = cgl.oi_current > 0 ? (cgl.liquidation_volume_24h || 0) / cgl.oi_current : 0;
+  const liqElevated24h = (cgl.liquidation_volume_24h || 0) > 500000;
+  const liqImbalanced = Math.abs(cgl.liquidation_imbalance_4h || 0) > 0.5;
+
+  // OKX
+  const okxUsdAvail = okx.okx_oi_unit === "USD_DIRECT" && okx.okx_oi_usd_direct !== null;
+  const okxRatio = okxUsdAvail && cgl.oi_current > 0 ? okx.okx_oi_usd_direct / cgl.oi_current : null;
+  const okxConfirm = okxRatio !== null && okxRatio > 0.01 && okxRatio < 0.5;
+
+  // OI decline
+  const oiDeclining4h = (cgl.oi_change_4h || 0) < 0;
+  const oiDeclining24h = (cgl.oi_change_24h || 0) < 0;
+
+  // Efficiency decay
+  const effDecay = priceUp && volElevated && cg.price_change_1h !== null && cg.price_change_24h !== null ? (cg.price_change_1h < cg.price_change_24h / 24 * 1.2) : false;
+
+  // ── State Assessment ──
+
+  // Deleveraging: OI decline + liquidation spike (2 layers: OI + liq)
+  if (oiDeclining24h && liqElevated24h) {
+    secondary.push({ state: "LAB_DELEVERAGING_OBSERVED", confidence: liqImbalanced ? "HIGH" : "MEDIUM", evidence: [`OI 24h change=${(cgl.oi_change_24h || 0).toFixed(0)}`, `Liq 24h=$${(cgl.liquidation_volume_24h || 0).toFixed(0)}`, `Liq 4h imbalance=${(cgl.liquidation_imbalance_4h || 0).toFixed(2)}`], limitations: ["OI decline + liq spike = deleveraging proxy, not confirmed direction"] });
   }
 
-  // Liquidation risk: liq elevated + price volatility
-  if (liqElevated && (priceExtreme || oiZscoreHigh)) {
-    secondary.push({ state: "LAB_LIQUIDATION_RISK", confidence: liqImbalanced ? "HIGH" : "MEDIUM", evidence: [`Liq volume 4h=$${(cgl.liq_volume_4h || 0).toFixed(0)}`, priceExtreme ? `Price 24h=${cg.price_change_24h?.toFixed(1)}%` : `OI zscore=${cgl.oi_zscore?.toFixed(1)}`], limitations: ["Liquidation proxy — not confirmed direction"] });
+  // Liquidation risk: liq elevated + (OI extreme or price volatile)
+  if (liqElevated24h && (oiChange24hExtreme || priceExtreme)) {
+    secondary.push({ state: "LAB_LIQUIDATION_RISK", confidence: liqImbalanced ? "HIGH" : "MEDIUM", evidence: [`Liq 24h=$${(cgl.liquidation_volume_24h || 0).toFixed(0)}`, oiChange24hExtreme ? `OI 24h ratio=${(oiChange24hRatio*100).toFixed(0)}%` : `Price 24h=${cg.price_change_24h?.toFixed(1)}%`], limitations: ["Liquidation proxy — not confirmed forced close direction"] });
   }
 
-  // Funding overheated: funding high + OI or price elevated
-  if (fundingHigh && (oiZscoreHigh || priceUp)) {
-    secondary.push({ state: "LAB_FUNDING_OVERHEATED", confidence: fundingPositive && fundingHigh ? "HIGH" : "MEDIUM", evidence: [`Funding zscore=${(cgl.funding_zscore || 0).toFixed(1)}`, `Streak=${cgl.funding_positive_streak || 0}`, oiZscoreHigh ? `OI zscore=${cgl.oi_zscore?.toFixed(1)}` : `Price 24h=${cg.price_change_24h?.toFixed(1)}%`], limitations: ["Funding overheated is risk indicator, not reversal signal"] });
+  // Funding overheated: abs extreme OR zscore high + supporting evidence
+  if (fundingAbsExtreme && (fundingStreakExtreme || oiToMcapExtreme) && !oiDeclining24h) {
+    const conf = fundingUnitConfirmed ? (fundingStreakExtreme && oiToMcapExtreme ? "HIGH" : "MEDIUM") : "MEDIUM";
+    secondary.push({ state: "LAB_FUNDING_OVERHEATED", confidence: conf, evidence: [`Funding=${fundingPct.toFixed(2)}% (raw=${(cgl.funding_rate_raw || 0).toFixed(4)})`, `Streak=${cgl.funding_positive_streak || 0}`, oiToMcapExtreme ? `OI/MCap=${oiToMcap.toFixed(2)}` : ""], limitations: [fundingUnitConfirmed ? "" : "Funding unit NEEDS_CONFIRMATION", "Funding overheated = risk indicator, not reversal signal"].filter(Boolean) });
+  } else if (fundingZscoreHigh && (oiZscoreHigh || priceUp)) {
+    secondary.push({ state: "LAB_FUNDING_OVERHEATED", confidence: "MEDIUM", evidence: [`Funding zscore=${(cgl.funding_zscore || 0).toFixed(1)}`, oiZscoreHigh ? `OI zscore=${cgl.oi_zscore?.toFixed(1)}` : `Price 24h=${cg.price_change_24h?.toFixed(1)}%`], limitations: ["Funding overheated = risk indicator, not reversal signal"] });
   }
 
-  // Efficiency decay: price advancing + vol/OI continuing but return/effort declining
+  // Efficiency decay
   if (effDecay && (oiRising24h || volElevated)) {
-    secondary.push({ state: "LAB_EFFICIENCY_DECAY", confidence: "MEDIUM", evidence: [`Price 24h=${cg.price_change_24h?.toFixed(1)}% 1h=${cg.price_change_1h?.toFixed(1)}%`, `Volume/mcap elevated=${volElevated}`, `OI rising 24h=${oiRising24h}`], limitations: ["Efficiency decay is structural observation, not timing signal"] });
+    secondary.push({ state: "LAB_EFFICIENCY_DECAY", confidence: "MEDIUM", evidence: [`Price 1h=${cg.price_change_1h?.toFixed(1)}% vs 24h=${cg.price_change_24h?.toFixed(1)}%`, `OI rising 24h=${oiRising24h}`], limitations: ["Efficiency decay is structural observation, not timing signal"] });
   }
 
-  // Derivatives crowding: OI rising + OI zscore high
-  if (oiRising24h && oiZscoreHigh && !fundingHigh) {
-    secondary.push({ state: "LAB_DERIVATIVES_CROWDING_PROXY", confidence: okxConfirm ? "HIGH" : "MEDIUM", evidence: [`OI zscore=${(cgl.oi_zscore || 0).toFixed(1)}`, `OI change 24h=+$${(cgl.oi_change_24h || 0).toFixed(0)}`, okxConfirm ? "OKX confirms" : "OKX cross-check pending"], limitations: ["OI crowding is structural context, not directional signal"] });
+  // Derivatives crowding: OI extreme + not yet overheat
+  if ((oiChange24hExtreme && oiToMcapExtreme) || (oiZscoreHigh && oiRising24h)) {
+    const alreadyOverheated = secondary.some(s => s.state === "LAB_FUNDING_OVERHEATED");
+    if (!alreadyOverheated || oiChange24hExtreme) {
+      secondary.push({ state: "LAB_DERIVATIVES_CROWDING_PROXY", confidence: okxConfirm ? "HIGH" : (oiToMcapExtreme ? "MEDIUM" : "LOW"), evidence: [`OI/MCap=${oiToMcap.toFixed(2)}`, `OI 24h ratio=${(oiChange24hRatio*100).toFixed(0)}%`, okxConfirm ? `OKX ratio=${(okxRatio!*100).toFixed(1)}%` : `OKX unit=${okx.okx_oi_unit || "?"}`], limitations: ["OI crowding = structural context, not directional signal"] });
+    }
   }
 
   // Breakout confirmation
-  if (priceUp && volElevated && oiRising24h && !fundingHigh) {
-    secondary.push({ state: "LAB_BREAKOUT_CONFIRMATION", confidence: okxConfirm ? "HIGH" : "MEDIUM", evidence: [`Price 24h=${cg.price_change_24h?.toFixed(1)}%`, `Volume/mcap elevated=${volElevated}`, `OI rising=${oiRising24h}`], limitations: ["Breakout confirmation is research context, not entry signal"] });
+  if (priceUp && volElevated && !oiDeclining24h) {
+    secondary.push({ state: "LAB_BREAKOUT_CONFIRMATION", confidence: okxConfirm ? "HIGH" : "MEDIUM", evidence: [`Price 24h=${cg.price_change_24h?.toFixed(1)}%`, `Vol/MCap=${cg.market_cap > 0 ? ((cg.volume_24h || 0) / cg.market_cap * 100).toFixed(0) : "?"}%`, `OI rising=${oiRising24h}`], limitations: ["Breakout confirmation = research context, not entry signal"] });
   }
 
-  // Sort by priority
-  const priorityOrder: StateId[] = ["DELEVERAGING", "LIQ_RISK", "FUNDING_HOT", "EFF_DECAY", "CROWDING", "BREAKOUT"];
-  const priorityMap: Record<string, StateId> = {
-    "LAB_DELEVERAGING_OBSERVED": "DELEVERAGING", "LAB_LIQUIDATION_RISK": "LIQ_RISK",
-    "LAB_FUNDING_OVERHEATED": "FUNDING_HOT", "LAB_EFFICIENCY_DECAY": "EFF_DECAY",
-    "LAB_DERIVATIVES_CROWDING_PROXY": "CROWDING", "LAB_BREAKOUT_CONFIRMATION": "BREAKOUT",
-  };
+  // Priority sort
+  const prio: Record<string, number> = { "LAB_DELEVERAGING_OBSERVED": 1, "LAB_LIQUIDATION_RISK": 2, "LAB_FUNDING_OVERHEATED": 3, "LAB_EFFICIENCY_DECAY": 4, "LAB_DERIVATIVES_CROWDING_PROXY": 5, "LAB_BREAKOUT_CONFIRMATION": 6 };
+  secondary.sort((a, b) => (prio[a.state] || 99) - (prio[b.state] || 99));
 
-  secondary.sort((a, b) => {
-    const pa = priorityMap[a.state] || "BREAKOUT";
-    const pb = priorityMap[b.state] || "BREAKOUT";
-    return priorityOrder.indexOf(pa) - priorityOrder.indexOf(pb);
-  });
-
-  const mainState = secondary.length > 0 ? secondary[0] : { state: "LAB_NO_CLEAR_RISK_SIGNAL", confidence: "MEDIUM", evidence: ["No risk states triggered"], limitations: ["Data quality sufficient but no clear risk signals detected"] };
+  const mainState = secondary.length > 0 ? secondary[0] : { state: "LAB_NO_CLEAR_RISK_SIGNAL", confidence: "MEDIUM", evidence: ["No risk states triggered"], limitations: [] };
   return { mainState, secondaryStates: secondary.filter(s => s.state !== mainState.state) };
 }
 
 // ── Main ──
 
 async function main() {
-  console.log("=== LAB Live Overheating & Reversal-Risk Monitor ===\n");
+  console.log("=== LAB Live Overheating & Reversal-Risk Monitor (v2) ===\n");
 
   if (process.env.NO_ARKHAM_MODE !== "true") {
     console.log("LAB_MONITOR_REQUIRES_NO_ARKHAM_MODE: set NO_ARKHAM_MODE=true");
@@ -251,145 +284,159 @@ async function main() {
   for (const d of [OUT_DIR, REPORTS_DIR]) { if (!existsSync(d)) mkdirSync(d, { recursive: true }); }
 
   const ts = new Date().toISOString();
-  const today = ts.slice(0, 10);
 
-  // Fetch all live data
+  // Fetch
   console.log("── Fetching Live Data ──\n");
   const cg = await fetchCoinGeckoLive();
-  console.log(`CoinGecko: ${cg.ok ? "OK" : "FAILED"} price=$${cg.price_usd?.toFixed(4) || "?"} 24h=${cg.price_change_24h?.toFixed(1) || "?"}%`);
+  console.log(`CoinGecko: ${cg.ok ? "OK" : "FAILED"} $${cg.price_usd?.toFixed(4) || "?"} 24h=${cg.price_change_24h?.toFixed(1) || "?"}%`);
 
   const cgl = await fetchCoinGlassLive();
-  console.log(`CoinGlass: ${cgl.ok ? "OK" : "FAILED"} OI=$${(cgl.oi_current || 0).toFixed(0)} funding=${cgl.funding_current?.toFixed(4) || "?"}`);
+  console.log(`CoinGlass: ${cgl.ok ? "OK" : "FAILED"} OI=$${(cgl.oi_current || 0).toFixed(0)} funding=${(cgl.funding_rate_raw || 0).toFixed(4)} (${cgl.funding_rate_percent?.toFixed(2) || "?"}%)`);
 
   const okx = await fetchOkxLive();
-  console.log(`OKX: ${okx.ok ? "OK" : "FAILED"} OI=$${(okx.oi_current || 0).toFixed(0)} funding=${okx.funding_rate?.toFixed(4) || "?"}`);
+  console.log(`OKX: ${okx.ok ? "OK" : "FAILED"} unit=${okx.okx_oi_unit || "?"} usd=${okx.okx_oi_usd_direct?.toFixed(0) || "?"} raw=${okx.okx_oi_raw || "?"}`);
 
   const dex: Record<string, any> = { ok: false, error: "DEX_DATA_INSUFFICIENT" };
-  console.log(`DEX: UNAVAILABLE (CoinGecko pool OHLCV may cover this)`);
+  console.log(`DEX: UNAVAILABLE`);
 
   const arkham = loadLocalArkhamReference();
-  console.log(`Arkham local: ${arkham.ok ? "OK" : "NO LOCAL DATA"} holder_coverage=${arkham.holder_entity_coverage?.toFixed(2) || "?"}`);
+  console.log(`Arkham local: ${arkham.ok ? "OK" : "NONE"}`);
 
-  // Data quality score
-  let dqScore = 0;
-  const missing: string[] = [];
-  if (cg.ok && cg.price_usd) dqScore += 0.25; else missing.push("CoinGecko");
-  if (cgl.ok && cgl.oi_current) dqScore += 0.35; else missing.push("CoinGlass OI");
-  if (cgl.liquidation_ok) dqScore += 0.15; else missing.push("CoinGlass liquidation");
-  if (okx.ok) dqScore += 0.15; else missing.push("OKX");
-  if (dex.ok) dqScore += 0.10; else missing.push("DEX");
-  if (arkham.ok) dqScore += 0.05;
-  const intradayAvail = cgl.oi_change_4h !== undefined;
+  // Data quality
+  const coreDq = (cg.ok ? 0.25 : 0) + (cgl.ok && cgl.oi_ok ? 0.40 : 0) + (cgl.liquidation_ok ? 0.20 : 0) + (okx.ok && okx.oi_ok ? 0.15 : 0);
+  const ctxDq = (dex.ok ? 0.70 : 0) + (arkham.ok ? 0.30 : 0);
+  const finalDq = coreDq;
 
-  console.log(`\nData quality: ${dqScore.toFixed(2)} (intraday: ${intradayAvail})`);
+  console.log(`\nDQ: core=${coreDq.toFixed(2)} context=${ctxDq.toFixed(2)} final=${finalDq.toFixed(2)}`);
 
   // Classify
-  const { mainState, secondaryStates } = classifyState(cg, cgl, okx, dex, arkham, dqScore);
-  console.log(`Main state: ${mainState.state} (${mainState.confidence})`);
-  for (const s of secondaryStates) console.log(`  Secondary: ${s.state} (${s.confidence})`);
+  const { mainState, secondaryStates } = classifyState(cg, cgl, okx, dex, arkham, coreDq);
+  console.log(`Main: ${mainState.state} (${mainState.confidence})`);
+  for (const s of secondaryStates) console.log(`  + ${s.state} (${s.confidence})`);
 
-  // ── Snapshot CSV ──
-  const snapH = "timestamp,token,price_usd,market_cap,volume_24h,return_1h,return_24h,return_7d,volume_to_mcap,coinglass_oi_usd,coinglass_oi_change_4h,coinglass_oi_change_24h,coinglass_oi_zscore_24h,oi_to_market_cap,oi_weighted_funding,funding_zscore_24h,funding_positive_streak,liquidation_volume_4h,long_liquidation_volume,short_liquidation_volume,liquidation_imbalance,okx_oi_usd,okx_funding_rate,okx_vs_global_oi_ratio,data_quality_score,main_state,limitations";
+  // ── Snapshot v2 ──
+  const oiToMcap = cg.market_cap > 0 && cgl.oi_current ? cgl.oi_current / cg.market_cap : 0;
+  const oiChange24hRatio = cgl.oi_current > 0 && cgl.oi_change_24h ? cgl.oi_change_24h / (cgl.oi_current - cgl.oi_change_24h) : 0;
+  const liq4hToOi = cgl.oi_current > 0 ? (cgl.liquidation_volume_4h || 0) / cgl.oi_current : 0;
+  const liq24hToOi = cgl.oi_current > 0 ? (cgl.liquidation_volume_24h || 0) / cgl.oi_current : 0;
+  // Report-scoped values (order: okxVsGlobal must be computed before rOkxConfirm)
+  const okxOiUsd = okx.okx_oi_usd_direct || okx.okx_oi_usd_estimated;
+  const okxVsGlobal: number | null = okxOiUsd && cgl.oi_current > 0 ? okxOiUsd / cgl.oi_current : null;
+  const rOkxConfirm = okxVsGlobal !== null && okxVsGlobal > 0.01 && okxVsGlobal < 0.5;
+  const rOiChange24hExtreme = oiChange24hRatio >= 0.30;
+  const rLiqElevated24h = (cgl.liquidation_volume_24h || 0) > 500000;
+  const rOiDeclining24h = (cgl.oi_change_24h || 0) < 0;
+  const okxRatioStatus = okx.okx_oi_unit === "USD_DIRECT" ? "USD_DIRECT" : okx.okx_oi_unit === "ESTIMATED_FROM_OI_CCY" ? "ESTIMATED" : "UNCONFIRMED";
+
+  const snapH = "timestamp,token,price_usd,market_cap,volume_24h,return_1h,return_24h,return_7d,volume_to_mcap,coinglass_oi_usd,oi_change_4h,oi_change_24h,oi_change_24h_ratio,oi_zscore_24h,oi_to_market_cap,oi_to_mcap_extreme,oi_change_24h_extreme,funding_rate_raw,funding_rate_decimal,funding_rate_percent,funding_unit_status,funding_zscore_24h,funding_positive_streak,funding_abs_extreme,funding_streak_extreme,liquidation_volume_4h,liquidation_volume_24h,long_liq_4h,short_liq_4h,long_liq_24h,short_liq_24h,liquidation_imbalance_4h,liquidation_imbalance_24h,liquidation_to_oi_4h,liquidation_to_oi_24h,okx_oi_raw,okx_oi_ccy,okx_oi_usd_direct,okx_oi_unit,okx_vs_global_oi_ratio,okx_vs_global_oi_ratio_status,core_data_quality,context_data_quality,final_data_quality,main_state";
+
   const snapRow = [
-    ts, LAB.sym,
-    cg.price_usd || "", cg.market_cap || "", cg.volume_24h || "",
+    ts, LAB.sym, cg.price_usd || "", cg.market_cap || "", cg.volume_24h || "",
     cg.price_change_1h || "", cg.price_change_24h || "", cg.price_change_7d || "",
     cg.market_cap > 0 ? ((cg.volume_24h || 0) / cg.market_cap).toFixed(4) : "",
-    cgl.oi_current || "", cgl.oi_change_4h || "", cgl.oi_change_24h || "", cgl.oi_zscore?.toFixed(2) || "",
-    cg.market_cap > 0 && cgl.oi_current ? (cgl.oi_current / cg.market_cap).toFixed(6) : "",
-    cgl.funding_current || "", cgl.funding_zscore?.toFixed(2) || "", cgl.funding_positive_streak || "",
-    cgl.liq_volume_4h || "", cgl.liq_long_4h || "", cgl.liq_short_4h || "", cgl.liq_imbalance?.toFixed(2) || "",
-    okx.oi_current || "", okx.funding_rate || "",
-    cgl.oi_current > 0 && okx.oi_current ? (okx.oi_current / cgl.oi_current).toFixed(4) : "",
-    dqScore.toFixed(2), mainState.state,
-    missing.length > 0 ? `Missing: ${missing.join(", ")}` : "",
+    cgl.oi_current || "", cgl.oi_change_4h || "", cgl.oi_change_24h || "",
+    oiChange24hRatio.toFixed(4), cgl.oi_zscore?.toFixed(2) || "", oiToMcap.toFixed(4),
+    String(oiToMcap >= 1.0), String(oiChange24hRatio >= 0.30),
+    cgl.funding_rate_raw || "", cgl.funding_rate_decimal || "", cgl.funding_rate_percent?.toFixed(2) || "",
+    cgl.funding_unit_status || "NEEDS_CONFIRMATION",
+    cgl.funding_zscore?.toFixed(2) || "", cgl.funding_positive_streak || "",
+    String((cgl.funding_rate_percent || 0) >= 5), String((cgl.funding_positive_streak || 0) >= 6),
+    cgl.liquidation_volume_4h || "", cgl.liquidation_volume_24h || "",
+    cgl.long_liquidation_volume_4h || "", cgl.short_liquidation_volume_4h || "",
+    cgl.long_liquidation_volume_24h || "", cgl.short_liquidation_volume_24h || "",
+    cgl.liquidation_imbalance_4h?.toFixed(4) || "", cgl.liquidation_imbalance_24h?.toFixed(4) || "",
+    liq4hToOi.toFixed(6), liq24hToOi.toFixed(6),
+    okx.okx_oi_raw || "", okx.okx_oi_ccy || "", okx.okx_oi_usd_direct || "",
+    okx.okx_oi_unit || "", okxVsGlobal?.toFixed(4) || "", okxRatioStatus,
+    coreDq.toFixed(2), ctxDq.toFixed(2), finalDq.toFixed(2), mainState.state,
   ];
 
-  const snapPath = join(OUT_DIR, "lab_live_feature_snapshot.csv");
+  const snapPath = join(OUT_DIR, "lab_live_feature_snapshot_v2.csv");
   const isNew = !existsSync(snapPath);
-  if (isNew) {
-    writeFileSync(snapPath, snapH + "\n" + snapRow.map(v => String(v ?? "").includes(",") ? `"${v}"` : String(v ?? "")).join(",") + "\n");
-  } else {
-    appendFileSync(snapPath, snapRow.map(v => String(v ?? "").includes(",") ? `"${v}"` : String(v ?? "")).join(",") + "\n");
-  }
-  console.log(`Snapshot ${isNew ? "created" : "appended"}: ${snapPath}`);
+  const escapeCsv = (v: any) => String(v ?? "").includes(",") ? `"${v}"` : String(v ?? "");
+  if (isNew) writeFileSync(snapPath, snapH + "\n" + snapRow.map(escapeCsv).join(",") + "\n");
+  else appendFileSync(snapPath, snapRow.map(escapeCsv).join(",") + "\n");
+  console.log(`Snapshot v2 ${isNew ? "created" : "appended"}`);
 
-  // Data quality CSV
+  // DQ CSV
   const dqPath = join(OUT_DIR, "lab_live_data_quality.csv");
-  const dqH = "timestamp,coingecko_ok,coinglass_ok,okx_ok,dex_ok,local_arkham_ok,missing_fields,intraday_available,data_quality_score,final_status_allowed";
-  const dqRow = [ts, String(cg.ok), String(cgl.ok), String(okx.ok), String(dex.ok), String(arkham.ok), missing.join("; "), String(intradayAvail), dqScore.toFixed(2), dqScore >= 0.7 ? "ALLOWED" : "LAB_DATA_INSUFFICIENT"];
+  const dqH = "timestamp,coingecko_ok,coinglass_ok,okx_ok,dex_ok,local_arkham_ok,core_data_quality,context_data_quality,final_data_quality,final_status_allowed";
+  const dqRow = [ts, String(cg.ok), String(cgl.ok), String(okx.ok), String(dex.ok), String(arkham.ok), coreDq.toFixed(2), ctxDq.toFixed(2), finalDq.toFixed(2), coreDq >= 0.7 ? "ALLOWED" : "LAB_DATA_INSUFFICIENT"];
   if (!existsSync(dqPath)) writeFileSync(dqPath, dqH + "\n");
   appendFileSync(dqPath, dqRow.join(",") + "\n");
 
   // ── Report ──
   const reportLines = [
-    "# LAB Live Overheating & Reversal-Risk Monitor", "",
+    "# LAB Live Overheating & Reversal-Risk Monitor (v2)", "",
     `Generated: ${ts}`,
-    `Data quality: ${dqScore.toFixed(2)}/${intradayAvail ? "intraday available" : "daily only"}`,
+    `Core DQ: ${coreDq.toFixed(2)} | Context DQ: ${ctxDq.toFixed(2)} | Final DQ: ${finalDq.toFixed(2)}`,
     "",
     "## 1. Executive Summary", "",
     `**Main State: ${mainState.state}** (confidence: ${mainState.confidence})`,
-    dqScore < 0.7 ? "**WARNING: Data quality insufficient — treat with caution.**" : "",
+    coreDq < 0.7 ? "**WARNING: Core data quality insufficient.**" : "",
+    ...(secondaryStates.length > 0 ? [`Secondary: ${secondaryStates.map(s => s.state).join(", ")}`] : []),
     "",
     "## 2. Current Market Snapshot", "",
     `- Price: $${cg.price_usd?.toFixed(6) || "?"}`,
     `- Market cap: $${(cg.market_cap || 0).toLocaleString()}`,
     `- Volume 24h: $${(cg.volume_24h || 0).toLocaleString()}`,
-    `- Price 1h: ${cg.price_change_1h?.toFixed(1) || "?"}%`,
-    `- Price 24h: ${cg.price_change_24h?.toFixed(1) || "?"}%`,
-    `- Price 7d: ${cg.price_change_7d?.toFixed(1) || "?"}%`,
+    `- 1h: ${cg.price_change_1h?.toFixed(1) || "?"}% | 24h: ${cg.price_change_24h?.toFixed(1) || "?"}% | 7d: ${cg.price_change_7d?.toFixed(1) || "?"}%`,
     `- Volume/MCap: ${cg.market_cap > 0 ? ((cg.volume_24h || 0) / cg.market_cap * 100).toFixed(1) : "?"}%`,
-    `- Circulating supply: ${cg.circulating_supply?.toLocaleString() || "?"}`,
-    `- FDV: $${(cg.fdv || 0).toLocaleString()}`,
     "",
-    "## 3. Derivatives Snapshot (CoinGlass)", "",
+    "## 3. Derivatives (CoinGlass)", "",
     `- Aggregated OI: $${(cgl.oi_current || 0).toLocaleString()}`,
-    `- OI change 4h: $${(cgl.oi_change_4h || 0).toLocaleString()}`,
-    `- OI change 24h: $${(cgl.oi_change_24h || 0).toLocaleString()}`,
-    `- OI z-score (24h): ${cgl.oi_zscore?.toFixed(2) || "?"}`,
-    `- OI / Market cap: ${cg.market_cap > 0 && cgl.oi_current ? (cgl.oi_current / cg.market_cap * 100).toFixed(2) : "?"}%`,
-    `- OI-weighted funding: ${cgl.funding_current?.toFixed(4) || "?"}`,
+    `- OI/MCap: ${oiToMcap.toFixed(2)} ${oiToMcap >= 1.0 ? "(EXTREME)" : ""}`,
+    `- OI 4h: ${cgl.oi_change_4h >= 0 ? "+" : ""}$${(cgl.oi_change_4h || 0).toLocaleString()}`,
+    `- OI 24h: ${cgl.oi_change_24h >= 0 ? "+" : ""}$${(cgl.oi_change_24h || 0).toLocaleString()} (${(oiChange24hRatio*100).toFixed(0)}%) ${oiChange24hRatio >= 0.30 ? "EXTREME" : ""}`,
+    `- OI z-score (12×4h): ${cgl.oi_zscore?.toFixed(2) || "?"}`,
+    "",
+    `- Funding raw: ${(cgl.funding_rate_raw || 0).toFixed(4)}`,
+    `- Funding percent: ${(cgl.funding_rate_percent || 0).toFixed(2)}% (unit: ${cgl.funding_unit_status || "?"})`,
     `- Funding z-score: ${cgl.funding_zscore?.toFixed(2) || "?"}`,
-    `- Funding positive streak: ${cgl.funding_positive_streak || 0}`,
-    `- Liq volume 4h: $${(cgl.liq_volume_4h || 0).toLocaleString()}`,
-    `- Long liq: $${(cgl.liq_long_4h || 0).toLocaleString()} / Short: $${(cgl.liq_short_4h || 0).toLocaleString()}`,
-    `- Liq imbalance: ${cgl.liq_imbalance?.toFixed(2) || "?"}`,
+    `- Funding streak: ${cgl.funding_positive_streak || 0} positive ${(cgl.funding_positive_streak || 0) >= 6 ? "EXTREME" : ""}`,
+    `- Funding abs extreme: ${(cgl.funding_rate_percent || 0) >= 5 ? "YES" : "NO"}`,
+    "",
+    `- Liq 4h: $${(cgl.liquidation_volume_4h || 0).toLocaleString()} (${(cgl.long_liquidation_volume_4h || 0).toLocaleString()} upward / ${(cgl.short_liquidation_volume_4h || 0).toLocaleString()} downward)`,
+    `- Liq 24h: $${(cgl.liquidation_volume_24h || 0).toLocaleString()}`,
+    `- Liq 4h imbalance: ${cgl.liquidation_imbalance_4h?.toFixed(2) || "?"}`,
+    `- Liq 4h/OI: ${(liq4hToOi*100).toFixed(4)}% | Liq 24h/OI: ${(liq24hToOi*100).toFixed(4)}%`,
     "",
     "## 4. OKX Cross-Check", "",
-    `- OKX OI: $${(okx.oi_current || 0).toLocaleString()}`,
-    `- OKX funding rate: ${okx.funding_rate?.toFixed(4) || "?"}`,
-    `- OKX vs Global OI ratio: ${cgl.oi_current > 0 && okx.oi_current ? (okx.oi_current / cgl.oi_current * 100).toFixed(1) : "?"}%`,
-    `- Cross-check status: ${okx.ok ? "OK" : "UNAVAILABLE"}`,
+    `- OKX OI unit: ${okx.okx_oi_unit || "?"}`,
+    `- OKX OI USD: ${okxOiUsd ? "$" + okxOiUsd.toLocaleString() : "UNKNOWN"}`,
+    `- OKX vs Global: ${okxVsGlobal ? (okxVsGlobal*100).toFixed(1) + "%" : "UNAVAILABLE (unit=" + okxRatioStatus + ")"}`,
+    `- OKX funding: ${okx.funding_rate?.toFixed(4) || "?"} (${((okx.funding_rate || 0)*100).toFixed(2)}%)`,
     "",
     "## 5. DEX Context", "",
-    dex.ok ? `- DEX pool volume available` : "- DEX_DATA_INSUFFICIENT",
+    dex.ok ? "- Available" : "- DEX_DATA_INSUFFICIENT",
     "",
     "## 6. Risk State Evidence", "",
-    "| State | Triggered | Evidence | Confidence | Limitations |",
-    "|-------|-----------|----------|------------|-------------|",
-    `| ${mainState.state} | **MAIN** | ${mainState.evidence.join("; ")} | ${mainState.confidence} | ${mainState.limitations.join("; ")} |`,
+    "| State | Status | Evidence | Confidence | Limitations |",
+    "|-------|--------|----------|------------|-------------|",
+    `| ${mainState.state} | MAIN | ${mainState.evidence.join("; ")} | ${mainState.confidence} | ${mainState.limitations.join("; ")} |`,
     ...secondaryStates.map(s => `| ${s.state} | secondary | ${s.evidence.join("; ")} | ${s.confidence} | ${s.limitations.join("; ")} |`),
     "",
     "## 7. Manual Review Checklist", "",
-    `- [ ] Multi-exchange OI同步上升: ${cgl.oi_change_24h > 0 ? "YES" : "NO/UNKNOWN"}`,
-    `- [ ] Funding极端: ${(cgl.funding_zscore || 0) > 2 ? "YES" : "NO"}`,
-    `- [ ] Liquidation放大: ${(cgl.liq_volume_4h || 0) > 100000 ? "YES" : "NO"}`,
+    `- [ ] Multi-exchange OI同步: ${rOiChange24hExtreme ? "EXTREME (+" + (oiChange24hRatio*100).toFixed(0) + "%)" : "Normal"}`,
+    `- [ ] Funding极端: ${(cgl.funding_rate_percent || 0) >= 5 ? "YES (" + (cgl.funding_rate_percent || 0).toFixed(1) + "%)" : "NO"}`,
+    `- [ ] Liquidation放大: ${rLiqElevated24h ? "YES ($" + ((cgl.liquidation_volume_24h || 0)/1e6).toFixed(1) + "M)" : "NO"}`,
     `- [ ] 价格推进效率下降: ${mainState.state === "LAB_EFFICIENCY_DECAY" ? "YES" : "UNCLEAR"}`,
-    `- [ ] OI开始下降: ${(cgl.oi_change_4h || 0) < 0 ? "YES" : "NO"}`,
+    `- [ ] OI开始下降: ${rOiDeclining24h ? "YES" : "NO (still rising)"}`,
     `- [ ] 出现去杠杆: ${mainState.state === "LAB_DELEVERAGING_OBSERVED" ? "YES" : "NO"}`,
-    `- [ ] DEX数据确认: ${dex.ok ? "YES" : "NO"}`,
-    `- [ ] 数据完整: ${dqScore >= 0.7 ? "YES" : "NO (score=" + dqScore.toFixed(2) + ")"}`,
+    `- [ ] OKX确认: ${rOkxConfirm ? "YES" : "UNAVAILABLE"}`,
+    `- [ ] DEX确认: ${dex.ok ? "YES" : "NO"}`,
+    `- [ ] 数据完整: ${coreDq >= 0.7 ? "YES" : "NO"}`,
     "",
     "## 8. What We Cannot Know", "",
     "- Cannot confirm accumulation",
     "- Cannot confirm distribution",
-    "- Cannot confirm short entry",
+    "- Cannot confirm directional entry",
     "- Cannot infer buy/sell intent",
     "- No trading recommendation",
   ];
 
   writeFileSync(join(REPORTS_DIR, "lab_live_monitor_report.md"), reportLines.join("\n"));
-  console.log(`\nReport saved: ${REPORTS_DIR}/lab_live_monitor_report.md`);
+  console.log(`\nReport saved.`);
 }
 
 main().catch(console.error);
