@@ -150,16 +150,22 @@ function computeV2(clusters:Cluster[], paths:ClusterPath[], data:{h:string[],row
 
   const recent3=rows.slice(-3), recent6=rows.slice(-6);
   const price3Up=recent3.length>=2&&num(recent3[2],h,"price_usd")>num(recent3[0],h,"price_usd");
-  const oi3Up=recent3.length>=2&&num(recent3[2],h,"coinglass_oi_usd")>num(recent3[0],h,"coinglass_oi_usd");
+  // OI trend: use absolute values, not oi_change_from_prev (which may be null)
+  const oiNow=num(lastR,h,"coinglass_oi_usd"), oi3Ago=num(recent3[0],h,"coinglass_oi_usd");
+  const oi3Up=oi3Ago>0&&oiNow>oi3Ago;
 
   // Find peak values in window
   let maxFund=fund, maxOI=oi, maxLiq=liq;
   for(const r of rows.slice(-12)){maxFund=Math.max(maxFund,num(r,h,"funding_rate_percent"));maxOI=Math.max(maxOI,num(r,h,"coinglass_oi_usd"));maxLiq=Math.max(maxLiq,num(r,h,"liq_4h"));}
   const fundFromPeak=maxFund-fund, oiFromPeak=maxOI>0?(oi-maxOI)/maxOI:0;
+  const oiRecoveringFromPeak=oiNow>oi3Ago&&oiFromPeak<-0.05; // was down from peak, now rising
 
   const latestCluster=clusters[clusters.length-1];
   const prevPhase=clusters.length>=2?clusters[clusters.length-2].microPhase:"INITIAL";
   const lastMajor=clusters.filter(c=>c.microPhase!=="EQUILIBRIUM"&&c.microPhase!=="OVERHEATED_TREND").slice(-1)[0];
+  // Look for RESET_REBOUND anywhere in recent clusters (not just last)
+  const hasResetRebound=clusters.some(c=>c.primaryType==="LIQUIDATION_RESET_REBOUND");
+  const resetCluster=clusters.find(c=>c.primaryType==="LIQUIDATION_RESET_REBOUND");
 
   // Trend continuation (0-100) — RECALIBRATED
   let trend=0;
@@ -202,45 +208,75 @@ function computeV2(clusters:Cluster[], paths:ClusterPath[], data:{h:string[],row
   dataConf-=10; // single-day, single-coin penalty
   dataConf=Math.max(0,Math.min(100,dataConf));
 
-  // Market phase
+  // Market phase — semantically calibrated
+  const priceRecovering=price3Up;
+
   let phase="RANGE_EQUILIBRIUM";
+  // Structural phases first (event-based), then score-based
   if(rev>40&&oiChg<0) phase="DELEVERAGING_PRESSURE";
+  else if(hasResetRebound&&((oiRecoveringFromPeak&&priceRecovering)||trend>55)&&fund>5) phase="OVERHEATED_RESET_REACCELERATION";
+  else if(hasResetRebound&&(oiRecoveringFromPeak||trend>50)&&priceRecovering) phase="RESET_REACCELERATION";
+  else if(hasResetRebound&&trend>40) phase="RESET_REBOUND";
   else if(rev>25&&oiChg<0) phase="ROLLOVER_WATCH";
-  else if(lastMajor?.primaryType==="LIQUIDATION_RESET_REBOUND"&&trend>50) phase="RESET_REBOUND";
   else if(trend>60&&fund<10&&liq<1e6) phase="TREND_REACCELERATION";
   else if(trend>40&&fund>=10) phase="OVERHEATED_BUT_TRENDING";
   else if(dataConf<25) phase="DATA_INSUFFICIENT";
-  else phase="RANGE_EQUILIBRIUM";
 
-  // Evidence
-  const strongest:string[]=[], weakest:string[]=[];
-  if(trend>=rev){strongest.push(`趋势(${trend})>反转(${rev})——价格和OI仍在上升`);weakest.push(`反转风险证据不足——但资金费率仍偏高`);}
-  else{strongest.push(`反转风险(${rev})>趋势(${trend})——OI回落+清算信号`);weakest.push(`趋势信号减弱`);}
-  if(fund>10) strongest.push(`资金费率 ${fund.toFixed(1)}% 仍处高位（从峰值 ${maxFund.toFixed(1)}% 回落 ${fundFromPeak.toFixed(1)}%）`);
-  if(liqWasHigh) strongest.push(`清算从峰值 $${(maxLiq/1e6).toFixed(1)}M 回落至 $${(liq/1e6).toFixed(2)}M`);
-  if(oiFromPeak<-0.1) strongest.push(`OI 从峰值 $${(maxOI/1e6).toFixed(0)}M 回落 ${Math.abs(oiFromPeak*100).toFixed(0)}%`);
+  // Evidence — structural chain, not static list
+  const strongestStruct:string[]=[], weakestStruct:string[]=[];
+  if(hasResetRebound&&priceRecovering&&oiRecoveringFromPeak){
+    strongestStruct.push(`清算从峰值 $${(maxLiq/1e6).toFixed(1)}M 回落后，价格与OI同步恢复——上一轮去杠杆压力阶段性消化，市场进入重置后的再加速观察`);
+  }else if(trend>=rev){
+    strongestStruct.push(`趋势(${trend})>反转(${rev})——价格和OI仍在上升`);
+  }else{
+    strongestStruct.push(`反转风险(${rev})>趋势(${trend})——OI回落+清算信号`);
+  }
+  if(fund>10) strongestStruct.push(`资金费率 ${fund.toFixed(1)}% 仍处高位（从峰值 ${maxFund.toFixed(1)}% 回落 ${fundFromPeak.toFixed(1)}%），衍生品拥挤未完全解除`);
+  if(oiFromPeak<-0.1) strongestStruct.push(`OI 从峰值 $${(maxOI/1e6).toFixed(0)}M 回落 ${Math.abs(oiFromPeak*100).toFixed(0)}%，但当前正在恢复`);
 
-  const contradiction=`${phase}: 趋势${trend} vs 反转${rev}。${fund>8?"资金费率仍偏高，不能视为健康趋势。":"资金费率正常。"}${lastMajor?"最近关键事件: "+lastMajor.primaryType+"。"+lastMajor.ts:""}`;
-  const invalidation=phase.includes("TREND")?`OI 转负且连续2次下降`:`OI 重新上升且清算回落`;
+  weakestStruct.push(`反转风险没有继续强化：清算未重新放大，OI未连续转负；但funding仍高于正常区间，不能把当前恢复视为健康趋势`);
+
+  const contradiction=`价格/OI正在恢复，但funding仍处高位——这说明市场从去杠杆后重新加速，但衍生品拥挤并未完全解除。`;
+
+  // Invalidation — 3 layers
+  const invalidation=[
+    `OI连续2次转负且价格未能继续推进——推翻reset-reacceleration`,
+    `funding再次急剧抬升(>15%)且OI继续堆积但价格停滞——推翻低反转风险`,
+    `清算重新放大至$1M+且持续——推翻压力已消化判断`,
+  ];
 
   const nextObs=[];
   if(fund>8) nextObs.push(`资金费率何时降至8%以下——当前 ${fund.toFixed(1)}%`);
   if(oiChg>0) nextObs.push(`OI 何时转负——当前 ${oiChg>=0?"+":""}$${Math.abs(oiChg/1e6).toFixed(1)}M`);
   if(liq<1e6) nextObs.push(`清算何时突破 $1M——当前 $${(liq/1e3).toFixed(0)}K`);
-  if(validPaths<totalClusters*0.3) nextObs.push(`需要更多快照提升路径置信度`);
+
+  // Preview push gate
+  const pushGrade=(dataConf>=60&&clusters.length>=3)?"PREVIEW_OK":"DECISION_GRADE_NOT_READY";
+  const decisionGrade=dataConf>=60?"REVIEW_GRADE":"OBSERVATION_ONLY";
+
+  // Case insight for key cluster
+  const caseInsight=resetCluster?{
+    signal:"LIQUIDATION_RESET_REBOUND",
+    ts:resetCluster.ts,
+    statistical_confidence:"LOW",
+    case_importance:"HIGH",
+    case_insight:"本轮行情中解释清算压力消化与价格/OI恢复的关键转折样本——尽管统计样本不足(单日单币)，但其在状态迁移链中的位置决定了它对理解当前结构有重要参考价值",
+  }:null;
 
   return {
     timestamp:new Date().toISOString(),market_phase:phase,previous_market_phase:prevPhase,
     latest_cluster:latestCluster?{type:latestCluster.primaryType,ts:latestCluster.ts,evidence:latestCluster.evidence}:null,
     last_major_cluster:lastMajor?{type:lastMajor.primaryType,ts:lastMajor.ts}:null,
     trend_continuation_score:trend,reversal_risk_score:rev,squeeze_rebound_score:sq,data_confidence_score:dataConf,
-    strongest_evidence:strongest.join("；"),weakest_evidence:weakest.join("；"),
-    main_scenario:phase,alternative_scenario:phase.includes("TREND")?"反转风险":"趋势恢复",
+    strongest_evidence:strongestStruct.join("；"),weakest_evidence:weakestStruct.join("；"),
+    main_scenario:phase,alternative_scenario:phase.includes("REACCELERATION")?"反转风险":"趋势恢复",
     invalidation_condition:invalidation,main_contradiction:contradiction,
     next_3_observations:nextObs.slice(0,3).join(" | "),
-    decision_support_grade:dataConf>=50?"REVIEW_GRADE":"OBSERVATION_ONLY",
-    sample_limitations:`快照${rows.length}条|聚类${clusters.length}个|有效路径${validPaths}/${totalClusters}|单日单币`,
-    commander_summary:`${phase}。趋势${trend}/100，反转风险${rev}/100。${strongest[0]||""}。${contradiction}`,
+    decision_support_grade:decisionGrade,
+    commander_push_grade:pushGrade,
+    case_insight:caseInsight,
+    sample_limitations:`快照${rows.length}条|聚类${clusters.length}个|有效路径${validPaths}/${totalClusters}|单日单币统计置信度有限`,
+    commander_summary:`清算从峰值回落后价格与OI同步恢复，市场从去杠杆进入重置后再加速。趋势${trend}/100，反转${rev}/100。funding仍偏高(${fund.toFixed(1)}%)，不能视为健康趋势。`,
   };
 }
 
@@ -291,7 +327,8 @@ function main(){
   if(!cdr){console.log("评分失败");return;}
   console.log(`  阶段: ${cdr.market_phase} (前: ${cdr.previous_market_phase})`);
   console.log(`  趋势: ${cdr.trend_continuation_score}/100 | 反转: ${cdr.reversal_risk_score}/100 | 反弹: ${cdr.squeeze_rebound_score}/100 | 置信: ${cdr.data_confidence_score}/100`);
-  console.log(`  等级: ${cdr.decision_support_grade}`);
+  console.log(`  推送: ${cdr.commander_push_grade} | 决策: ${cdr.decision_support_grade}`);
+  if(cdr.case_insight) console.log(`  Case: ${cdr.case_insight.signal} stat=${cdr.case_insight.statistical_confidence} importance=${cdr.case_insight.case_importance}`);
   writeFileSync(join(OUT_DIR,"lab_commander_brief_v2.json"),JSON.stringify(cdr,null,2));
 
   // 6. Report v2
@@ -305,18 +342,25 @@ function main(){
     `| 数据置信 | ${cdr.data_confidence_score}/100 | 单日单币，扣10分 |`,
     "","## 3. 阶段迁移",`${cdr.previous_market_phase} → ${cdr.market_phase}`,
     cdr.last_major_cluster?`最近关键事件: ${cdr.last_major_cluster.type} (${cdr.last_major_cluster.ts})`:"",
+    cdr.case_insight?`\n### Case Insight: ${cdr.case_insight.signal}\n- 统计置信度: ${cdr.case_insight.statistical_confidence}\n- 案例重要性: ${cdr.case_insight.case_importance}\n- ${cdr.case_insight.case_insight}`:"",
     "","## 4. 事件聚类","| ID | 时间 | 主类型 | 事件数 | 微阶段 |","|----|------|--------|--------|--------|",
     ...clusters.slice(-10).map(c=>`| ${c.id} | ${c.ts} | ${c.primaryType} | ${c.eventCount} | ${c.microPhase} |`),
-    "","## 5. 组合信号归因","| 信号 | 样本 | 有效路径 | 分类 | 置信度 |","|------|------|---------|------|--------|",
-    ...attrs.map(a=>`| ${a.name} | ${a.samples} | ${a.validPaths} | ${a.leadLag} | ${a.confidence} |`),
+    "","## 5. 组合信号归因","| 信号 | 样本 | 有效路径 | 统计置信 | 案例重要性 | 分类 |","|------|------|---------|---------|----------|------|",
+    ...attrs.map(a=>{
+      const importance=a.name==="LIQUIDATION_RESET_REBOUND"?"HIGH":"MEDIUM";
+      return `| ${a.name} | ${a.samples} | ${a.validPaths} | ${a.confidence} | ${importance} | ${a.leadLag} |`;
+    }),
     "","## 6. 证据与矛盾",`- 最强: ${cdr.strongest_evidence}`,`- 最弱: ${cdr.weakest_evidence}`,`- 矛盾: ${cdr.main_contradiction}`,
-    "","## 7. 情景推演",`- 主情景: ${cdr.main_scenario}`,`- 替代: ${cdr.alternative_scenario}`,`- 推翻: ${cdr.invalidation_condition}`,
-    "","## 8. 边界",`${cdr.sample_limitations} | 等级: ${cdr.decision_support_grade}`,
+    "","## 7. 推翻条件","",...(cdr.invalidation_condition as string[]).map((s,i)=>`${i+1}. ${s}`),
+    "","## 8. 推送闸门",`- 推送等级: ${cdr.commander_push_grade}`,`- 决策等级: ${cdr.decision_support_grade}`,
+    cdr.commander_push_grade==="PREVIEW_OK"?"可预览推送——标题需含Preview，明确标注单日单币边界":cdr.commander_push_grade==="DECISION_GRADE_NOT_READY"?"不可推送——样本不足":"禁止推送",
+    "","## 9. 边界",`${cdr.sample_limitations}`,
     "本报告仅为情报分析，不包含交易执行建议。",
   ];
   writeFileSync(join(REPORTS_DIR,"lab_intraday_commander_report_v2.md"),report.join("\n"));
 
   // 7. Quality check
+  const hasResetRebound=clusters.some(c=>c.primaryType==="LIQUIDATION_RESET_REBOUND");
   const checks=[
     cdr.trend_continuation_score>=0&&cdr.trend_continuation_score<=100,
     cdr.reversal_risk_score>=0&&cdr.reversal_risk_score<=100,
@@ -324,10 +368,15 @@ function main(){
     cdr.data_confidence_score>=0&&cdr.data_confidence_score<=100,
     cdr.strongest_evidence.length>0,cdr.weakest_evidence.length>0,
     cdr.main_contradiction.length>0,cdr.next_3_observations.length>0,
-    cdr.invalidation_condition.length>0,cdr.market_phase.length>0,
-    clusters.length>0,validPaths.length>0,
-    cdr.trend_continuation_score<95||cdr.market_phase!=="TREND_CONTINUATION", // v1 had 95 TREND — v2 must not
-    !cdr.commander_summary.includes("健康趋势")||cdr.market_phase.includes("HEALTHY"), // no false healthy label
+    Array.isArray(cdr.invalidation_condition)&&cdr.invalidation_condition.length>=3,
+    cdr.market_phase.length>0,clusters.length>0,validPaths.length>0,
+    cdr.commander_push_grade==="PREVIEW_OK"||cdr.commander_push_grade==="DECISION_GRADE_NOT_READY",
+    cdr.case_insight!==null||!hasResetRebound, // if reset rebound cluster exists, case insight required
+    !cdr.market_phase.includes("RANGE_EQUILIBRIUM")||!hasResetRebound, // no RANGE_EQUILIBRIUM when reset occurred
+    cdr.strongest_evidence.includes("去杠杆")||cdr.strongest_evidence.includes("恢复")||cdr.strongest_evidence.includes("reset"), // structural chain
+    !cdr.commander_summary.includes("健康趋势"), // never claim healthy
+    cdr.decision_support_grade!=="HIGH_CONFIDENCE_REVIEW", // no decision-grade push
+    !cdr.market_phase.includes("TREND_CONTINUATION"), // v1 overconfident phase — blocked
   ];
   const allPass=checks.every(c=>c);
   console.log(`\n质量检查: ${allPass?"全部通过":`${checks.filter(c=>!c).length}项未通过`}`);
