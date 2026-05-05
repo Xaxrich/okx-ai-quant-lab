@@ -149,8 +149,42 @@ async function main() {
   if (!existsSync(OUT_DIR)) mkdirSync(OUT_DIR, { recursive: true });
   writeFileSync(join(OUT_DIR, "analysis_msg.txt"), analysis);
 
+  // ── 检查是否需要推送 ──
+  const cur = readings[readings.length - 1], prev = readings[readings.length - 2];
+  const oiDelta = Math.abs(cur.oi - prev.oi) / 1e6;
+  const fundDelta = Math.abs(cur.fund - prev.fund);
+  const liqDelta = Math.abs(cur.liq - prev.liq) / 1e3;
+  const scoreDelta = Math.abs(cur.score - prev.score);
+  const stateChanged = cur.state !== prev.state;
+
+  // 检查上次推送时间
+  const pushLogPath = join(OUT_DIR, "lab_feishu_push_log.jsonl");
+  let lastPushMin = 999;
+  if (existsSync(pushLogPath)) {
+    const lines = readFileSync(pushLogPath, "utf-8").trim().split("\n").filter(Boolean);
+    for (let i = lines.length - 1; i >= 0; i--) {
+      try {
+        const e = JSON.parse(lines[i]);
+        if (e.status === "已发送" || e.status === "SENT") {
+          lastPushMin = (Date.now() - new Date(e.timestamp).getTime()) / 60000;
+          break;
+        }
+      } catch { /* skip */ }
+    }
+  }
+
+  const materialChange = stateChanged || scoreDelta >= 5 || oiDelta > 5 || fundDelta > 0.3 || liqDelta > 300;
+  const heartbeatDue = lastPushMin > 30;
+
+  if (!materialChange && !heartbeatDue) {
+    console.log(`跳过: 数据无显著变化 (OIΔ=$${oiDelta.toFixed(1)}M fundΔ=${fundDelta.toFixed(2)}% liqΔ=$${liqDelta.toFixed(0)}K scoreΔ=${scoreDelta}) 上次推送${lastPushMin.toFixed(0)}分钟前`);
+    return;
+  }
+
+  console.log(materialChange ? `推送理由: 显著变化` : `推送理由: 心跳 (${lastPushMin.toFixed(0)}分钟无推送)`);
+
   // 发送飞书
-  console.log("\n发送飞书...");
+  console.log("发送飞书...");
   if (!CHAT_ID) { console.log("FEISHU_CHAT_ID 未设置"); return; }
   if (!isFeishuEnabled()) { console.log("飞书未启用"); return; }
 
