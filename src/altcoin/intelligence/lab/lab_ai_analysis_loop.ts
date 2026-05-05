@@ -35,7 +35,8 @@ function analyze(readings: any[], cgHistory: any, fwData: any): string {
   const fundBreaking = !fundFlat && prev2 && Math.abs(prev.fund - prev2.fund) < 0.1 && Math.abs(cur.fund - prev.fund) > 0.3;
 
   if (fundBreaking) {
-    fundLines.push(`资金费率破了平台：${prev2.fund.toFixed(2)}% → ${prev.fund.toFixed(2)}% → ${cur.fund.toFixed(2)}%。连续3次卡在同一水平后突然上行——市场均衡被打破，多头博弈变得更拥挤。`);
+    const direction=cur.fund>prev2.fund?"上行":"下行";
+    fundLines.push(`资金费率破了平台：${prev2.fund.toFixed(2)}% → ${prev.fund.toFixed(2)}% → ${cur.fund.toFixed(2)}%。连续3次卡在同一水平后突然${direction}——市场均衡被打破。`);
     urgency += 2;
   } else if (cur.fund > prev.fund + 0.5) {
     fundLines.push(`资金费率继续上升：${prev.fund.toFixed(2)}% → ${cur.fund.toFixed(2)}%（+${(cur.fund-prev.fund).toFixed(2)}%）。多头仍在加价争夺对手方。`);

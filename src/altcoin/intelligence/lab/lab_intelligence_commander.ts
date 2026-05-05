@@ -1,10 +1,10 @@
 import { writeFileSync, mkdirSync, existsSync, readFileSync } from "fs";
 import { join } from "path";
+import { readCsv } from "../../../utils/csv.js";
 
 const OUT_DIR = join(import.meta.dirname, "..", "..", "..", "..", "data", "altcoin", "intelligence", "lab", "live");
 const REPORTS_DIR = join(import.meta.dirname, "..", "..", "..", "..", "reports", "altcoin", "intelligence", "lab");
 
-function readCsv(p: string) { if(!existsSync(p)) return null; const l=readFileSync(p,"utf8").trim().split("\n"); if(l.length<2) return null; return {h:l[0].split(","),rows:l.slice(1).map(x=>x.split(","))}; }
 function col(r:string[],h:string[],n:string):string{const i=h.indexOf(n);return i>=0?r[i]||"":"";}
 function num(r:string[],h:string[],n:string):number{const v=parseFloat(col(r,h,n));return isNaN(v)?0:v;}
 
