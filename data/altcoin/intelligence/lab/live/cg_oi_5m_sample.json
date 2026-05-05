@@ -1,0 +1,1 @@
+{"code":"403","msg":"The requested interval is not available for your current API plan.","details":{"upgrade_required":"STANDARD","current_plan":"HOBBYIST","supported_intervals":"[\"4h\", \"6h\", \"8h\", \"12h\", \"1d\", \"1w\"]","requested_interval":"5m","upgrade_url":"https://www.coinglass.com/pricing"}}

@@ -53,6 +53,7 @@
     "intelligence:arkham:control-only-transfer": "tsx src/altcoin/intelligence/arkham/arkham_control_only_segmented_transfer_loop.ts",
     "intelligence:no-arkham:discovery": "tsx src/altcoin/intelligence/no_arkham/no_arkham_discovery_loop.ts",
     "intelligence:lab:live-monitor": "tsx src/altcoin/intelligence/lab/lab_live_monitor.ts",
+    "intelligence:lab:fast-watch": "tsx src/altcoin/intelligence/lab/lab_fast_watch.ts",
 
     "fetch:data": "npm run okx:fetch-data",
     "backtest": "npm run okx:backtest",

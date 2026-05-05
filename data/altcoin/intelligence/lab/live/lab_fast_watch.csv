@@ -1,0 +1,2 @@
+timestamp,token,price_usd,price_source,return_1h,return_24h,coinglass_oi_usd,oi_change_from_prev,oi_change_4h,funding_rate_percent,funding_cache_age_min,funding_streak,liquidation_volume_4h,liq_long_4h,liq_short_4h,liq_change_from_prev,okx_oi_usd,okx_funding_rate,fast_watch_state,risk_score,review_label,api_calls_used,cache_hits,limitations
+2026-05-05T08:23:51.290Z,LAB,2.49,coingecko_simple,,38.79384514719435,394519549.8368,,40913419.83679998,15.70,,12,433258.62,25941.69,407316.93,,,,LAB_FAST_FUNDING_OVERHEATED,35,WATCH,4,0,
