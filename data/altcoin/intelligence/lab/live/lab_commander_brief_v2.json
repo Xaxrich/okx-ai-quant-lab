@@ -1,0 +1,28 @@
+{
+  "timestamp": "2026-05-05T13:07:04.615Z",
+  "market_phase": "RANGE_EQUILIBRIUM",
+  "previous_market_phase": "TREND_REACCELERATION",
+  "latest_cluster": {
+    "type": "TREND_REACCELERATION",
+    "ts": "12:50:17",
+    "evidence": "OI +$12.8M; 20→30"
+  },
+  "last_major_cluster": {
+    "type": "TREND_REACCELERATION",
+    "ts": "12:50:17"
+  },
+  "trend_continuation_score": 60,
+  "reversal_risk_score": 15,
+  "squeeze_rebound_score": 30,
+  "data_confidence_score": 80,
+  "strongest_evidence": "趋势(60)>反转(15)——价格和OI仍在上升；清算从峰值 $2.1M 回落至 $0.29M",
+  "weakest_evidence": "反转风险证据不足——但资金费率仍偏高",
+  "main_scenario": "RANGE_EQUILIBRIUM",
+  "alternative_scenario": "趋势恢复",
+  "invalidation_condition": "OI 重新上升且清算回落",
+  "main_contradiction": "RANGE_EQUILIBRIUM: 趋势60 vs 反转15。资金费率仍偏高，不能视为健康趋势。最近关键事件: TREND_REACCELERATION。12:50:17",
+  "next_3_observations": "资金费率何时降至8%以下——当前 8.2% | OI 何时转负——当前 +$4.4M | 清算何时突破 $1M——当前 $292K",
+  "decision_support_grade": "REVIEW_GRADE",
+  "sample_limitations": "快照29条|聚类8个|有效路径8/8|单日单币",
+  "commander_summary": "RANGE_EQUILIBRIUM。趋势60/100，反转风险15/100。趋势(60)>反转(15)——价格和OI仍在上升。RANGE_EQUILIBRIUM: 趋势60 vs 反转15。资金费率仍偏高，不能视为健康趋势。最近关键事件: TREND_REACCELERATION。12:50:17"
+}
