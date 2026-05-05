@@ -1,16 +1,16 @@
 {
-  "timestamp": "2026-05-05T12:54:56.102Z",
-  "market_phase": "TREND_CONTINUATION",
-  "trend_continuation_score": 95,
-  "reversal_risk_score": 0,
+  "timestamp": "2026-05-05T14:02:39.362Z",
+  "market_phase": "ROLLOVER_WATCH",
+  "trend_continuation_score": 35,
+  "reversal_risk_score": 55,
   "squeeze_rebound_score": 10,
   "data_confidence_score": 80,
-  "main_scenario": "趋势延续",
-  "alternative_scenario": "反转风险",
-  "invalidation_condition": "OI 转负且价格跌破支撑",
-  "strongest_evidence": "趋势延续得分 95>反转 0; OI 仍在上升",
-  "weakest_evidence": "反转风险证据较弱",
-  "main_contradiction": "趋势得分 95 vs 反转风险 0，市场TREND_CONTINUATION",
-  "next_observation": "OI 何时转负——当前 +$12.8M | 清算何时突破 $1M——当前 $151K",
-  "commander_summary": "LAB 当前处于 TREND_CONTINUATION。趋势95/100，反转风险0/100。趋势延续得分 95>反转 0。反转风险证据较弱。"
+  "main_scenario": "OI回落观察",
+  "alternative_scenario": "趋势恢复",
+  "invalidation_condition": "OI 回升且清算回落",
+  "strongest_evidence": "反转风险得分 55>趋势 35",
+  "weakest_evidence": "趋势信号减弱; OI 开始回落",
+  "main_contradiction": "趋势得分 35 vs 反转风险 55，市场ROLLOVER_WATCH",
+  "next_observation": "清算何时突破 $1M——当前 $602K",
+  "commander_summary": "LAB 当前处于 ROLLOVER_WATCH。趋势35/100，反转风险55/100。反转风险得分 55>趋势 35。趋势信号减弱。"
 }

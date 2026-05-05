@@ -1,15 +1,15 @@
 {
-  "timestamp": "2026-05-05T13:55:20.977Z",
-  "market_phase": "OVERHEATED_RESET_REACCELERATION",
+  "timestamp": "2026-05-05T14:02:40.005Z",
+  "market_phase": "DELEVERAGING_PRESSURE",
   "previous_market_phase": "TREND_REACCELERATION",
   "latest_cluster": {
-    "type": "TREND_REACCELERATION",
-    "ts": "12:50:17",
-    "evidence": "OI +$12.8M; 20→30"
+    "type": "DELEVERAGING_COMPOSITE",
+    "ts": "14:02:37",
+    "evidence": "OI -$16.9M; liq $602K +$310K; price 2.56→2.43 OI -$16.9M; 30→20"
   },
   "last_major_cluster": {
-    "type": "TREND_REACCELERATION",
-    "ts": "12:50:17"
+    "type": "DELEVERAGING_COMPOSITE",
+    "ts": "14:02:37"
   },
   "top_case_cluster": {
     "type": "LIQUIDATION_RESET_REBOUND",
@@ -19,21 +19,21 @@
     "case_importance": "HIGH",
     "role": "KEY_STRUCTURAL_TURNING_POINT"
   },
-  "trend_continuation_score": 60,
-  "reversal_risk_score": 15,
-  "squeeze_rebound_score": 30,
-  "data_confidence_score": 80,
-  "strongest_evidence": "清算从峰值 $2.1M 回落后，价格与OI同步恢复——上一轮去杠杆压力阶段性消化，市场进入重置后的再加速观察；但funding仍处高位(8.2%)，衍生品拥挤未完全解除",
+  "trend_continuation_score": 10,
+  "reversal_risk_score": 65,
+  "squeeze_rebound_score": 15,
+  "data_confidence_score": 65,
+  "strongest_evidence": "清算从峰值 $2.1M 回落后，价格与OI同步恢复——上一轮去杠杆压力阶段性消化，市场进入重置后的再加速观察；但funding仍处高位(8.9%)，衍生品拥挤未完全解除",
   "weakest_evidence": "反转风险没有继续强化：清算未重新放大，OI未连续转负；但funding仍高于正常区间，不能把当前恢复视为健康趋势",
-  "main_scenario": "OVERHEATED_RESET_REACCELERATION",
-  "alternative_scenario": "反转风险",
+  "main_scenario": "DELEVERAGING_PRESSURE",
+  "alternative_scenario": "趋势恢复",
   "invalidation_condition": [
     "OI连续2次转负且价格未能继续推进——推翻reset-reacceleration",
     "funding再次急剧抬升(>15%)且OI继续堆积但价格停滞——推翻低反转风险",
     "清算重新放大至$1M+且持续——推翻压力已消化判断"
   ],
   "main_contradiction": "价格/OI正在恢复，但funding仍处高位——这说明市场从去杠杆后重新加速，但衍生品拥挤并未完全解除。",
-  "next_3_observations": "资金费率何时降至8%以下——当前 8.2% | OI 何时转负——当前 +$4.4M | 清算何时突破 $1M——当前 $292K",
+  "next_3_observations": "资金费率何时降至8%以下——当前 8.9% | 清算何时突破 $1M——当前 $602K",
   "decision_support_grade": "REVIEW_GRADE",
   "commander_push_grade": "PREVIEW_OK",
   "case_insight": {
@@ -43,6 +43,6 @@
     "case_importance": "HIGH",
     "case_insight": "本轮行情中解释清算压力消化与价格/OI恢复的关键转折样本——尽管统计样本不足(单日单币)，但其在状态迁移链中的位置决定了它对理解当前结构有重要参考价值"
   },
-  "sample_limitations": "快照29条|聚类8个|有效路径8/8|单日单币统计置信度有限",
-  "commander_summary": "清算从峰值回落后价格与OI同步恢复，市场从去杠杆进入重置后再加速。趋势60/100，反转15/100。funding仍偏高(8.2%)，不能视为健康趋势。"
+  "sample_limitations": "快照30条|聚类7个|有效路径6/7|单日单币统计置信度有限",
+  "commander_summary": "清算从峰值回落后价格与OI同步恢复，市场从去杠杆进入重置后再加速。趋势10/100，反转65/100。funding仍偏高(8.9%)，不能视为健康趋势。"
 }

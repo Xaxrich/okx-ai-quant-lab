@@ -339,9 +339,31 @@ function main(){
   console.log(`  趋势: ${cdr.trend_continuation_score}/100 | 反转: ${cdr.reversal_risk_score}/100 | 反弹: ${cdr.squeeze_rebound_score}/100 | 置信: ${cdr.data_confidence_score}/100`);
   console.log(`  推送: ${cdr.commander_push_grade} | 决策: ${cdr.decision_support_grade}`);
   if(cdr.case_insight) console.log(`  Case: ${cdr.case_insight.signal} stat=${cdr.case_insight.statistical_confidence} importance=${cdr.case_insight.case_importance}`);
-  writeFileSync(join(OUT_DIR,"lab_commander_brief_v2.json"),JSON.stringify(cdr,null,2));
+  // 6. Quality check BEFORE writing JSON (P1 fix)
+  const hasResetReboundQ=clusters.some(c=>c.primaryType==="LIQUIDATION_RESET_REBOUND");
+  const qChecks:{name:string,passed:boolean,expected:string,actual:string}[]=[
+    {name:"market_phase_not_range_when_reset_exists",passed:!cdr.market_phase.includes("RANGE_EQUILIBRIUM")||!hasResetReboundQ,expected:"not RANGE_EQUILIBRIUM",actual:cdr.market_phase},
+    {name:"strongest_evidence_is_structural_chain",passed:cdr.strongest_evidence.includes("清算")||cdr.strongest_evidence.includes("去杠杆")||cdr.strongest_evidence.includes("恢复"),expected:"contains structural chain",actual:cdr.strongest_evidence.slice(0,60)},
+    {name:"strongest_evidence_not_static_score",passed:!cdr.strongest_evidence.startsWith("趋势(")&&!cdr.strongest_evidence.startsWith("反转风险("),expected:"not static score comparison",actual:cdr.strongest_evidence.slice(0,40)},
+    {name:"invalidation_three_layers",passed:Array.isArray(cdr.invalidation_condition)&&cdr.invalidation_condition.length>=3,expected:"3 conditions",actual:String(cdr.invalidation_condition?.length||0)},
+    {name:"top_case_cluster_is_reset_rebound",passed:cdr.top_case_cluster?.type==="LIQUIDATION_RESET_REBOUND"||!hasResetReboundQ,expected:"LIQUIDATION_RESET_REBOUND",actual:cdr.top_case_cluster?.type||"null"},
+    {name:"case_insight_present",passed:cdr.case_insight!==null||!hasResetReboundQ,expected:"case_insight when reset exists",actual:cdr.case_insight?"present":"null"},
+    {name:"no_false_healthy_label",passed:!cdr.commander_summary.includes("是健康趋势")&&!cdr.commander_summary.includes("属于健康趋势"),expected:"no affirmative healthy claim",actual:"ok"},
+    {name:"sample_limitations_present",passed:cdr.sample_limitations.length>0,expected:"sample limitations",actual:cdr.sample_limitations.slice(0,40)},
+    {name:"forbidden_terms_absent",passed:!cdr.commander_summary.includes("BUY")&&!cdr.commander_summary.includes("SELL")&&!cdr.commander_summary.includes("SHORT")&&!cdr.commander_summary.includes("LONG"),expected:"no forbidden terms",actual:"ok"},
+  ];
+  const allPass=qChecks.every(c=>c.passed);
+  const failedChecks=qChecks.filter(c=>!c.passed).map(c=>c.name);
 
-  // 6. Report v2
+  // P1 fix: override push_grade BEFORE writing JSON
+  if(!allPass){cdr.commander_push_grade="DO_NOT_PUSH";console.log(`\n质量检查未通过(${failedChecks.length}项)，推送阻断`);for(const f of failedChecks){const c=qChecks.find(x=>x.name===f)!;console.log(`  ${f}: 预期${c.expected} 实际${c.actual}`);}}
+  else{console.log(`\n质量检查: 全部通过`);}
+
+  // Write JSON AFTER quality gate (guarantees DO_NOT_PUSH is persisted)
+  writeFileSync(join(OUT_DIR,"lab_commander_brief_v2.json"),JSON.stringify(cdr,null,2));
+  writeFileSync(join(OUT_DIR,"lab_commander_quality_v2.json"),JSON.stringify({passed:allPass,failed_checks:failedChecks,checks:qChecks,ts:new Date().toISOString()},null,2));
+
+  // 7. Report v2
   const report=[
     `# LAB 盘中情报参谋报告 v2`,`生成: ${new Date().toISOString().slice(0,19).replace("T"," ")}`,`快照: ${data.rows.length} | 聚类: ${clusters.length} | 有效路径: ${validPaths.length}`,
     "","## 1. 综合研判",`**${cdr.market_phase}** (前: ${cdr.previous_market_phase})`,cdr.commander_summary,
@@ -368,35 +390,6 @@ function main(){
     "本报告仅为情报分析，不包含交易执行建议。",
   ];
   writeFileSync(join(REPORTS_DIR,"lab_intraday_commander_report_v2.md"),report.join("\n"));
-
-  // 7. Quality check with named items
-  const hasResetReboundQ=clusters.some(c=>c.primaryType==="LIQUIDATION_RESET_REBOUND");
-  const qChecks:{name:string,passed:boolean,expected:string,actual:string}[]=[
-    {name:"market_phase_not_range_when_reset_exists",passed:!cdr.market_phase.includes("RANGE_EQUILIBRIUM")||!hasResetReboundQ,expected:"not RANGE_EQUILIBRIUM",actual:cdr.market_phase},
-    {name:"strongest_evidence_is_structural_chain",passed:cdr.strongest_evidence.includes("清算")||cdr.strongest_evidence.includes("去杠杆")||cdr.strongest_evidence.includes("恢复"),expected:"contains structural chain",actual:cdr.strongest_evidence.slice(0,60)},
-    {name:"strongest_evidence_mentions_price_oi_recovery",passed:cdr.strongest_evidence.includes("价格")&&cdr.strongest_evidence.includes("OI"),expected:"mentions price+OI recovery",actual:cdr.strongest_evidence.slice(0,60)},
-    {name:"strongest_evidence_not_static_score_compare",passed:!cdr.strongest_evidence.startsWith("趋势(")&&!cdr.strongest_evidence.startsWith("反转风险("),expected:"not static score comparison",actual:cdr.strongest_evidence.slice(0,40)},
-    {name:"invalidation_has_three_layers",passed:Array.isArray(cdr.invalidation_condition)&&cdr.invalidation_condition.length>=3,expected:"3 conditions",actual:String(cdr.invalidation_condition?.length||0)},
-    {name:"top_case_cluster_present",passed:cdr.top_case_cluster!==null&&cdr.top_case_cluster!==undefined||!hasResetReboundQ,expected:"top_case_cluster if reset exists",actual:cdr.top_case_cluster?cdr.top_case_cluster.type:"null"},
-    {name:"top_case_cluster_is_reset_rebound",passed:cdr.top_case_cluster?.type==="LIQUIDATION_RESET_REBOUND"||!hasResetReboundQ,expected:"LIQUIDATION_RESET_REBOUND",actual:cdr.top_case_cluster?.type||"null"},
-    {name:"case_insight_present",passed:cdr.case_insight!==null||!hasResetReboundQ,expected:"case_insight when reset exists",actual:cdr.case_insight?"present":"null"},
-    {name:"push_grade_present",passed:cdr.commander_push_grade.length>0,expected:"PREVIEW_OK or DECISION_GRADE_NOT_READY",actual:cdr.commander_push_grade},
-    {name:"no_false_healthy_trend_label",passed:!cdr.commander_summary.includes("是健康趋势")&&!cdr.commander_summary.includes("属于健康趋势"),expected:"no affirmative healthy trend claim",actual:cdr.commander_summary.includes("健康趋势")?"mentions but check negation":"ok"},
-    {name:"sample_limitations_present",passed:cdr.sample_limitations.length>0,expected:"sample limitations stated",actual:cdr.sample_limitations.slice(0,40)},
-    {name:"forbidden_terms_absent",passed:!cdr.commander_summary.includes("BUY")&&!cdr.commander_summary.includes("SELL")&&!cdr.commander_summary.includes("SHORT")&&!cdr.commander_summary.includes("LONG"),expected:"no forbidden terms",actual:"ok"},
-  ];
-  const allPass=qChecks.every(c=>c.passed);
-  const failedChecks=qChecks.filter(c=>!c.passed).map(c=>c.name);
-
-  // Override push_grade if quality failed
-  if(!allPass){
-    cdr.commander_push_grade="DO_NOT_PUSH";
-    console.log(`\n质量检查未通过，推送阻断`);
-  }
-
-  console.log(`\n质量检查: ${allPass?"全部通过":`${failedChecks.length}项未通过: ${failedChecks.join(", ")}`}`);
-  if(!allPass) for(const f of failedChecks){const c=qChecks.find(x=>x.name===f)!;console.log(`  ${f}: 预期${c.expected} 实际${c.actual}`);}
-  writeFileSync(join(OUT_DIR,"lab_commander_quality_v2.json"),JSON.stringify({passed:allPass,failed_checks:failedChecks,checks:qChecks,ts:new Date().toISOString()},null,2));
 
   console.log(`\n报告: ${REPORTS_DIR}/lab_intraday_commander_report_v2.md`);
 }

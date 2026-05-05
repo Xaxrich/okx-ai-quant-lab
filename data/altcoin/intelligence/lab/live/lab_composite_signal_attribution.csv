@@ -1,6 +1,6 @@
 signal_name,sample_count,valid_paths,lead_or_lag,confidence,avg_f1_ret,avg_f3_ret,avg_max_adv,notes
-MIXED,2,2,NOISE,LOW,0.00%,2.12%,0.00%,flat path
-LIQUIDATION_EXPANSION,2,2,NOISE,LOW,-0.21%,-0.00%,-0.43%,flat path
-TREND_REACCELERATION,2,2,NOISE,LOW,-0.58%,4.92%,-0.58%,flat path
-FUNDING_COOLING,1,1,INSUFFICIENT_SAMPLE,LOW,0.86%,0.43%,0.00%,<2 samples
+MIXED,2,2,NOISE,LOW,0.00%,1.48%,-0.21%,flat path
+TREND_REACCELERATION,2,2,LAGGING,LOW,-0.58%,4.92%,-3.09%,adv=-3.1%
+LIQUIDATION_EXPANSION,1,1,INSUFFICIENT_SAMPLE,LOW,-0.43%,0.43%,-0.43%,<2 samples
 LIQUIDATION_RESET_REBOUND,1,1,INSUFFICIENT_SAMPLE,LOW,0.00%,0.85%,0.00%,<2 samples
+DELEVERAGING_COMPOSITE,1,0,INSUFFICIENT_SAMPLE,undefined,undefined,undefined,undefined,no valid paths
