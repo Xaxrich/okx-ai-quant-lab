@@ -5,3 +5,12 @@
 {"timestamp":"2026-05-05T08:32:01.664Z","source":"coinglass","endpoint_group":"liq","mode":"micro","cache_hit":false,"counted_call":true,"status":"OK"}
 {"timestamp":"2026-05-05T08:32:01.848Z","source":"coinglass","endpoint_group":"funding","mode":"micro","cache_hit":false,"counted_call":true,"status":"OK"}
 {"timestamp":"2026-05-05T08:32:35.714Z","source":"coinglass","endpoint_group":"oi","mode":"micro","cache_hit":false,"counted_call":true,"status":"OK"}
+{"timestamp":"2026-05-05T08:40:14.272Z","source":"coinglass","endpoint_group":"oi","mode":"micro","cache_hit":false,"counted_call":true,"status":"OK"}
+{"timestamp":"2026-05-05T08:40:27.166Z","source":"coinglass","endpoint_group":"oi","mode":"micro","cache_hit":false,"counted_call":true,"status":"OK"}
+{"timestamp":"2026-05-05T08:40:28.337Z","source":"coinglass","endpoint_group":"oi","mode":"micro","cache_hit":false,"counted_call":true,"status":"OK"}
+{"timestamp":"2026-05-05T08:40:45.878Z","source":"coinglass","endpoint_group":"oi","mode":"standard","cache_hit":false,"counted_call":true,"status":"OK"}
+{"timestamp":"2026-05-05T08:40:46.037Z","source":"coinglass","endpoint_group":"liq","mode":"standard","cache_hit":false,"counted_call":true,"status":"OK"}
+{"timestamp":"2026-05-05T08:40:46.199Z","source":"coinglass","endpoint_group":"funding","mode":"standard","cache_hit":false,"counted_call":true,"status":"OK"}
+{"timestamp":"2026-05-05T08:41:03.483Z","source":"coinglass","endpoint_group":"oi","mode":"micro","cache_hit":false,"counted_call":true,"status":"OK"}
+{"timestamp":"2026-05-05T08:41:54.100Z","source":"coinglass","endpoint_group":"oi","mode":"micro","cache_hit":false,"counted_call":true,"status":"OK"}
+{"timestamp":"2026-05-05T08:43:13.301Z","source":"coinglass","endpoint_group":"oi","mode":"micro","cache_hit":true,"counted_call":false,"status":"CACHE_HIT"}

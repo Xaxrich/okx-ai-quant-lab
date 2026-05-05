@@ -1,4 +1,4 @@
-import { writeFileSync, mkdirSync, existsSync, readFileSync, appendFileSync } from "fs";
+import { writeFileSync, mkdirSync, existsSync, readFileSync, appendFileSync, statSync } from "fs";
 import { join } from "path";
 
 const OUT_DIR = join(import.meta.dirname, "..", "..", "..", "..", "data", "altcoin", "intelligence", "lab", "live");
@@ -55,8 +55,8 @@ function cacheGet(key: string, maxAgeMin: number): { hit: boolean; data?: string
   const path = join(CACHE_DIR, `${key}.json`);
   if (!existsSync(path)) return { hit: false };
   try {
-    const stat = require("fs").statSync(path);
-    if ((Date.now() - stat.mtimeMs) / 60000 > maxAgeMin) return { hit: false };
+    const s = statSync(path);
+    if ((Date.now() - s.mtimeMs) / 60000 > maxAgeMin) return { hit: false };
     return { hit: true, data: readFileSync(path, "utf-8") };
   } catch { return { hit: false }; }
 }
@@ -67,7 +67,7 @@ function cachePut(key: string, data: string) {
 function getCacheAge(key: string): number | null {
   const path = join(CACHE_DIR, `${key}.json`);
   if (!existsSync(path)) return null;
-  try { return (Date.now() - require("fs").statSync(path).mtimeMs) / 60000; } catch { return null; }
+  try { return (Date.now() - statSync(path).mtimeMs) / 60000; } catch { return null; }
 }
 
 async function fetchWithCache(
@@ -307,17 +307,43 @@ async function main() {
   const oi = await fetchCoinGlassOI(mode, cgBudget);
   if (oi.calls > 0) { extCalls += oi.calls; cgCalls += oi.calls; }
 
-  // In micro mode, liq and funding use cache ONLY — no API calls
-  const liqMode = mode === "micro" ? "micro" : mode;
-  const fundMode = mode === "micro" ? "micro" : mode;
-  // For micro: force budget blocked so only cache is used
-  const microBudget = mode === "micro" ? { ok: false, used: cgBudget.used, remaining: cgBudget.remaining } : cgBudget;
+  // Micro mode: liq and funding are CACHE ONLY — ZERO API calls
+  let liq, fund;
+  if (mode === "micro") {
+    // Read from raw cache (matching fetchFunding/fetchCoinGlassLiq response structure)
+    const liqCached = cacheGet("liq", 30);
+    if (liqCached.hit && liqCached.data) {
+      try {
+        const j = JSON.parse(liqCached.data);
+        if (j.code === "0" && j.data?.length > 0) {
+          const latest = j.data[0];
+          const long = parseFloat(latest.aggregated_long_liquidation_usd || "0");
+          const short = parseFloat(latest.aggregated_short_liquidation_usd || "0");
+          liq = { liq4h: long + short, liqLong4h: long, liqShort4h: short, calls: 0, cacheAge: getCacheAge("liq") };
+        } else { liq = { liq4h: null, liqLong4h: null, liqShort4h: null, calls: 0, cacheAge: null }; }
+      } catch { liq = { liq4h: null, liqLong4h: null, liqShort4h: null, calls: 0, cacheAge: null }; }
+    } else { liq = { liq4h: null, liqLong4h: null, liqShort4h: null, calls: 0, cacheAge: null }; }
 
-  const liq = await fetchCoinGlassLiq(liqMode, microBudget);
-  if (liq.calls > 0) { extCalls += liq.calls; cgCalls += liq.calls; }
-
-  const fund = await fetchFunding(fundMode, microBudget);
-  if (fund.calls > 0) { extCalls += fund.calls; cgCalls += fund.calls; }
+    const fundCached = cacheGet("funding", 30);
+    if (fundCached.hit && fundCached.data) {
+      try {
+        const j = JSON.parse(fundCached.data);
+        if (j.code === "0" && j.data?.length > 0) {
+          const vals = j.data.map((d: any) => parseFloat(d.close || "0")).filter((v: number) => !isNaN(v));
+          const latest = vals[vals.length - 1] || 0;
+          let streak = 0;
+          for (let i = vals.length - 1; i >= 0 && vals[i] > 0; i--) streak++;
+          fund = { rate: latest, streak, calls: 0, cacheAge: getCacheAge("funding") };
+        } else { fund = { rate: null, streak: null, calls: 0, cacheAge: null }; }
+      } catch { fund = { rate: null, streak: null, calls: 0, cacheAge: null }; }
+    } else { fund = { rate: null, streak: null, calls: 0, cacheAge: null }; }
+  } else {
+    // Standard/full: liq and funding CAN call API
+    liq = await fetchCoinGlassLiq(mode, cgBudget);
+    if (liq.calls > 0) { extCalls += liq.calls; cgCalls += liq.calls; }
+    fund = await fetchFunding(mode, cgBudget);
+    if (fund.calls > 0) { extCalls += fund.calls; cgCalls += fund.calls; }
+  }
 
   // OKX: only with --with-okx AND budget allows (OKX = 2 calls)
   let okx = { oiUsd: null as number | null, funding: null as number | null, calls: 0 };
@@ -364,8 +390,13 @@ async function main() {
     freshness,
     [freshness === "STALE" ? "stale data" : "", freshness === "BUDGET_BLOCKED" ? "budget blocked" : "", !cgBudget.ok ? "over limit" : ""].filter(Boolean).join("; "),
   ];
+  // MICRO_BUDGET_VIOLATION check
+  if (mode === "micro" && cgCalls > 1) {
+    console.log(`WARNING: MICRO_BUDGET_VIOLATION — ${cgCalls} CG calls in micro mode (limit=1)`);
+  }
+
   const esc = (v: any) => String(v ?? "").includes(",") ? `"${v}"` : String(v ?? "");
-  const snapPath = join(OUT_DIR, "lab_fast_watch.csv");
+  const snapPath = join(OUT_DIR, "lab_fast_watch_v2.csv");
   if (!existsSync(snapPath)) writeFileSync(snapPath, snapH + "\n");
   appendFileSync(snapPath, snapRow.map(esc).join(",") + "\n");
 
