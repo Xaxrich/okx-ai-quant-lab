@@ -17,7 +17,9 @@ function analyze(readings: any[], cgHistory: any, fwData: any): string {
   if (r.length < 2) return "数据不足，无法分析。";
 
   const cur = r[r.length - 1], prev = r[r.length - 2], prev2 = r.length >= 3 ? r[r.length - 3] : null;
+  const dataTime = cur.ts || "?";
   const lines: string[] = [];
+  lines.push(`数据时间: ${dataTime} (UTC)`);
   let urgency = 0;
 
   // ── 1. 资金费率分析 ──
