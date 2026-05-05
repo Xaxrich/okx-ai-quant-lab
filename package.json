@@ -57,6 +57,7 @@
     "intelligence:lab:ai-analysis": "tsx src/altcoin/intelligence/lab/lab_ai_analysis_loop.ts",
     "intelligence:lab:commander": "tsx src/altcoin/intelligence/lab/lab_intelligence_commander.ts",
     "intelligence:lab:commander-v2": "tsx src/altcoin/intelligence/lab/lab_intelligence_commander_v2.ts",
+    "intelligence:lab:commander-v3": "tsx src/altcoin/intelligence/lab/lab_intelligence_commander_v3.ts",
     "intelligence:lab:commander-all": "tsx src/altcoin/intelligence/lab/lab_intelligence_commander.ts && tsx src/altcoin/intelligence/lab/lab_intelligence_commander_v2.ts",
     "intelligence:lab:advanced-indicators": "tsx src/altcoin/intelligence/lab/lab_advanced_indicators.ts",
     "intelligence:lab:deep-insight": "tsx src/altcoin/intelligence/lab/lab_deep_insight.ts",

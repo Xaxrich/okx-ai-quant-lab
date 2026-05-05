@@ -1,0 +1,53 @@
+{
+  "timestamp": "2026-05-05T14:44:03.697Z",
+  "market_phase": "RESET_EQUILIBRIUM",
+  "previous_phase": "RESET_REBOUND",
+  "dominant_signal": {
+    "id": "C7",
+    "name": "清算压力",
+    "confidence": "MEDIUM"
+  },
+  "active_signals": [
+    "C7",
+    "C8",
+    "C6"
+  ],
+  "trend_continuation_score": 75,
+  "reversal_risk_score": 0,
+  "reset_reacceleration_score": 45,
+  "liquidity_fragility_score": 30,
+  "data_confidence_score": 80,
+  "strongest_evidence_chain": "OI从峰值$417M回落5%；DEX买卖均衡(49%买)——无单边情绪",
+  "weakest_evidence": "统计样本仅单日单币，组合信号未经多周期验证",
+  "main_contradiction": "RESET_EQUILIBRIUM: 去杠杆压力已释放，但资金费率仍处偏高水平(9.7%)。OI已从峰值显著回落。",
+  "scenario_main": "RESET_EQUILIBRIUM",
+  "scenario_alternative": "二次去杠杆",
+  "invalidation_conditions": [
+    "OI持续下降且不恢复——推翻reset-reacceleration",
+    "清算重新放大至$1M+——推翻压力已消化",
+    "资金费率重新突破10%且OI同步上升——推翻均衡"
+  ],
+  "next_3_observations": [
+    "OI是否从回落转为继续上升",
+    "清算是否突破$1M——当前$799K",
+    "DEX turnover是否升至极端水平"
+  ],
+  "case_insight": null,
+  "sample_limitations": "快照38条|单日单币|组合信号未经多周期回测",
+  "commander_push_grade": "PREVIEW_OK",
+  "commander_summary": "RESET_EQUILIBRIUM。清算压力已释放，OI从峰值回落，资金费率仍偏高但回落至9.7%。",
+  "dex_microstructure": {
+    "liquidity": 552676.57,
+    "volume_24h": 8692744.569999998,
+    "volume_to_liquidity": 15.728447779141423,
+    "buy_ratio": 0.49430509176568044,
+    "state": "DEX_BALANCED"
+  },
+  "exchange_oi": {
+    "total_oi": 395377848.2034,
+    "hhi": 0.17074459460495425,
+    "top3": 0.6492856748771249,
+    "growing": 3,
+    "shrinking": 9
+  }
+}
