@@ -1,0 +1,23 @@
+token,sample_group,segment,time_gte,time_lte,sort_dir,pages_fetched,rows_fetched,unique_tx_hashes,min_timestamp,max_timestamp,covers_segment_start,covers_segment_end,entity_coverage,usd_coverage,pagination_truncated,cache_hits,status,limitations
+LAB,P0,SEG_A,2026-03-24,2026-04-08,asc+desc,6,464,464,2026-03-24T00:00:05Z,2026-04-08T23:59:59Z,true,true,99.8%,100.0%,false,0,SEGMENT_READY,136 duplicates removed
+LAB,P0,SEG_B,2026-04-09,2026-04-15,asc+desc,6,495,495,2026-04-09T00:00:02Z,2026-04-15T23:59:57Z,true,true,98.2%,100.0%,false,0,SEGMENT_READY,105 duplicates removed
+LAB,P0,SEG_C,2026-04-16,2026-04-22,asc+desc,6,517,517,2026-04-16T00:00:03Z,2026-04-22T23:59:00Z,true,true,96.1%,100.0%,false,0,SEGMENT_READY,83 duplicates removed
+LAB,P0,SEG_D,2026-04-23,2026-04-26,asc+desc,6,527,527,2026-04-23T00:00:04Z,2026-04-26T23:59:59Z,true,true,96.2%,100.0%,false,0,SEGMENT_READY,73 duplicates removed
+LAB,P0,SEG_E,2026-04-11,2026-04-17,asc+desc,6,519,519,2026-04-11T00:00:03Z,2026-04-17T23:59:59Z,true,true,99.2%,100.0%,false,0,SEGMENT_READY,81 duplicates removed
+LAB,P0,SEG_F,2026-04-18,2026-04-21,asc+desc,6,515,515,2026-04-18T00:00:01Z,2026-04-21T23:59:44Z,true,true,98.6%,100.0%,false,0,SEGMENT_READY,85 duplicates removed
+UB,P0,SEG_A,2026-03-26,2026-04-10,asc+desc,6,451,451,2026-03-26T00:00:05Z,2026-04-10T23:59:04Z,true,true,99.8%,100.0%,false,0,SEGMENT_READY,149 duplicates removed
+UB,P0,SEG_B,2026-04-11,2026-04-17,asc+desc,6,583,583,2026-04-11T00:00:06Z,2026-04-17T23:59:59Z,true,true,99.7%,100.0%,false,0,SEGMENT_READY,17 duplicates removed
+UB,P0,SEG_C,2026-04-18,2026-04-24,asc+desc,6,569,569,2026-04-18T00:00:03Z,2026-04-24T23:59:59Z,true,true,98.6%,100.0%,false,0,SEGMENT_READY,31 duplicates removed
+UB,P0,SEG_D,2026-04-25,2026-04-28,asc+desc,6,530,530,2026-04-25T00:00:17Z,2026-04-28T23:59:55Z,true,true,95.3%,100.0%,false,0,SEGMENT_READY,70 duplicates removed
+UB,P0,SEG_E,2026-04-15,2026-04-21,asc+desc,6,521,521,2026-04-15T00:00:04Z,2026-04-21T23:59:52Z,true,true,93.5%,100.0%,false,0,SEGMENT_READY,79 duplicates removed
+UB,P0,SEG_F,2026-04-22,2026-04-25,asc+desc,6,522,522,2026-04-22T00:00:03Z,2026-04-25T23:59:55Z,true,true,94.3%,100.0%,false,0,SEGMENT_READY,78 duplicates removed
+BSB,P0,SEG_A,2026-03-26,2026-04-10,asc+desc,6,491,491,2026-03-26T00:19:11Z,2026-04-10T23:43:59Z,true,true,31.2%,100.0%,false,0,SEGMENT_READY,109 duplicates removed
+BSB,P0,SEG_B,2026-04-11,2026-04-17,asc+desc,6,450,450,2026-04-11T00:30:11Z,2026-04-17T23:57:47Z,true,true,55.6%,100.0%,false,0,SEGMENT_READY,150 duplicates removed
+BSB,P0,SEG_C,2026-04-18,2026-04-24,asc+desc,6,476,476,2026-04-18T00:02:11Z,2026-04-24T23:59:11Z,true,true,50.2%,100.0%,false,0,SEGMENT_READY,124 duplicates removed
+BSB,P0,SEG_D,2026-04-25,2026-04-28,asc+desc,6,535,535,2026-04-25T00:14:35Z,2026-04-28T23:59:35Z,true,true,47.1%,100.0%,false,0,SEGMENT_READY,65 duplicates removed
+BSB,P0,SEG_E,2026-04-13,2026-04-19,asc+desc,6,444,444,2026-04-13T00:17:35Z,2026-04-19T22:57:59Z,true,true,55.6%,100.0%,false,0,SEGMENT_READY,156 duplicates removed
+BSB,P0,SEG_F,2026-04-20,2026-04-23,asc+desc,6,521,521,2026-04-20T00:11:47Z,2026-04-23T23:59:11Z,true,true,50.9%,100.0%,false,0,SEGMENT_READY,79 duplicates removed
+PEPE,CONTROL,SEG_RECENT,2026-03-21,2026-05-05,asc+desc,6,483,483,2026-03-21T00:00:11Z,2026-05-05T05:53:59Z,true,true,73.1%,100.0%,false,0,SEGMENT_READY,117 duplicates removed
+FLOKI,CONTROL,SEG_RECENT,2026-03-21,2026-05-05,asc+desc,6,420,420,2026-03-21T00:04:11Z,2026-05-05T05:47:59Z,true,true,91.2%,100.0%,false,0,SEGMENT_READY,180 duplicates removed
+PENDLE,P2,SEG_RECENT,2026-03-21,2026-05-05,asc+desc,6,280,280,2026-03-21T00:01:11Z,2026-05-05T05:54:23Z,true,true,86.1%,100.0%,false,0,SEGMENT_READY,320 duplicates removed
+ONDO,P2,SEG_RECENT,2026-03-21,2026-05-05,asc+desc,6,482,482,2026-03-21T00:00:11Z,2026-05-05T05:54:59Z,true,true,78.6%,100.0%,false,0,SEGMENT_READY,118 duplicates removed
