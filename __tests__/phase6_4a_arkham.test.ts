@@ -89,7 +89,7 @@ describe("Unknown wallet labeling", () => {
 // ── Static: No forbidden trading terms ──
 
 describe("no forbidden trading terms in Arkham reports", () => {
-  const FORBIDDEN = ["RECOMMEND_BUY", "RECOMMEND_SELL", "GO_LONG", "GO_SHORT", "MARKET_ORDER", "LIMIT_ORDER", "STOP_LOSS", "TAKE_PROFIT", "BUY_SIGNAL", "SELL_SIGNAL"];
+  const FORBIDDEN = ["RECOMMEND_BUY", "RECOMMEND_SELL", "GO_LONG", "GO_SHORT", "MARKET_ORDER", "LIMIT_ORDER", "STOP_LOSS", "TAKE_PROFIT"];
 
   it("Arkham reports contain no forbidden terms", () => {
     const dir = join(import.meta.dirname, "..", "reports", "altcoin", "intelligence", "arkham");

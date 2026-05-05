@@ -42,6 +42,9 @@
     "intelligence:arkham:holder-features": "tsx src/altcoin/intelligence/arkham/arkham_holder_entity_feature_builder.ts",
     "intelligence:arkham:flow-schema-probe": "tsx src/altcoin/intelligence/arkham/arkham_flow_schema_probe.ts",
     "intelligence:arkham:reconcile": "tsx src/altcoin/intelligence/arkham/arkham_entity_label_registry.ts",
+    "intelligence:arkham:volume-features": "tsx src/altcoin/intelligence/arkham/arkham_volume_feature_builder.ts",
+    "intelligence:arkham:holder-volume-loop": "tsx src/altcoin/intelligence/arkham/arkham_holder_volume_loop.ts",
+    "intelligence:arkham:flow-schema-probe-v2": "tsx src/altcoin/intelligence/arkham/arkham_flow_schema_probe.ts",
 
     "fetch:data": "npm run okx:fetch-data",
     "backtest": "npm run okx:backtest",

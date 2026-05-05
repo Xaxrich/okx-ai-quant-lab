@@ -1,0 +1,8 @@
+token,endpoint_variant,params,status,rows,from_entity,to_entity,amount_usd,from_label,to_label,pagination,parser_ready,limitations
+PEPE,basic,,OK,3,false,false,false,false,false,false,false,blockHash; blockNumber; blockTimestamp; chain; fromAddress; fromAddress.address; fromAddress.chain; fromAddress.contract; fromAddress.isUserAddress; fromIsContract; historicalUSD; id; toAddress; toAdd
+PEPE,with_base,,OK,0,false,false,false,false,false,false,false,
+LAB,basic,,OK,3,false,false,false,false,false,false,false,blockHash; blockNumber; blockTimestamp; chain; fromAddress; fromAddress.address; fromAddress.arkhamEntity; fromAddress.arkhamEntity.addresses; fromAddress.arkhamEntity.id; fromAddress.arkhamEntity.nam
+LAB,with_base,,OK,0,false,false,false,false,false,false,false,
+BSB,basic,,OK,3,false,false,false,false,false,false,false,blockHash; blockNumber; blockTimestamp; chain; fromAddress; fromAddress.address; fromAddress.arkhamEntity; fromAddress.arkhamEntity.addresses; fromAddress.arkhamEntity.crunchbase; fromAddress.arkhamEn
+BSB,with_base,,OK,0,false,false,false,false,false,false,false,
+SUMMARY,,,,,,,,,,,,TRANSFER_ENTITY_SCHEMA_UNRESOLVED

@@ -1,0 +1,7 @@
+candidate_id,candidate_name,formula,involved_metrics,expected_timing,p0_trigger_rate,control_trigger_rate,discrimination_ratio,classification,decision,limitations
+HVC_001,low_labeled_ratio_high_vol_zscore,Low labeled holder ratio + extreme volume z-score,holder_entity + volume,structural_context_only,2,0,Infinity,STRUCTURAL_RISK,KEEP_AS_CANDIDATE,P0-specific composite — research only, not lead signal
+HVC_002,high_unknown_ratio_high_vol_zscore,High unknown holder ratio + extreme volume z-score,holder_entity + volume,structural_context_only,2,0,Infinity,STRUCTURAL_RISK,KEEP_AS_CANDIDATE,P0-specific composite — research only, not lead signal
+HVC_003,high_cex_ratio_volume_expansion,High CEX holder ratio + volume expansion 7d > 100%,holder_entity + volume,structural_context_only,1,3,0.3,NOISE,REJECT_NOISE,No discrimination — composite not useful
+HVC_004,high_concentration_vol_spike,High holder concentration + volume spike z > 2.5,holder_entity + volume,structural_context_only,2,0,Infinity,STRUCTURAL_RISK,KEEP_AS_CANDIDATE,P0-specific composite — research only, not lead signal
+HVC_005,fund_present_high_volume,Fund/institution holder present + high volume,holder_entity + volume,structural_context_only,1,0,Infinity,STRUCTURAL_CONTEXT,KEEP_AS_CANDIDATE,Weak P0 vs control discrimination
+HVC_006,low_entity_coverage_rising_volume,Low entity coverage + volume change 7d > 50%,holder_entity + volume,structural_context_only,2,0,Infinity,STRUCTURAL_RISK,KEEP_AS_CANDIDATE,P0-specific composite — research only, not lead signal
