@@ -1,13 +1,2 @@
-timestamp,token,mode,price_usd,price_source,coinglass_oi_usd,oi_change_4h,funding_rate_percent,funding_streak,liq_4h,okx_oi_usd,okx_funding,fast_watch_state,risk_score,review_label,total_external_calls,coinglass_calls,okx_calls,cg_budget_used,cg_budget_remaining,oi_cache_age_min,funding_cache_age_min,liq_cache_age_min,data_freshness_status,limitations
-2026-05-05T08:40:13.492Z,LAB,micro,2.32,coingecko,363397767.826,9791637.825999975,,,,,,LAB_FAST_CLEAR,0,OBSERVE,2,1,0,8,492,,,,FRESH,
-2026-05-05T08:40:26.642Z,LAB,micro,2.32,coingecko,363802015.0592,10195885.059199989,,,,,,LAB_FAST_CLEAR,0,OBSERVE,2,1,0,9,491,,,,FRESH,
-2026-05-05T08:40:27.815Z,LAB,micro,2.32,coingecko,363802015.0592,10195885.059199989,,,,,,LAB_FAST_CLEAR,0,OBSERVE,2,1,0,10,490,,,,FRESH,
-2026-05-05T08:40:45.142Z,LAB,standard,2.32,coingecko,362781037.2563,9174907.256299973,15.45,12,545197.96,,,LAB_FAST_FUNDING_OVERHEATED,30,OBSERVE,4,3,0,13,487,,,,FRESH,
-2026-05-05T08:41:02.949Z,LAB,micro,2.32,coingecko,363261376.6916,9655246.691600025,,,,,,LAB_FAST_CLEAR,0,OBSERVE,2,1,0,14,486,,,,FRESH,
-2026-05-05T08:41:53.309Z,LAB,micro,2.3,coingecko,365619099.9524,12012969.952400029,,,,,,LAB_FAST_CLEAR,0,OBSERVE,2,1,0,15,485,,,,FRESH,
-2026-05-05T08:43:13.300Z,LAB,micro,2.3,cache,365619099.9524,12012969.952400029,15.45,12,545197.96,,,LAB_FAST_FUNDING_OVERHEATED,30,OBSERVE,0,0,0,15,485,1.3,2.5,2.5,FRESH,
-2026-05-05T08:46:21.983Z,LAB,standard,2.3,cache,365619099.9524,12012969.952400029,15.45,12,545197.96,,,LAB_FAST_FUNDING_OVERHEATED,30,OBSERVE,0,0,0,15,485,4.5,5.6,5.6,FRESH,
-2026-05-05T08:46:37.653Z,LAB,micro,2.3,cache,365619099.9524,12012969.952400029,15.45,12,545197.96,,,LAB_FAST_FUNDING_OVERHEATED,30,OBSERVE,0,0,0,15,485,4.7,5.9,5.9,FRESH,
-2026-05-05T08:47:38.356Z,LAB,micro,2.33,coingecko,365619099.9524,12012969.952400029,15.45,12,545197.96,,,LAB_FAST_FUNDING_OVERHEATED,30,OBSERVE,1,0,0,15,485,5.7,6.9,6.9,FRESH,
-2026-05-05T09:10:05.152Z,LAB,standard,2.56,coingecko,405348014.087,51741884.08700001,16.47,12,755391.11,,,LAB_FAST_FUNDING_OVERHEATED,45,WATCH,4,3,0,18,482,0.0,-0.0,0.0,FRESH,
-2026-05-05T09:20:09.290Z,LAB,standard,2.6,CoinGecko,52.231861438180395,413635196.6599,60029066.65990001,8287182.572899997,16.47,0.00,12,755391.11,,123912.5,631478.61,资金费率过热,45,密切关注,LAB_FAST_FUNDING_OVERHEATED,45,2,1,19,481,0.0,10.1,10.1,新鲜,状态: LAB_FAST_FUNDING_OVERHEATED → 资金费率过热; OI: +$8.3M,OI 何时转负 (当前 4h +$60.0M); 资金费率何时突破 20% (当前 16.5%); 清算何时突破 $1M (当前 $755K); CoinGlass 预算剩余 481
+timestamp,token,mode,price_usd,price_source,return_24h,coinglass_oi_usd,oi_change_4h,oi_change_from_prev,funding_rate_percent,funding_change_from_prev,funding_streak,liq_4h,liq_change_from_prev,liq_upward,liq_downward,fast_watch_state,risk_score,review_label,prev_state,prev_score,total_ext_calls,cg_calls,cg_budget_used,cg_budget_remaining,oi_age_min,funding_age_min,liq_age_min,data_freshness,changes_summary,next_watch
+2026-05-05T09:26:34.169Z,LAB,standard,2.64,CoinGecko,54.72677023873052,428200776.0259,74594646.0259,,16.89,,12,860517.02,,132428.74,728088.28,资金费率过热,45,密切关注,,,4,3,22,478,0.0,0.0,0.0,新鲜,,OI 何时转负 (当前 4h +$74.6M); 资金费率何时突破 20% (当前 16.9%); 清算何时突破 $1M (当前 $861K); CoinGlass 预算剩余 478

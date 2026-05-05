@@ -60,17 +60,18 @@ export function shouldSendFastAlert(
   return { send: false, reasons: ["PUSH_SKIPPED_NO_MATERIAL_CHANGE"] };
 }
 
-export function shouldSendStandardBrief(hash: string): { send: boolean; reason: string } {
+export function shouldSendStandardBrief(hash: string, force?: boolean): { send: boolean; reason: string } {
+  if (force) return { send: true, reason: "FORCED" };
   const prev = loadState();
   const now = new Date().toISOString();
 
   if (prev.last_standard_brief_at) {
     const lastAt = new Date(prev.last_standard_brief_at).getTime();
-    if (Date.now() - lastAt < 14 * 60000) {
+    if (!isNaN(lastAt) && Date.now() - lastAt < 14 * 60000) {
       return { send: false, reason: "THROTTLED: <15min since last standard brief" };
     }
   }
-  if (hash === prev.last_message_hash) {
+  if (hash === prev.last_message_hash && hash !== "") {
     return { send: false, reason: "DUPLICATE: same message hash" };
   }
 

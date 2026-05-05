@@ -1,0 +1,9 @@
+metric_id,metric_name,p0_value_avg,control_value_avg,discrimination_ratio,p0_tokens_high,control_tokens_high,classification,decision,limitations
+AK_HE_001,labeled_holder_ratio,0.400,0.825,0.48,,PEPE|WIF|FLOKI,STRUCTURAL_RISK,ADD_STRUCTURAL_RISK_ONLY,P0 lower than control — structural risk indicator
+AK_HE_002,cex_holder_ratio,0.263,0.725,0.36,,PEPE|WIF,STRUCTURAL_CONTEXT,ADD_STRUCTURAL_RESEARCH_ONLY,P0 vs control difference observed — research context only | Holder snapshot — cannot be lead/lag signal
+AK_HE_003,unknown_holder_ratio,0.600,0.175,3.43,LAB|UB|BSB|AI,BONK,STRUCTURAL_RISK,ADD_STRUCTURAL_RISK_ONLY,P0 higher than control — structural risk indicator
+AK_HE_004,top_entity_holder_share,0.524,0.393,1.33,UB|BSB|AI,PEPE|FLOKI,NOISE,REJECT_NOISE,No meaningful P0 vs control discrimination
+AK_HE_005,holder_entity_concentration,0.400,0.218,1.83,LAB|BSB,PEPE|WIF,STRUCTURAL_CONTEXT,KEEP_AS_CONTEXT,Weak discrimination — keep as context | Holder snapshot — cannot be lead/lag signal
+AK_HE_006,market_maker_proxy_holder_count,0.000,0.000,0.00,,,STRUCTURAL_CONTEXT,ADD_STRUCTURAL_RESEARCH_ONLY,P0 vs control difference observed — research context only | Holder snapshot — cannot be lead/lag signal
+AK_HE_007,fund_holder_count,0.750,0.000,Infinity,LAB|AI,,STRUCTURAL_RISK,ADD_STRUCTURAL_RISK_ONLY,P0 higher than control — structural risk indicator
+AK_HE_008,holder_entity_coverage,0.400,0.825,0.48,,PEPE|WIF|FLOKI,STRUCTURAL_RISK,ADD_STRUCTURAL_RISK_ONLY,P0 lower than control — structural risk indicator

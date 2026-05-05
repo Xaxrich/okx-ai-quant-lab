@@ -1,0 +1,11 @@
+metric_id,metric_name,p0_trigger_rate,control_trigger_rate,discrimination_ratio,false_positive_rate,avg_lead_days,median_lead_days,triggered_p0_segments,triggered_ctrl_segments,classification,decision,limitations
+AK_STE_001,unique_transfer_count,N/A,N/A,N/A,N/A,,,,,INSUFFICIENT_DATA,NEED_MORE_SAMPLE,
+AK_STE_002,transfer_volume_usd,N/A,N/A,N/A,N/A,,,,,INSUFFICIENT_DATA,NEED_MORE_SAMPLE,
+AK_STE_003,labeled_transfer_ratio,N/A,N/A,N/A,N/A,,,,,INSUFFICIENT_DATA,NEED_MORE_SAMPLE,
+AK_STE_004,unknown_transfer_ratio,N/A,N/A,N/A,N/A,,,,,INSUFFICIENT_DATA,NEED_MORE_SAMPLE,
+AK_STE_005,cex_proxy_transfer_count,N/A,N/A,N/A,N/A,,,,,INSUFFICIENT_DATA,NEED_MORE_SAMPLE,
+AK_STE_006,cex_proxy_transfer_volume_usd,N/A,N/A,N/A,N/A,,,,,INSUFFICIENT_DATA,NEED_MORE_SAMPLE,
+AK_STE_007,cex_proxy_netflow_usd,N/A,N/A,N/A,N/A,,,,,INSUFFICIENT_DATA,NEED_MORE_SAMPLE,
+AK_STE_010,dex_proxy_transfer_volume_usd,N/A,N/A,N/A,N/A,,,,,INSUFFICIENT_DATA,NEED_MORE_SAMPLE,
+AK_STE_013,top_entity_transfer_share,N/A,N/A,N/A,N/A,,,,,INSUFFICIENT_DATA,NEED_MORE_SAMPLE,
+AK_STE_014,entity_transfer_concentration,N/A,N/A,N/A,N/A,,,,,INSUFFICIENT_DATA,NEED_MORE_SAMPLE,

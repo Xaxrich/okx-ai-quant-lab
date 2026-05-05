@@ -1,3 +1,5 @@
 timestamp,coingecko_ok,coinglass_ok,okx_ok,dex_ok,local_arkham_ok,missing_fields,intraday_available,data_quality_score,final_status_allowed
 2026-05-05T07:50:44.712Z,true,true,true,false,true,DEX,true,0.95,ALLOWED
 2026-05-05T08:04:16.322Z,true,true,true,false,true,1.00,0.30,1.00,ALLOWED
+2026-05-05T09:09:44.427Z,true,true,true,false,true,1.00,0.30,1.00,ALLOWED
+2026-05-05T09:20:10.727Z,true,true,true,false,true,1.00,0.30,1.00,ALLOWED
