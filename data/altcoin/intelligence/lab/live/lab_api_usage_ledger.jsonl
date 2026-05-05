@@ -163,3 +163,6 @@
 {"timestamp":"2026-05-05T16:10:59.572Z","source":"coinglass","endpoint_group":"oi","mode":"standard","cache_hit":true,"counted_call":false,"status":"CACHE_HIT"}
 {"timestamp":"2026-05-05T16:10:59.882Z","source":"coinglass","endpoint_group":"liq","mode":"standard","cache_hit":false,"counted_call":true,"status":"OK"}
 {"timestamp":"2026-05-05T16:11:00.044Z","source":"coinglass","endpoint_group":"funding","mode":"standard","cache_hit":false,"counted_call":true,"status":"OK"}
+{"timestamp":"2026-05-05T16:21:19.892Z","source":"coinglass","endpoint_group":"oi","mode":"standard","cache_hit":false,"counted_call":true,"status":"OK"}
+{"timestamp":"2026-05-05T16:21:19.892Z","source":"coinglass","endpoint_group":"liq","mode":"standard","cache_hit":true,"counted_call":false,"status":"CACHE_HIT"}
+{"timestamp":"2026-05-05T16:21:19.893Z","source":"coinglass","endpoint_group":"funding","mode":"standard","cache_hit":true,"counted_call":false,"status":"CACHE_HIT"}
