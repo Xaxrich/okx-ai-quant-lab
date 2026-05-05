@@ -13,6 +13,8 @@ const KEYS: { name: string; value: string }[] = [
   { name: "OKX_API_KEY", value: process.env.OKX_API_KEY || "" },
   { name: "OKX_SECRET_KEY", value: process.env.OKX_SECRET_KEY || "" },
   { name: "OKX_PASSPHRASE", value: process.env.OKX_PASSPHRASE || "" },
+  { name: "FEISHU_APP_ID", value: process.env.FEISHU_APP_ID || "" },
+  { name: "FEISHU_APP_SECRET", value: process.env.FEISHU_APP_SECRET || "" },
 ];
 
 const nonEmptyKeys = KEYS.filter(k => k.value.length > 0);
