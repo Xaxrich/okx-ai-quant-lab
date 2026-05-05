@@ -1,15 +1,16 @@
 # LAB Fast Watch
 
-Generated: 2026-05-05T08:23:51.290Z
-State: **LAB_FAST_FUNDING_OVERHEATED** | Risk: **35/100** | WATCH
+Generated: 2026-05-05T08:32:34.957Z | Mode: micro
+State: **LAB_FAST_OI_ACCELERATING** | Risk: **10/100** | OBSERVE | Freshness: FRESH
 
-- Price: $2.4900 (source: coingecko_simple)
-- OI: $394519550 (4h: +$40913420)
-- Funding: 15.70% | streak: 12
-- Liq 4h: $433259
-- OKX OI: $?
+- Price: $2.4500 (coingecko)
+- OI: $380063191 (4h: +$26457061, age: ?min)
+- Funding: ? | streak: ? | age: ?min
+- Liq 4h: $0 (age: ?min)
+- OKX OI: $not queried
+- CG budget: 7/500 (493 remaining)
 
-Risks: funding 15.7% extreme; funding streak 12; OI accelerating
+Risks: OI accelerating
 
 **No trading recommendation.**
-CoinGlass HOBBYIST plan: 4h minimum interval, intraday OI/liq not available.
+CoinGlass 4h-only. Snapshot deltas are NOT intraday OI.

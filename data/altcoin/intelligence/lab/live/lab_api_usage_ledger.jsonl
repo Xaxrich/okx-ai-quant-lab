@@ -1,0 +1,7 @@
+{"timestamp":"2026-05-05T08:31:59.969Z","source":"coinglass","endpoint_group":"oi","mode":"micro","cache_hit":false,"counted_call":true,"status":"OK"}
+{"timestamp":"2026-05-05T08:32:00.128Z","source":"coinglass","endpoint_group":"liq","mode":"micro","cache_hit":false,"counted_call":true,"status":"OK"}
+{"timestamp":"2026-05-05T08:32:00.294Z","source":"coinglass","endpoint_group":"funding","mode":"micro","cache_hit":false,"counted_call":true,"status":"OK"}
+{"timestamp":"2026-05-05T08:32:01.504Z","source":"coinglass","endpoint_group":"oi","mode":"micro","cache_hit":false,"counted_call":true,"status":"OK"}
+{"timestamp":"2026-05-05T08:32:01.664Z","source":"coinglass","endpoint_group":"liq","mode":"micro","cache_hit":false,"counted_call":true,"status":"OK"}
+{"timestamp":"2026-05-05T08:32:01.848Z","source":"coinglass","endpoint_group":"funding","mode":"micro","cache_hit":false,"counted_call":true,"status":"OK"}
+{"timestamp":"2026-05-05T08:32:35.714Z","source":"coinglass","endpoint_group":"oi","mode":"micro","cache_hit":false,"counted_call":true,"status":"OK"}
