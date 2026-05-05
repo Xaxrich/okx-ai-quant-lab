@@ -1,0 +1,4 @@
+token,sample_group,metric,T_minus_30,T_minus_14,T_minus_7,T_minus_3,T_minus_1,T0,T_plus_1,T_plus_3,T_plus_7,near_peak,post_peak,source,limitations
+LAB,P0,ALL,,,,,,,,,,,,SNAPSHOT_ONLY_NO_EVENT_REPLAY
+BSB,P0,ALL,,,,,,,,,,,,SNAPSHOT_ONLY_NO_EVENT_REPLAY
+UB,P0,ALL,,,,,,,,,,,,SNAPSHOT_ONLY_NO_EVENT_REPLAY

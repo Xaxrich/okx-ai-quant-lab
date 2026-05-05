@@ -46,6 +46,7 @@
     "intelligence:arkham:holder-volume-loop": "tsx src/altcoin/intelligence/arkham/arkham_holder_volume_loop.ts",
     "intelligence:arkham:flow-schema-probe-v2": "tsx src/altcoin/intelligence/arkham/arkham_flow_schema_probe.ts",
     "intelligence:arkham:transfer-loop": "tsx src/altcoin/intelligence/arkham/arkham_transfer_entity_loop.ts",
+    "intelligence:arkham:historical-transfer-fix": "tsx src/altcoin/intelligence/arkham/arkham_historical_transfer_fix.ts",
 
     "fetch:data": "npm run okx:fetch-data",
     "backtest": "npm run okx:backtest",
