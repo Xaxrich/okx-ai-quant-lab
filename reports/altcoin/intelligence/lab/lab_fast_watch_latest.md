@@ -1,16 +1,33 @@
-# LAB Fast Watch
+# LAB 快速监控 [标准]
 
-Generated: 2026-05-05T08:32:34.957Z | Mode: micro
-State: **LAB_FAST_OI_ACCELERATING** | Risk: **10/100** | OBSERVE | Freshness: FRESH
+**资金费率过热** | 风险 45/100 [密切关注] | 数据: 新鲜 | 2026-05-05 09:20:09
 
-- Price: $2.4500 (coingecko)
-- OI: $380063191 (4h: +$26457061, age: ?min)
-- Funding: ? | streak: ? | age: ?min
-- Liq 4h: $0 (age: ?min)
-- OKX OI: $not queried
-- CG budget: 7/500 (493 remaining)
+## 快照
+- 价格: $2.6000 | 24h: +52.2% | 来源: CoinGecko
+- OI: $413635197 | 4h: +$60.0M | 较上次: +$8.3M
+- 资金费率: 16.47% | 连续 12 期 | 较上次: +0.00%
+- 清算 4h: $755391 (上行 $123913 / 下行 $631479)
+- API: 外部2 CG1 | CG预算: 19/500 (剩481)
 
-Risks: OI accelerating
+## 风险信号
+- 资金费率 16.5% 极度危险
+- 连续 12 期为正
+- OI 加速 (+17%)
 
-**No trading recommendation.**
-CoinGlass 4h-only. Snapshot deltas are NOT intraday OI.
+## 变化
+- 状态: LAB_FAST_FUNDING_OVERHEATED → 资金费率过热
+- OI: +$8.3M
+
+## 阈值临近
+- 距 REVIEW_REQUIRED 还差 6 分
+- 资金费率距 20% 极端线还差 3.5%
+- OI 仍在上升，回落触发线为 4h 负值
+- 清算距 $1M 告警线还差 $245K
+
+## 下次关注
+- OI 何时转负 (当前 4h +$60.0M)
+- 资金费率何时突破 20% (当前 16.5%)
+- 清算何时突破 $1M (当前 $755K)
+- CoinGlass 预算剩余 481
+
+**不构成交易建议。无法推断方向性意图。**

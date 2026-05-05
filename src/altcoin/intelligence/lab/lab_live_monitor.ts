@@ -273,7 +273,7 @@ function classifyState(cg: any, cgl: any, okx: any, dex: any, arkham: any, coreD
 // ── Main ──
 
 async function main() {
-  console.log("=== LAB Live Overheating & Reversal-Risk Monitor (v2) ===\n");
+  console.log("=== LAB 高位风险监控 (v2) ===\n");
 
   if (process.env.NO_ARKHAM_MODE !== "true") {
     console.log("LAB_MONITOR_REQUIRES_NO_ARKHAM_MODE: set NO_ARKHAM_MODE=true");
@@ -285,34 +285,34 @@ async function main() {
 
   const ts = new Date().toISOString();
 
-  // Fetch
-  console.log("── Fetching Live Data ──\n");
+  // 获取数据
+  console.log("── 获取实时数据 ──\n");
   const cg = await fetchCoinGeckoLive();
-  console.log(`CoinGecko: ${cg.ok ? "OK" : "FAILED"} $${cg.price_usd?.toFixed(4) || "?"} 24h=${cg.price_change_24h?.toFixed(1) || "?"}%`);
+  console.log(`CoinGecko: ${cg.ok ? "OK" : "失败"} $${cg.price_usd?.toFixed(4) || "?"} 24h=${cg.price_change_24h?.toFixed(1) || "?"}%`);
 
   const cgl = await fetchCoinGlassLive();
-  console.log(`CoinGlass: ${cgl.ok ? "OK" : "FAILED"} OI=$${(cgl.oi_current || 0).toFixed(0)} funding=${(cgl.funding_rate_raw || 0).toFixed(4)} (${cgl.funding_rate_percent?.toFixed(2) || "?"}%)`);
+  console.log(`CoinGlass: ${cgl.ok ? "OK" : "失败"} OI=$${(cgl.oi_current || 0).toFixed(0)} 资金费率=${(cgl.funding_rate_raw || 0).toFixed(4)} (${cgl.funding_rate_percent?.toFixed(2) || "?"}%)`);
 
   const okx = await fetchOkxLive();
-  console.log(`OKX: ${okx.ok ? "OK" : "FAILED"} unit=${okx.okx_oi_unit || "?"} usd=${okx.okx_oi_usd_direct?.toFixed(0) || "?"} raw=${okx.okx_oi_raw || "?"}`);
+  console.log(`OKX: ${okx.ok ? "OK" : "失败"} 单位=${okx.okx_oi_unit || "?"} usd=${okx.okx_oi_usd_direct?.toFixed(0) || "?"} 原始=${okx.okx_oi_raw || "?"}`);
 
-  const dex: Record<string, any> = { ok: false, error: "DEX_DATA_INSUFFICIENT" };
-  console.log(`DEX: UNAVAILABLE`);
+  const dex: Record<string, any> = { ok: false, error: "DEX数据不可用" };
+  console.log(`DEX: 不可用`);
 
   const arkham = loadLocalArkhamReference();
-  console.log(`Arkham local: ${arkham.ok ? "OK" : "NONE"}`);
+  console.log(`Arkham 本地: ${arkham.ok ? "可用" : "无数据"}`);
 
-  // Data quality
+  // 数据质量
   const coreDq = (cg.ok ? 0.25 : 0) + (cgl.ok && cgl.oi_ok ? 0.40 : 0) + (cgl.liquidation_ok ? 0.20 : 0) + (okx.ok && okx.oi_ok ? 0.15 : 0);
   const ctxDq = (dex.ok ? 0.70 : 0) + (arkham.ok ? 0.30 : 0);
   const finalDq = coreDq;
 
-  console.log(`\nDQ: core=${coreDq.toFixed(2)} context=${ctxDq.toFixed(2)} final=${finalDq.toFixed(2)}`);
+  console.log(`\n数据质量: 核心${coreDq.toFixed(2)} 扩展${ctxDq.toFixed(2)} 综合${finalDq.toFixed(2)}`);
 
-  // Classify
+  // 判定
   const { mainState, secondaryStates } = classifyState(cg, cgl, okx, dex, arkham, coreDq);
-  console.log(`Main: ${mainState.state} (${mainState.confidence})`);
-  for (const s of secondaryStates) console.log(`  + ${s.state} (${s.confidence})`);
+  console.log(`主状态: ${mainState.state} (${mainState.confidence})`);
+  for (const s of secondaryStates) console.log(`  次状态: ${s.state} (${s.confidence})`);
 
   // ── Snapshot v2 ──
   const oiToMcap = cg.market_cap > 0 && cgl.oi_current ? cgl.oi_current / cg.market_cap : 0;
@@ -365,74 +365,76 @@ async function main() {
   if (!existsSync(dqPath)) writeFileSync(dqPath, dqH + "\n");
   appendFileSync(dqPath, dqRow.join(",") + "\n");
 
-  // ── Report ──
+  // ── 报告（中文）──
+  const riskLabel = (s: string) => s.includes("DELEVERAGING") || s.includes("LIQUIDATION") ? "🔴" : s.includes("FUNDING") || s.includes("OVERHEATED") ? "🟠" : s.includes("CROWDING") || s.includes("EFFICIENCY") ? "🟡" : "🟢";
   const reportLines = [
-    "# LAB Live Overheating & Reversal-Risk Monitor (v2)", "",
-    `Generated: ${ts}`,
-    `Core DQ: ${coreDq.toFixed(2)} | Context DQ: ${ctxDq.toFixed(2)} | Final DQ: ${finalDq.toFixed(2)}`,
+    "# LAB 高位风险监控报告", "",
+    `生成时间: ${ts.slice(0, 19).replace("T", " ")}`,
+    `数据质量: 核心${coreDq.toFixed(2)} / 扩展${ctxDq.toFixed(2)} / 综合${finalDq.toFixed(2)}`,
     "",
-    "## 1. Executive Summary", "",
-    `**Main State: ${mainState.state}** (confidence: ${mainState.confidence})`,
-    coreDq < 0.7 ? "**WARNING: Core data quality insufficient.**" : "",
-    ...(secondaryStates.length > 0 ? [`Secondary: ${secondaryStates.map(s => s.state).join(", ")}`] : []),
+    "## 1. 综合研判", "",
+    `**主状态: ${riskLabel(mainState.state)} ${mainState.state}**（置信度: ${mainState.confidence}）`,
+    coreDq < 0.7 ? "**⚠️ 核心数据质量不足，结论需谨慎。**" : "",
+    ...(secondaryStates.length > 0 ? [`次状态: ${secondaryStates.map(s => s.state).join("、")}`] : []),
     "",
-    "## 2. Current Market Snapshot", "",
-    `- Price: $${cg.price_usd?.toFixed(6) || "?"}`,
-    `- Market cap: $${(cg.market_cap || 0).toLocaleString()}`,
-    `- Volume 24h: $${(cg.volume_24h || 0).toLocaleString()}`,
+    "## 2. 市场快照", "",
+    `- 价格: $${cg.price_usd?.toFixed(6) || "?"}`,
+    `- 市值: $${(cg.market_cap || 0).toLocaleString()}`,
+    `- 24h 成交量: $${(cg.volume_24h || 0).toLocaleString()}`,
     `- 1h: ${cg.price_change_1h?.toFixed(1) || "?"}% | 24h: ${cg.price_change_24h?.toFixed(1) || "?"}% | 7d: ${cg.price_change_7d?.toFixed(1) || "?"}%`,
-    `- Volume/MCap: ${cg.market_cap > 0 ? ((cg.volume_24h || 0) / cg.market_cap * 100).toFixed(1) : "?"}%`,
+    `- 换手率: ${cg.market_cap > 0 ? ((cg.volume_24h || 0) / cg.market_cap * 100).toFixed(1) : "?"}%`,
+    `- 流通量: ${cg.circulating_supply?.toLocaleString() || "?"}`,
+    `- FDV: $${(cg.fdv || 0).toLocaleString()}`,
     "",
-    "## 3. Derivatives (CoinGlass)", "",
-    `- Aggregated OI: $${(cgl.oi_current || 0).toLocaleString()}`,
-    `- OI/MCap: ${oiToMcap.toFixed(2)} ${oiToMcap >= 1.0 ? "(EXTREME)" : ""}`,
-    `- OI 4h: ${cgl.oi_change_4h >= 0 ? "+" : ""}$${(cgl.oi_change_4h || 0).toLocaleString()}`,
-    `- OI 24h: ${cgl.oi_change_24h >= 0 ? "+" : ""}$${(cgl.oi_change_24h || 0).toLocaleString()} (${(oiChange24hRatio*100).toFixed(0)}%) ${oiChange24hRatio >= 0.30 ? "EXTREME" : ""}`,
-    `- OI z-score (12×4h): ${cgl.oi_zscore?.toFixed(2) || "?"}`,
+    "## 3. 衍生品（CoinGlass）", "",
+    `- 聚合 OI: $${(cgl.oi_current || 0).toLocaleString()}`,
+    `- OI/市值: ${oiToMcap.toFixed(2)} ${oiToMcap >= 1.0 ? "⚠️极端" : ""}`,
+    `- OI 4h: ${(cgl.oi_change_4h || 0) >= 0 ? "+" : ""}$${Math.abs(cgl.oi_change_4h || 0).toLocaleString()}`,
+    `- OI 24h: ${(cgl.oi_change_24h || 0) >= 0 ? "+" : ""}$${Math.abs(cgl.oi_change_24h || 0).toLocaleString()} (${(oiChange24hRatio*100).toFixed(0)}%) ${oiChange24hRatio >= 0.30 ? "⚠️极端" : ""}`,
+    `- OI z-score: ${cgl.oi_zscore?.toFixed(2) || "?"}`,
     "",
-    `- Funding raw: ${(cgl.funding_rate_raw || 0).toFixed(4)}`,
-    `- Funding percent: ${(cgl.funding_rate_percent || 0).toFixed(2)}% (unit: ${cgl.funding_unit_status || "?"})`,
-    `- Funding z-score: ${cgl.funding_zscore?.toFixed(2) || "?"}`,
-    `- Funding streak: ${cgl.funding_positive_streak || 0} positive ${(cgl.funding_positive_streak || 0) >= 6 ? "EXTREME" : ""}`,
-    `- Funding abs extreme: ${(cgl.funding_rate_percent || 0) >= 5 ? "YES" : "NO"}`,
+    `- 资金费率: ${(cgl.funding_rate_percent || 0).toFixed(2)}%（原始值: ${(cgl.funding_rate_raw || 0).toFixed(4)}，单位: ${cgl.funding_unit_status || "?"}）`,
+    `- 资金费率 z-score: ${cgl.funding_zscore?.toFixed(2) || "?"}`,
+    `- 资金费率连续正向: ${cgl.funding_positive_streak || 0} 期 ${(cgl.funding_positive_streak || 0) >= 6 ? "⚠️极端" : ""}`,
+    `- 资金费率绝对值极端: ${(cgl.funding_rate_percent || 0) >= 5 ? "是 (≥5%)" : "否"}`,
     "",
-    `- Liq 4h: $${(cgl.liquidation_volume_4h || 0).toLocaleString()} (${(cgl.long_liquidation_volume_4h || 0).toLocaleString()} upward / ${(cgl.short_liquidation_volume_4h || 0).toLocaleString()} downward)`,
-    `- Liq 24h: $${(cgl.liquidation_volume_24h || 0).toLocaleString()}`,
-    `- Liq 4h imbalance: ${cgl.liquidation_imbalance_4h?.toFixed(2) || "?"}`,
-    `- Liq 4h/OI: ${(liq4hToOi*100).toFixed(4)}% | Liq 24h/OI: ${(liq24hToOi*100).toFixed(4)}%`,
+    `- 清算 4h: $${(cgl.liquidation_volume_4h || 0).toLocaleString()} (上行 $${(cgl.long_liquidation_volume_4h || 0).toLocaleString()} / 下行 $${(cgl.short_liquidation_volume_4h || 0).toLocaleString()})`,
+    `- 清算 24h: $${(cgl.liquidation_volume_24h || 0).toLocaleString()}`,
+    `- 清算 4h 不平衡: ${cgl.liquidation_imbalance_4h?.toFixed(2) || "?"}`,
+    `- 清算 4h/OI: ${(liq4hToOi*100).toFixed(4)}% | 清算 24h/OI: ${(liq24hToOi*100).toFixed(4)}%`,
     "",
-    "## 4. OKX Cross-Check", "",
-    `- OKX OI unit: ${okx.okx_oi_unit || "?"}`,
-    `- OKX OI USD: ${okxOiUsd ? "$" + okxOiUsd.toLocaleString() : "UNKNOWN"}`,
-    `- OKX vs Global: ${okxVsGlobal ? (okxVsGlobal*100).toFixed(1) + "%" : "UNAVAILABLE (unit=" + okxRatioStatus + ")"}`,
-    `- OKX funding: ${okx.funding_rate?.toFixed(4) || "?"} (${((okx.funding_rate || 0)*100).toFixed(2)}%)`,
+    "## 4. OKX 对照", "",
+    `- OKX OI 单位: ${okx.okx_oi_unit || "?"}`,
+    `- OKX OI USD: ${okxOiUsd ? "$" + okxOiUsd.toLocaleString() : "未知"}`,
+    `- OKX 占全球 OI: ${okxVsGlobal ? (okxVsGlobal*100).toFixed(1) + "%" : "不可用 (单位=" + okxRatioStatus + ")"}`,
+    `- OKX 资金费率: ${okx.funding_rate?.toFixed(4) || "?"} (${((okx.funding_rate || 0)*100).toFixed(2)}%)`,
     "",
-    "## 5. DEX Context", "",
-    dex.ok ? "- Available" : "- DEX_DATA_INSUFFICIENT",
+    "## 5. DEX 上下文", "",
+    dex.ok ? "- 可用" : "- DEX 数据不可用",
     "",
-    "## 6. Risk State Evidence", "",
-    "| State | Status | Evidence | Confidence | Limitations |",
-    "|-------|--------|----------|------------|-------------|",
-    `| ${mainState.state} | MAIN | ${mainState.evidence.join("; ")} | ${mainState.confidence} | ${mainState.limitations.join("; ")} |`,
-    ...secondaryStates.map(s => `| ${s.state} | secondary | ${s.evidence.join("; ")} | ${s.confidence} | ${s.limitations.join("; ")} |`),
+    "## 6. 风险状态证据", "",
+    "| 状态 | 等级 | 证据 | 置信度 | 限制 |",
+    "|------|------|------|--------|------|",
+    `| ${mainState.state} | 主状态 | ${mainState.evidence.join("；")} | ${mainState.confidence} | ${mainState.limitations.join("；")} |`,
+    ...secondaryStates.map(s => `| ${s.state} | 次状态 | ${s.evidence.join("；")} | ${s.confidence} | ${s.limitations.join("；")} |`),
     "",
-    "## 7. Manual Review Checklist", "",
-    `- [ ] Multi-exchange OI同步: ${rOiChange24hExtreme ? "EXTREME (+" + (oiChange24hRatio*100).toFixed(0) + "%)" : "Normal"}`,
-    `- [ ] Funding极端: ${(cgl.funding_rate_percent || 0) >= 5 ? "YES (" + (cgl.funding_rate_percent || 0).toFixed(1) + "%)" : "NO"}`,
-    `- [ ] Liquidation放大: ${rLiqElevated24h ? "YES ($" + ((cgl.liquidation_volume_24h || 0)/1e6).toFixed(1) + "M)" : "NO"}`,
-    `- [ ] 价格推进效率下降: ${mainState.state === "LAB_EFFICIENCY_DECAY" ? "YES" : "UNCLEAR"}`,
-    `- [ ] OI开始下降: ${rOiDeclining24h ? "YES" : "NO (still rising)"}`,
-    `- [ ] 出现去杠杆: ${mainState.state === "LAB_DELEVERAGING_OBSERVED" ? "YES" : "NO"}`,
-    `- [ ] OKX确认: ${rOkxConfirm ? "YES" : "UNAVAILABLE"}`,
-    `- [ ] DEX确认: ${dex.ok ? "YES" : "NO"}`,
-    `- [ ] 数据完整: ${coreDq >= 0.7 ? "YES" : "NO"}`,
+    "## 7. 人工复核清单", "",
+    `- [ ] 多交易所 OI 同步: ${rOiChange24hExtreme ? "⚠️极端 (+" + (oiChange24hRatio*100).toFixed(0) + "%)" : "正常"}`,
+    `- [ ] 资金费率极端: ${(cgl.funding_rate_percent || 0) >= 5 ? "⚠️是 (" + (cgl.funding_rate_percent || 0).toFixed(1) + "%)" : "否"}`,
+    `- [ ] 清算放大: ${rLiqElevated24h ? "⚠️是 ($" + ((cgl.liquidation_volume_24h || 0)/1e6).toFixed(1) + "M)" : "否"}`,
+    `- [ ] 价格推进效率下降: ${mainState.state === "LAB_EFFICIENCY_DECAY" ? "⚠️是" : "不明确"}`,
+    `- [ ] OI 开始下降: ${rOiDeclining24h ? "⚠️是" : "否（仍在上升）"}`,
+    `- [ ] 出现去杠杆: ${mainState.state.includes("DELEVERAGING") ? "⚠️是" : "否"}`,
+    `- [ ] OKX 确认: ${rOkxConfirm ? "是" : "不可用"}`,
+    `- [ ] DEX 确认: ${dex.ok ? "是" : "否"}`,
+    `- [ ] 数据完整: ${coreDq >= 0.7 ? "是" : "否"}`,
     "",
-    "## 8. What We Cannot Know", "",
-    "- Cannot confirm accumulation",
-    "- Cannot confirm distribution",
-    "- Cannot confirm directional entry",
-    "- Cannot infer buy/sell intent",
-    "- No trading recommendation",
+    "## 8. 无法确认的事项", "",
+    "- 无法确认吸筹",
+    "- 无法确认出货",
+    "- 无法确认方向性入场",
+    "- 无法推断买卖意图",
+    "- 不构成交易建议",
   ];
 
   writeFileSync(join(REPORTS_DIR, "lab_live_monitor_report.md"), reportLines.join("\n"));
