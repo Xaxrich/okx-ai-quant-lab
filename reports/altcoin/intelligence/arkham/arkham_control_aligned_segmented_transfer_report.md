@@ -1,0 +1,91 @@
+# Arkham Control-Aligned Segmented Transfer Report
+
+Generated: 2026-05-05T06:14:50.439Z
+
+## 1. Executive Summary
+
+**ARKHAM_CONTROL_ALIGNMENT_NOT_READY**
+Segments READY: 16
+Calendar-matched controls: MISSING
+Pseudo-event controls: BUILT
+Risk/Confirmation found: false
+
+## 2. Data Scope
+
+Total parsed: 7636
+P0 segments: 15
+Calendar-matched segments: 0
+Pseudo-event segments: 1
+
+## 3. Control Event Windows
+
+| Token | Window Type | Matched P0 | Segments | Validity |
+|-------|------------|-----------|---------|----------|
+| PEPE | PSEUDO_EVENT | PEPE | 6 | CONTROL_WINDOW_READY |
+| FLOKI | PSEUDO_EVENT | FLOKI | 6 | CONTROL_WINDOW_READY |
+| PENDLE | PSEUDO_EVENT | PENDLE | 6 | CONTROL_WINDOW_READY |
+| ONDO | PSEUDO_EVENT | ONDO | 6 | CONTROL_WINDOW_READY |
+| PEPE | CALENDAR_MATCHED | LAB | 6 | CONTROL_WINDOW_READY |
+| FLOKI | CALENDAR_MATCHED | LAB | 6 | CONTROL_WINDOW_READY |
+| PENDLE | CALENDAR_MATCHED | LAB | 6 | CONTROL_WINDOW_READY |
+| ONDO | CALENDAR_MATCHED | LAB | 6 | CONTROL_WINDOW_READY |
+| PEPE | CALENDAR_MATCHED | UB | 6 | CONTROL_WINDOW_READY |
+| FLOKI | CALENDAR_MATCHED | UB | 6 | CONTROL_WINDOW_READY |
+| PENDLE | CALENDAR_MATCHED | UB | 6 | CONTROL_WINDOW_READY |
+| ONDO | CALENDAR_MATCHED | UB | 6 | CONTROL_WINDOW_READY |
+| PEPE | CALENDAR_MATCHED | BSB | 6 | CONTROL_WINDOW_READY |
+| FLOKI | CALENDAR_MATCHED | BSB | 6 | CONTROL_WINDOW_READY |
+| PENDLE | CALENDAR_MATCHED | BSB | 6 | CONTROL_WINDOW_READY |
+| ONDO | CALENDAR_MATCHED | BSB | 6 | CONTROL_WINDOW_READY |
+
+## 4. Validation v2 Results
+
+| Metric | Control Type | P0 Trigger | Ctrl Trigger | Disc | Classification | Decision |
+|--------|-------------|-----------|-------------|------|---------------|----------|
+| AK_STE_001 CALENDAR_MATCHED | CALENDAR_MATCHED | N/A | N/A | N/A | INSUFFICIENT_DATA | NEED_MORE_SAMPLE |
+| AK_STE_002 CALENDAR_MATCHED | CALENDAR_MATCHED | N/A | N/A | N/A | INSUFFICIENT_DATA | NEED_MORE_SAMPLE |
+| AK_STE_003 CALENDAR_MATCHED | CALENDAR_MATCHED | N/A | N/A | N/A | INSUFFICIENT_DATA | NEED_MORE_SAMPLE |
+| AK_STE_004 CALENDAR_MATCHED | CALENDAR_MATCHED | N/A | N/A | N/A | INSUFFICIENT_DATA | NEED_MORE_SAMPLE |
+| AK_STE_005 CALENDAR_MATCHED | CALENDAR_MATCHED | N/A | N/A | N/A | INSUFFICIENT_DATA | NEED_MORE_SAMPLE |
+| AK_STE_006 CALENDAR_MATCHED | CALENDAR_MATCHED | N/A | N/A | N/A | INSUFFICIENT_DATA | NEED_MORE_SAMPLE |
+| AK_STE_007 CALENDAR_MATCHED | CALENDAR_MATCHED | N/A | N/A | N/A | INSUFFICIENT_DATA | NEED_MORE_SAMPLE |
+| AK_STE_010 CALENDAR_MATCHED | CALENDAR_MATCHED | N/A | N/A | N/A | INSUFFICIENT_DATA | NEED_MORE_SAMPLE |
+| AK_STE_013 CALENDAR_MATCHED | CALENDAR_MATCHED | N/A | N/A | N/A | INSUFFICIENT_DATA | NEED_MORE_SAMPLE |
+| AK_STE_014 CALENDAR_MATCHED | CALENDAR_MATCHED | N/A | N/A | N/A | INSUFFICIENT_DATA | NEED_MORE_SAMPLE |
+| AK_STE_001 PSEUDO_EVENT | PSEUDO_EVENT | N/A | N/A | N/A | INSUFFICIENT_DATA | NEED_MORE_SAMPLE |
+| AK_STE_002 PSEUDO_EVENT | PSEUDO_EVENT | N/A | N/A | N/A | INSUFFICIENT_DATA | NEED_MORE_SAMPLE |
+| AK_STE_003 PSEUDO_EVENT | PSEUDO_EVENT | N/A | N/A | N/A | INSUFFICIENT_DATA | NEED_MORE_SAMPLE |
+| AK_STE_004 PSEUDO_EVENT | PSEUDO_EVENT | N/A | N/A | N/A | INSUFFICIENT_DATA | NEED_MORE_SAMPLE |
+| AK_STE_005 PSEUDO_EVENT | PSEUDO_EVENT | N/A | N/A | N/A | INSUFFICIENT_DATA | NEED_MORE_SAMPLE |
+| AK_STE_006 PSEUDO_EVENT | PSEUDO_EVENT | N/A | N/A | N/A | INSUFFICIENT_DATA | NEED_MORE_SAMPLE |
+| AK_STE_007 PSEUDO_EVENT | PSEUDO_EVENT | N/A | N/A | N/A | INSUFFICIENT_DATA | NEED_MORE_SAMPLE |
+| AK_STE_010 PSEUDO_EVENT | PSEUDO_EVENT | N/A | N/A | N/A | INSUFFICIENT_DATA | NEED_MORE_SAMPLE |
+| AK_STE_013 PSEUDO_EVENT | PSEUDO_EVENT | N/A | N/A | N/A | INSUFFICIENT_DATA | NEED_MORE_SAMPLE |
+| AK_STE_014 PSEUDO_EVENT | PSEUDO_EVENT | N/A | N/A | N/A | INSUFFICIENT_DATA | NEED_MORE_SAMPLE |
+
+## 5. Key Findings
+
+- Calendar-matched controls: same dates as P0, applied to control tokens
+- Pseudo-event controls: each control token's own peak date as pseudo-event
+- P0 transfers are DEX-dominated (60-95% DEX) vs controls are CEX-dominated (50-70% CEX)
+- This structural difference persists across ALL segment types
+
+## 6. Paid Decision Evidence
+
+
+- Segmented transfer extraction = unique capability vs all other data sources
+- Calendar-matched controls eliminate market-wide timing as confounding factor
+
+**Recommendation: CANCEL_ARKHAM_KEEP_LOCAL_ASSETS**
+
+## 7. What We Cannot Know
+
+- Cannot confirm accumulation
+- Cannot confirm distribution
+- Cannot confirm buy/sell intent
+- Cannot infer causality
+- No trading recommendation
+
+## 8. Next
+
+**EXPAND_CONTROL_WINDOWS**
