@@ -1,0 +1,79 @@
+{
+  "passed": true,
+  "failed_checks": [],
+  "checks": [
+    {
+      "name": "market_phase_not_range_when_reset_exists",
+      "passed": true,
+      "expected": "not RANGE_EQUILIBRIUM",
+      "actual": "OVERHEATED_RESET_REACCELERATION"
+    },
+    {
+      "name": "strongest_evidence_is_structural_chain",
+      "passed": true,
+      "expected": "contains structural chain",
+      "actual": "清算从峰值 $2.1M 回落后，价格与OI同步恢复——上一轮去杠杆压力阶段性消化，市场进入重置后的再加速观察；但fund"
+    },
+    {
+      "name": "strongest_evidence_mentions_price_oi_recovery",
+      "passed": true,
+      "expected": "mentions price+OI recovery",
+      "actual": "清算从峰值 $2.1M 回落后，价格与OI同步恢复——上一轮去杠杆压力阶段性消化，市场进入重置后的再加速观察；但fund"
+    },
+    {
+      "name": "strongest_evidence_not_static_score_compare",
+      "passed": true,
+      "expected": "not static score comparison",
+      "actual": "清算从峰值 $2.1M 回落后，价格与OI同步恢复——上一轮去杠杆压力阶段性消化"
+    },
+    {
+      "name": "invalidation_has_three_layers",
+      "passed": true,
+      "expected": "3 conditions",
+      "actual": "3"
+    },
+    {
+      "name": "top_case_cluster_present",
+      "passed": true,
+      "expected": "top_case_cluster if reset exists",
+      "actual": "LIQUIDATION_RESET_REBOUND"
+    },
+    {
+      "name": "top_case_cluster_is_reset_rebound",
+      "passed": true,
+      "expected": "LIQUIDATION_RESET_REBOUND",
+      "actual": "LIQUIDATION_RESET_REBOUND"
+    },
+    {
+      "name": "case_insight_present",
+      "passed": true,
+      "expected": "case_insight when reset exists",
+      "actual": "present"
+    },
+    {
+      "name": "push_grade_present",
+      "passed": true,
+      "expected": "PREVIEW_OK or DECISION_GRADE_NOT_READY",
+      "actual": "PREVIEW_OK"
+    },
+    {
+      "name": "no_false_healthy_trend_label",
+      "passed": true,
+      "expected": "no affirmative healthy trend claim",
+      "actual": "mentions but check negation"
+    },
+    {
+      "name": "sample_limitations_present",
+      "passed": true,
+      "expected": "sample limitations stated",
+      "actual": "快照29条|聚类8个|有效路径8/8|单日单币统计置信度有限"
+    },
+    {
+      "name": "forbidden_terms_absent",
+      "passed": true,
+      "expected": "no forbidden terms",
+      "actual": "ok"
+    }
+  ],
+  "ts": "2026-05-05T13:55:20.978Z"
+}

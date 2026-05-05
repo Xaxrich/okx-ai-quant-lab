@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-05T13:33:30.989Z",
+  "timestamp": "2026-05-05T13:55:20.977Z",
   "market_phase": "OVERHEATED_RESET_REACCELERATION",
   "previous_market_phase": "TREND_REACCELERATION",
   "latest_cluster": {
@@ -11,11 +11,19 @@
     "type": "TREND_REACCELERATION",
     "ts": "12:50:17"
   },
+  "top_case_cluster": {
+    "type": "LIQUIDATION_RESET_REBOUND",
+    "ts": "12:05:16",
+    "evidence": "funding 14.5→8.9%; liq $2097→$24K; price 2.35→2.34 OI -$1.7M; 60→35",
+    "statistical_confidence": "LOW",
+    "case_importance": "HIGH",
+    "role": "KEY_STRUCTURAL_TURNING_POINT"
+  },
   "trend_continuation_score": 60,
   "reversal_risk_score": 15,
   "squeeze_rebound_score": 30,
   "data_confidence_score": 80,
-  "strongest_evidence": "趋势(60)>反转(15)——价格和OI仍在上升",
+  "strongest_evidence": "清算从峰值 $2.1M 回落后，价格与OI同步恢复——上一轮去杠杆压力阶段性消化，市场进入重置后的再加速观察；但funding仍处高位(8.2%)，衍生品拥挤未完全解除",
   "weakest_evidence": "反转风险没有继续强化：清算未重新放大，OI未连续转负；但funding仍高于正常区间，不能把当前恢复视为健康趋势",
   "main_scenario": "OVERHEATED_RESET_REACCELERATION",
   "alternative_scenario": "反转风险",
