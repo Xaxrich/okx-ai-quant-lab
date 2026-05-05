@@ -17,9 +17,16 @@ function analyze(readings: any[], cgHistory: any, fwData: any): string {
   if (r.length < 2) return "数据不足，无法分析。";
 
   const cur = r[r.length - 1], prev = r[r.length - 2], prev2 = r.length >= 3 ? r[r.length - 3] : null;
-  const dataTime = cur.ts || "?";
+  // UTC → 北京时间 (UTC+8)
+  const utcTime = cur.ts || "?";
+  let bjTime = utcTime;
+  if (utcTime.includes(":")) {
+    const [h, m, s] = utcTime.split(":");
+    const bjH = (parseInt(h) + 8) % 24;
+    bjTime = `${String(bjH).padStart(2, "0")}:${m}:${s}`;
+  }
   const lines: string[] = [];
-  lines.push(`数据时间: ${dataTime} (UTC)`);
+  lines.push(`数据时间: ${bjTime} (北京时间)`);
   let urgency = 0;
 
   // ── 1. 资金费率分析 ──
