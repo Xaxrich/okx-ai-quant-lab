@@ -1,0 +1,7 @@
+candidate_id,candidate_name,formula,involved_metrics,expected_timing,p0_trigger,ctrl_trigger,discrimination_ratio,classification,decision,limitations
+HVT_001,low_labeled_holder_high_transfer_vol,HVT_001,holder+transfer,structural/risk,0,0,1.0,NOISE,REJECT_NOISE,
+HVT_002,high_unknown_holder_high_transfer_vol,HVT_002,holder+transfer,structural/risk,0,0,1.0,NOISE,REJECT_NOISE,
+HVT_003,holder_concentration_cex_transfer_spike,HVT_003,holder+transfer,structural/risk,0,0,1.0,NOISE,REJECT_NOISE,
+HVT_004,low_entity_coverage_transfer_vol_zscore,HVT_004,holder+transfer,structural/risk,0,0,1.0,NOISE,REJECT_NOISE,
+HVT_005,cex_proxy_netflow_extreme,HVT_005,holder+transfer,structural/risk,0,0,1.0,NOISE,REJECT_NOISE,
+HVT_006,fund_or_mm_transfer_active,HVT_006,holder+transfer,structural/risk,3,2,1.5,NOISE,REJECT_NOISE,

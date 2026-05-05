@@ -1,0 +1,25 @@
+token,sample_group,metric,T_minus_30,T_minus_14,T_minus_7,T_minus_3,T_minus_1,T0,T_plus_1,T_plus_3,T_plus_7,near_peak,post_peak,limitations
+LAB,P0,transfer_count,,,,,,100,,,,100,,short history
+LAB,P0,transfer_volume_usd,,,,,,7525.85059146675,,,,7525.85059146675,,short history
+LAB,P0,labeled_transfer_ratio,,,,,,0.920,,,,0.920,,short history
+LAB,P0,cex_proxy_transfer_count,,,,,,12,,,,12,,short history
+LAB,P0,cex_proxy_netflow_usd,,,,,,166.92,,,,166.92,,short history
+LAB,P0,dex_proxy_transfer_count,,,,,,79,,,,79,,short history
+LAB,P0,unknown_transfer_ratio,,,,,,0.080,,,,0.080,,short history
+LAB,P0,transfer_volume_zscore_7d,,,,,,,,,,,,short history
+BSB,P0,transfer_count,,,,,,100,,,,100,,short history
+BSB,P0,transfer_volume_usd,,,,,,28180.37522313619,,,,28180.37522313619,,short history
+BSB,P0,labeled_transfer_ratio,,,,,,0.700,,,,0.700,,short history
+BSB,P0,cex_proxy_transfer_count,,,,,,16,,,,16,,short history
+BSB,P0,cex_proxy_netflow_usd,,,,,,-5829.82,,,,-5829.82,,short history
+BSB,P0,dex_proxy_transfer_count,,,,,,42,,,,42,,short history
+BSB,P0,unknown_transfer_ratio,,,,,,0.300,,,,0.300,,short history
+BSB,P0,transfer_volume_zscore_7d,,,,,,,,,,,,short history
+UB,P0,transfer_count,,,,,,100,,,,100,,short history
+UB,P0,transfer_volume_usd,,,,,,23961.546972104028,,,,23961.546972104028,,short history
+UB,P0,labeled_transfer_ratio,,,,,,0.980,,,,0.980,,short history
+UB,P0,cex_proxy_transfer_count,,,,,,,,,,,,short history
+UB,P0,cex_proxy_netflow_usd,,,,,,0.00,,,,0.00,,short history
+UB,P0,dex_proxy_transfer_count,,,,,,98,,,,98,,short history
+UB,P0,unknown_transfer_ratio,,,,,,0.020,,,,0.020,,short history
+UB,P0,transfer_volume_zscore_7d,,,,,,,,,,,,short history

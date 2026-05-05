@@ -1,0 +1,8 @@
+token,sample_group,request_status,rows_returned,rows_with_from_entity,rows_with_to_entity,rows_with_any_entity,rows_with_historical_usd,rows_with_unit_value,entity_coverage,amount_coverage,parse_errors,transfer_entity_readiness,limitations
+LAB,P0,OK,100,38,69,92,100,100,92.0%,100.0%,0,ARKHAM_TRANSFER_ENTITY_READY,
+BSB,P0,OK,100,43,46,70,100,100,70.0%,100.0%,0,ARKHAM_TRANSFER_ENTITY_READY,
+UB,P0,OK,100,65,33,98,100,100,98.0%,100.0%,0,ARKHAM_TRANSFER_ENTITY_READY,
+PEPE,CONTROL,OK,100,49,41,79,100,100,79.0%,100.0%,0,ARKHAM_TRANSFER_ENTITY_READY,
+FLOKI,CONTROL,OK,100,2,99,100,100,100,100.0%,100.0%,0,ARKHAM_TRANSFER_ENTITY_READY,
+PENDLE,P2,OK,100,41,54,84,100,100,84.0%,100.0%,0,ARKHAM_TRANSFER_ENTITY_READY,
+ONDO,P2,OK,100,51,55,86,100,100,86.0%,100.0%,0,ARKHAM_TRANSFER_ENTITY_READY,

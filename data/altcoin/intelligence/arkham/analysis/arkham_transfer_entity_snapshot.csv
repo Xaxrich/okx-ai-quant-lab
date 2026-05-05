@@ -1,0 +1,8 @@
+token,sample_group,total_transfers,cex_proxy_pct,dex_proxy_pct,fund_pct,mm_pct,unknown_pct,labeled_pct,top_entity_name,top_entity_pct,top_entity_type,second_entity_name,source_channel
+LAB,P0,100,12.0%,79.0%,0.0%,0.0%,8.0%,92.0%,Uniswap,56,dex,PancakeSwap,ARKHAM_CHANNEL
+BSB,P0,100,16.0%,42.0%,0.0%,0.0%,30.0%,70.0%,0x,28,dex,Uniswap,ARKHAM_CHANNEL
+UB,P0,100,0.0%,98.0%,0.0%,0.0%,2.0%,98.0%,PancakeSwap,85,dex,Uniswap,ARKHAM_CHANNEL
+PEPE,CONTROL,100,47.0%,25.0%,0.0%,1.0%,21.0%,79.0%,Uniswap,20,dex,Binance,ARKHAM_CHANNEL
+FLOKI,CONTROL,100,98.0%,1.0%,0.0%,0.0%,0.0%,100.0%,Coinbase,99,cex,Uniswap,ARKHAM_CHANNEL
+PENDLE,P2,100,11.0%,56.0%,0.0%,0.0%,16.0%,84.0%,Uniswap,40,dex,Kyber Network,ARKHAM_CHANNEL
+ONDO,P2,100,55.0%,27.0%,0.0%,1.0%,14.0%,86.0%,Upbit,44,cex,Uniswap,ARKHAM_CHANNEL

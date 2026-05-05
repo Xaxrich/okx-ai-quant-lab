@@ -1,0 +1,8 @@
+token,sample_group,date,transfer_count,transfer_volume_usd,labeled_transfer_count,labeled_transfer_ratio,unknown_transfer_count,unknown_transfer_ratio,cex_proxy_transfer_count,cex_proxy_transfer_volume_usd,cex_proxy_netflow_usd,to_cex_proxy_count,to_cex_proxy_volume_usd,from_cex_proxy_count,from_cex_proxy_volume_usd,dex_proxy_transfer_count,dex_proxy_transfer_volume_usd,fund_or_institution_transfer_count,fund_or_institution_transfer_volume_usd,market_maker_proxy_transfer_count,market_maker_proxy_transfer_volume_usd,top_entity_transfer_share,entity_transfer_concentration,transfer_volume_zscore_7d,cex_proxy_volume_zscore_7d,unknown_transfer_ratio_zscore_7d,transfer_entity_status
+LAB,P0,2026-05-05,100,7525.85059146675,92,0.920,8,0.080,12,2523.4571402388196,166.92,7,1345.19,5,1178.27,79,4335.00,0,0.00,0,0.00,0.429,0.3470,,,,OK
+BSB,P0,2026-05-05,100,28180.37522313619,70,0.700,30,0.300,16,15101.032373671356,-5829.82,14,4635.61,2,10465.43,42,1589.29,0,0.00,0,0.00,0.881,0.7823,,,,OK
+UB,P0,2026-05-05,100,23961.546972104028,98,0.980,2,0.020,0,0,0.00,0,0.00,0,0.00,98,23623.05,0,0.00,0,0.00,0.977,0.9542,,,,OK
+PEPE,CONTROL,2026-05-05,100,461360.4224942419,79,0.790,21,0.210,47,337769.2880873309,-110771.85,18,113498.72,29,224270.57,25,28864.35,0,0.00,1,43344.18,0.326,0.1856,,,,OK
+FLOKI,CONTROL,2026-05-05,100,14558.559394115275,100,1.000,0,0.000,98,14484.537332735674,14484.54,98,14484.54,0,0.00,1,8.98,0,0.00,0,0.00,0.995,0.9899,,,,OK
+PENDLE,P2,2026-05-05,100,348223.5737873167,84,0.840,16,0.160,11,228970.81044137356,38235.34,7,133603.08,4,95367.73,56,110786.54,0,0.00,0,0.00,0.298,0.2188,,,,OK
+ONDO,P2,2026-05-05,100,1641423.1320725714,86,0.860,14,0.140,55,1482732.9481217589,816584.79,29,1149658.87,26,333074.08,27,68140.89,0,0.00,1,84863.39,0.808,0.6580,,,,OK
