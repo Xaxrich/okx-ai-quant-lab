@@ -54,6 +54,7 @@
     "intelligence:no-arkham:discovery": "tsx src/altcoin/intelligence/no_arkham/no_arkham_discovery_loop.ts",
     "intelligence:lab:live-monitor": "tsx src/altcoin/intelligence/lab/lab_live_monitor.ts",
     "intelligence:lab:fast-watch": "tsx src/altcoin/intelligence/lab/lab_fast_watch.ts",
+    "intelligence:lab:ai-analysis": "tsx src/altcoin/intelligence/lab/lab_ai_analysis_loop.ts",
     "intelligence:lab:deep-insight": "tsx src/altcoin/intelligence/lab/lab_deep_insight.ts",
     "intelligence:lab:push-feishu": "tsx src/altcoin/intelligence/lab/lab_feishu_push.ts",
     "feishu:test-send": "tsx src/integrations/feishu/feishu_test_send.ts",
