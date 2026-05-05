@@ -13,114 +13,134 @@ function fmt(n:number,d=0):string{return n.toLocaleString(undefined,{minimumFrac
 function pct(n:number):string{return (n>=0?"+":"")+n.toFixed(1)+"%";}
 
 function analyze(readings: any[], cgHistory: any, fwData: any): string {
-  const r = readings; // array of {ts,price,oi,oi4h,fund,liq,score,state}
-  if (r.length < 2) return "数据不足，无法分析。";
+  const r = readings;
+  if (r.length < 2) return "数据不足。";
 
-  const cur = r[r.length - 1], prev = r[r.length - 2], prev2 = r.length >= 3 ? r[r.length - 3] : null;
-  // UTC → 北京时间 (UTC+8)
+  const cur = r[r.length - 1], first = r[0];
   const utcTime = cur.ts || "?";
   let bjTime = utcTime;
-  if (utcTime.includes(":")) {
-    const [h, m, s] = utcTime.split(":");
-    const bjH = (parseInt(h) + 8) % 24;
-    bjTime = `${String(bjH).padStart(2, "0")}:${m}:${s}`;
-  }
+  if (utcTime.includes(":")) { const [h, m, s] = utcTime.split(":"); bjTime = `${String((parseInt(h) + 8) % 24).padStart(2, "0")}:${m}:${s}`; }
+
+  // ── 计算全序列趋势（不是只看前1-2条）──
+  const allOI = r.map((x: any) => x.oi).filter((v: number) => v > 0);
+  const allFund = r.map((x: any) => x.fund).filter((v: number) => v > 0);
+  const allLiq = r.map((x: any) => x.liq);
+  const allPrice = r.map((x: any) => x.price).filter((v: number) => v > 0);
+  const allScore = r.map((x: any) => x.score);
+
+  // 极值
+  const maxOI = Math.max(...allOI), minOI = Math.min(...allOI);
+  const maxFund = Math.max(...allFund), minFund = Math.min(...allFund);
+  const maxLiq = Math.max(...allLiq), maxPrice = Math.max(...allPrice);
+  const maxScore = Math.max(...allScore);
+
+  // 趋势：比较前半段 vs 后半段
+  const half = Math.floor(r.length / 2);
+  const firstHalfOI = allOI.slice(0, half), secondHalfOI = allOI.slice(half);
+  const firstHalfFund = allFund.slice(0, half), secondHalfFund = allFund.slice(half);
+  const avgFirstOI = firstHalfOI.reduce((a: number, b: number) => a + b, 0) / firstHalfOI.length;
+  const avgSecondOI = secondHalfOI.reduce((a: number, b: number) => a + b, 0) / secondHalfOI.length;
+  const avgFirstFund = firstHalfFund.reduce((a: number, b: number) => a + b, 0) / firstHalfFund.length;
+  const avgSecondFund = secondHalfFund.reduce((a: number, b: number) => a + b, 0) / secondHalfFund.length;
+
+  const oiTrendDir = avgSecondOI > avgFirstOI * 1.02 ? "上升" : avgSecondOI < avgFirstOI * 0.98 ? "下降" : "持平";
+  const fundTrendDir = avgSecondFund > avgFirstFund * 1.1 ? "上升" : avgSecondFund < avgFirstFund * 0.9 ? "下降" : "持平";
+
+  // 近3次方向
+  const recent3 = r.slice(-3);
+  const oiDirs = recent3.slice(1).map((x: any, i: number) => x.oi - recent3[i].oi);
+  const oiStreakUp = oiDirs.filter((d: number) => d > 0).length;
+  const oiStreakDown = oiDirs.filter((d: number) => d < 0).length;
+  const fundDirs = recent3.slice(1).map((x: any, i: number) => x.fund - recent3[i].fund);
+  const fundStreakUp = fundDirs.filter((d: number) => d > 0).length;
+  const fundStreakDown = fundDirs.filter((d: number) => d < 0).length;
+
+  // ── 构建分析 ──
   const lines: string[] = [];
-  lines.push(`数据时间: ${bjTime} (北京时间)`);
-  let urgency = 0;
+  lines.push(`数据时间: ${bjTime} (北京时间) | 共${r.length}次读数`);
 
-  // ── 1. 资金费率分析 ──
-  const fundLines: string[] = [];
-  const fundFlat = prev2 && Math.abs(cur.fund - prev.fund) < 0.05 && Math.abs(prev.fund - prev2.fund) < 0.05;
-  const fundBreaking = !fundFlat && prev2 && Math.abs(prev.fund - prev2.fund) < 0.1 && Math.abs(cur.fund - prev.fund) > 0.3;
+  // 1. 数据说了什么（事实，非模板）
+  const facts: string[] = [];
 
-  if (fundBreaking) {
-    const direction=cur.fund>prev2.fund?"上行":"下行";
-    fundLines.push(`资金费率破了平台：${prev2.fund.toFixed(2)}% → ${prev.fund.toFixed(2)}% → ${cur.fund.toFixed(2)}%。连续3次卡在同一水平后突然${direction}——市场均衡被打破。`);
-    urgency += 2;
-  } else if (cur.fund > prev.fund + 0.5) {
-    fundLines.push(`资金费率继续上升：${prev.fund.toFixed(2)}% → ${cur.fund.toFixed(2)}%（+${(cur.fund-prev.fund).toFixed(2)}%）。多头仍在加价争夺对手方。`);
-    urgency += 1;
-  } else if (Math.abs(cur.fund - prev.fund) < 0.1) {
-    fundLines.push(`资金费率持平在 ${cur.fund.toFixed(2)}%。市场在当前位置暂时均衡。`);
-  } else {
-    fundLines.push(`资金费率回落：${prev.fund.toFixed(2)}% → ${cur.fund.toFixed(2)}%。`);
-    urgency -= 1;
-  }
+  // OI 事实
+  const oiFromPeak = maxOI > 0 ? (cur.oi - maxOI) / maxOI * 100 : 0;
+  const oiRange = maxOI - minOI;
+  if (cur.oi === maxOI) facts.push(`OI 处于监控周期最高点 $${(cur.oi/1e6).toFixed(0)}M`);
+  else if (oiFromPeak < -10) facts.push(`OI 已从峰值 $${(maxOI/1e6).toFixed(0)}M 累计回落 ${Math.abs(oiFromPeak).toFixed(0)}%，当前 $${(cur.oi/1e6).toFixed(0)}M`);
+  else if (oiFromPeak < -3) facts.push(`OI 较峰值 $${(maxOI/1e6).toFixed(0)}M 回落 ${Math.abs(oiFromPeak).toFixed(0)}%`);
+  else facts.push(`OI 接近峰值 $${(cur.oi/1e6).toFixed(0)}M`);
 
-  if (cur.fund > 15) { fundLines.push(`当前 ${cur.fund.toFixed(2)}% 处于极端区域——多头为维持仓位付出的年化成本极高。这不是做空信号，但一旦买盘枯竭，持仓成本将迅速驱动平仓。`); urgency += 1; }
+  if (oiStreakDown === 2) facts.push(`OI 连续 ${oiStreakDown + 1} 次下降`);
+  else if (oiStreakUp === 2) facts.push(`OI 连续 ${oiStreakUp + 1} 次上升`);
 
-  lines.push(...fundLines);
+  // 资金费率事实
+  if (cur.fund === maxFund) facts.push(`资金费率处于监控周期最高 ${cur.fund.toFixed(2)}%`);
+  else if (maxFund > 15 && cur.fund < maxFund * 0.6) facts.push(`资金费率已从峰值 ${maxFund.toFixed(1)}% 大幅回落至 ${cur.fund.toFixed(2)}%`);
+  else if (cur.fund > 10) facts.push(`资金费率 ${cur.fund.toFixed(2)}% 仍偏高`);
+  else facts.push(`资金费率 ${cur.fund.toFixed(2)}% 处于中等水平`);
 
-  // ── 2. 清算分析 ──
-  const liqCrossing1M = prev.liq < 1e6 && cur.liq >= 1e6;
-  const liqSpiking = prev.liq > 0 && cur.liq > prev.liq * 1.5;
+  if (fundStreakDown === 2) facts.push(`资金费率连续 ${fundStreakDown + 1} 次下降`);
+  else if (fundStreakUp === 2) facts.push(`资金费率连续 ${fundStreakUp + 1} 次上升`);
 
-  if (liqCrossing1M) {
-    lines.push(`\n清算首次突破 $1M 告警线：$${fmt(prev.liq/1e3,0)}K → $${fmt(cur.liq/1e3,0)}K。这不是偶然——它与资金费率破平台同时发生。杠杆开始出现裂缝。`);
-    urgency += 3;
-  } else if (liqSpiking) {
-    lines.push(`\n清算急剧放大：$${fmt(prev.liq/1e3,0)}K → $${fmt(cur.liq/1e3,0)}K（${pct((cur.liq-prev.liq)/prev.liq*100)}%）。加速值得警惕。`);
-    urgency += 2;
-  } else if (cur.liq > 5e5) {
-    lines.push(`\n清算 $${fmt(cur.liq/1e3,0)}K——仍在积累中，尚未触发系统性压力。`);
-  }
+  // 清算事实
+  if (cur.liq >= 1e6) facts.push(`清算 $${(cur.liq/1e6).toFixed(1)}M 处于高位`);
+  else if (maxLiq > 1e6 && cur.liq < maxLiq * 0.3) facts.push(`清算已从峰值 $${(maxLiq/1e6).toFixed(1)}M 大幅回落至 $${(cur.liq/1e3).toFixed(0)}K`);
+  else if (cur.liq > 5e5) facts.push(`清算 $${(cur.liq/1e3).toFixed(0)}K 处于中等水平`);
+  else facts.push(`清算 $${(cur.liq/1e3).toFixed(0)}K 处于低位`);
 
-  if (cur.liq > 0 && cur.oi > 0) {
-    const liqRatio = cur.liq / cur.oi * 100;
-    if (liqRatio > 0.005) {
-      lines.push(`清算/OI 比率 ${liqRatio.toFixed(4)}%——清算压力相对于 OI 规模在上升。`);
-      urgency += 1;
-    }
-  }
+  // 价格事实
+  const priceFromPeak = maxPrice > 0 ? (cur.price - maxPrice) / maxPrice * 100 : 0;
+  if (cur.price === maxPrice) facts.push(`价格处于监控周期最高 $${cur.price.toFixed(2)}`);
+  else if (priceFromPeak < -10) facts.push(`价格已从峰值 $${maxPrice.toFixed(2)} 回落 ${Math.abs(priceFromPeak).toFixed(0)}%`);
+  else if (priceFromPeak < -3) facts.push(`价格较峰值回落 ${Math.abs(priceFromPeak).toFixed(0)}%`);
 
-  // ── 3. OI 趋势 ──
-  const oiChg = cur.oi - prev.oi;
-  const oiStreak = (() => { let s = 0; for (let i = r.length - 1; i >= 1 && r[i].oi > r[i-1].oi; i--) s++; return s; })();
+  lines.push(`\n${facts.join("。")}。`);
 
-  if (oiStreak >= 3) {
-    lines.push(`\nOI 连续 ${oiStreak} 次上升——趋势未破，资金仍在涌入。当前 $${fmt(cur.oi/1e6,1)}M。`);
-  } else if (oiChg < 0) {
-    lines.push(`\n⚠️ OI 回落：$${fmt(Math.abs(oiChg)/1e6,1)}M。这是否是拐点——取决于下次读数是否继续下降。`);
-    urgency += 3;
-  }
+  // 2. 趋势判断（基于全序列，不是单点）
+  lines.push(`\n── 趋势 ──`);
+  lines.push(`OI 整体趋势: ${oiTrendDir}（前半段均值 $${(avgFirstOI/1e6).toFixed(0)}M → 后半段 $${(avgSecondOI/1e6).toFixed(0)}M）`);
+  lines.push(`资金费率整体: ${fundTrendDir}（${avgFirstFund.toFixed(2)}% → ${avgSecondFund.toFixed(2)}%）`);
 
-  // 历史位置
+  // 3. 与历史周期的关系（用真实数据，不用模板）
   if (cgHistory) {
-    const labOI = cgHistory.rows.filter((r: string[]) => r[0] === "LAB").map((r: string[]) => num(r, cgHistory.h, "oi_usd")).filter((v: number) => v > 0);
+    const labOI = cgHistory.rows.filter((r2: string[]) => r2[0] === "LAB").map((r2: string[]) => num(r2, cgHistory.h, "oi_usd")).filter((v: number) => v > 0);
     if (labOI.length > 0) {
       const oiMean = labOI.reduce((a: number, b: number) => a + b, 0) / labOI.length;
       const oiStd = Math.sqrt(labOI.reduce((s: number, v: number) => s + (v - oiMean) ** 2, 0) / labOI.length);
       const z = (cur.oi - oiMean) / oiStd;
-      const peakRow = cgHistory.rows.find((r: string[]) => r[0] === "LAB" && col(r, cgHistory.h, "date") >= "2026-05-02");
+      const peakRow = cgHistory.rows.find((r2: string[]) => r2[0] === "LAB" && col(r2, cgHistory.h, "date") >= "2026-05-02");
       const peakOI = peakRow ? num(peakRow, cgHistory.h, "oi_usd") : 0;
-      lines.push(`\n背景：OI 处于 90天均值 ${z.toFixed(1)}σ 之外${peakOI > 0 ? "，比5月2日前次崩盘前Peak ($" + fmt(peakOI/1e6,0) + "M)高出 " + pct((cur.oi-peakOI)/peakOI*100) : ""}。`);
+      const peakFund = peakRow ? num(peakRow, cgHistory.h, "funding_oi_w") : 0;
+      if (peakOI > 0) {
+        const oiVsPeak = (cur.oi - peakOI) / peakOI * 100;
+        const fundVsPeak = peakFund > 0 ? cur.fund - peakFund * 100 : 0;
+        lines.push(`\n── 与前次崩盘(5/2)对比 ──`);
+        lines.push(`前次 Peak: OI $${(peakOI/1e6).toFixed(0)}M, 资金 ${(peakFund*100).toFixed(1)}% → 随后2天跌82%`);
+        lines.push(`当前: OI $${(cur.oi/1e6).toFixed(0)}M (${oiVsPeak > 0 ? "高" : "低"}${Math.abs(oiVsPeak).toFixed(0)}%), 资金 ${cur.fund.toFixed(2)}% (${fundVsPeak > 0 ? "高" : "低"}${Math.abs(fundVsPeak).toFixed(1)}个百分点)`);
+        if (cur.oi > peakOI && cur.fund < peakFund * 100) {
+          lines.push(`→ 当前 OI 比前次更大，但资金费率更低——说明这次杠杆分布更均衡，或市场结构已变。`);
+        } else if (cur.oi < peakOI && cur.fund < peakFund * 100) {
+          lines.push(`→ OI 和资金费率均低于前次 Peak——去杠杆压力已明显缓解。`);
+        }
+      }
     }
   }
 
-  // ── 4. 综合判断 ──
-  lines.push(`\n── 综合判断 ──`);
-
-  if (urgency >= 5) {
-    lines.push(`风险升级中。资金费率破平台 + 清算突破告警线 + OI 高位运行——三重信号同时恶化。这不是逆势时机。关注接下来15分钟内OI是否转为下降、清算是否继续放大。`);
-    lines.push(`风险等级: 🔴 高风险`);
-  } else if (urgency >= 3) {
-    lines.push(`风险偏高但尚未质变。关注资金费率是否继续上行、清算是否突破下一级阈值。`);
-    lines.push(`风险等级: 🟠 警惕`);
-  } else if (urgency >= 1) {
-    lines.push(`结构稳定。市场在当前位置运行，无显著恶化信号。`);
-    lines.push(`风险等级: 🟡 观察`);
+  // 4. 最值得关注的一件事（不是三件事）
+  lines.push(`\n── 核心观察 ──`);
+  if (maxLiq > 2e6 && cur.liq < 5e5) {
+    lines.push(`清算已从 $${(maxLiq/1e6).toFixed(1)}M 的高位完全回落至 $${(cur.liq/1e3).toFixed(0)}K。强制平仓压力已解除。当前最大风险不是清算，是资金费率能否继续回落。`);
+  } else if (oiStreakDown >= 2 && cur.fund > 8) {
+    lines.push(`OI 在下降但资金费率仍偏高——这是"资金在撤但多头还没死心"的矛盾阶段。如果 OI 继续降，资金费率通常会跟随。如果 OI 反弹，说明新的资金在进场。`);
+  } else if (oiStreakUp >= 2 && cur.fund < 10) {
+    lines.push(`OI 和价格都在恢复，资金费率温和——这是去杠杆后最健康的恢复结构。前次崩盘(5/2)没有出现这种结构就直接跌了。`);
+  } else if (cur.fund > 15) {
+    lines.push(`资金费率 ${cur.fund.toFixed(1)}% 极度危险。历史上前次 LAB Peak 资金费率最高到 ${(maxFund).toFixed(1)}%。这不是做空信号，但每一次读数在这个水平都是不可持续的。`);
   } else {
-    lines.push(`风险消退中。`);
-    lines.push(`风险等级: 🟢 正常`);
+    lines.push(`市场处于相对均衡状态。OI ${oiTrendDir}，资金费率 ${fundTrendDir}，清算低位。没有单一指标出现极端值。`);
   }
 
-  lines.push(`\n接下来15分钟重点：`);
-  lines.push(`1. OI ${oiStreak >= 2 ? "仍在上升——关注何时首次持续回落" : "已回落——关注是否持续"}`);
-  lines.push(`2. 清算${cur.liq >= 1e6 ? "已破 $1M——关注是否加速" : "尚未破 $1M——关注何时突破"}`);
-  lines.push(`3. 资金费率${cur.fund > prev.fund ? "仍在上升——关注是否突破20%" : "已回落或持平"}`);
   lines.push(`\n不构成交易建议。无法推断方向性意图。`);
-
   return lines.join("\n");
 }
 
