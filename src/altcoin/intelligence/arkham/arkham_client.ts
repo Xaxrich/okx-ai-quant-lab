@@ -60,6 +60,15 @@ export async function arkhamGet(
     return base;
   }
 
+  // No-Arkham mode
+  if (process.env.NO_ARKHAM_MODE === "true") {
+    base.ok = false;
+    base.status = "ARKHAM_DISABLED_BY_NO_ARKHAM_MODE";
+    base.error = "Arkham API disabled — NO_ARKHAM_MODE=true";
+    base.limitations = ["No-Arkham mode active — use local cache/assets only"];
+    return base;
+  }
+
   // Trial guard
   const trial = checkTrialStatus();
   if (!trial.allowed) {

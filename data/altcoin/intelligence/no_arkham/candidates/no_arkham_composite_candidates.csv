@@ -1,0 +1,7 @@
+candidate_id,candidate_name,formula,metric_a_status,metric_b_status,combined_value,classification,limitations
+NC_001,price_quiet + OI_rising,Price quiet breakout + OI change 7d elevated,STRUCTURAL_RISK,NOISE,KEEP_AS_CANDIDATE,One metric promoted
+NC_002,volume_zscore + funding_neutral,Volume elevated + funding NOT overheated,STRUCTURAL_CONTEXT,STRUCTURAL_CONTEXT,STRUCTURAL_CONTEXT,One metric promoted
+NC_003,OI_rising + funding_not_overheated,OI rising 7d + funding z-score < 2,STRUCTURAL_CONTEXT,STRUCTURAL_CONTEXT,STRUCTURAL_CONTEXT,One metric promoted
+NC_004,funding_overheated + liquidation_risk,Funding extreme + liquidation volume elevated,STRUCTURAL_CONTEXT,STRUCTURAL_CONTEXT,KEEP_AS_CANDIDATE,One metric promoted
+NC_005,DEX_activity + OI_confirmation,DEX compression + OI z-score elevated,INSUFFICIENT_DATA,NOISE,NOISE,
+NC_006,volume_zscore + OI_zscore,Volume + OI both elevated,STRUCTURAL_CONTEXT,NOISE,KEEP_AS_CANDIDATE,One metric promoted
