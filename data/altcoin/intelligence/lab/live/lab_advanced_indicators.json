@@ -1,0 +1,18 @@
+{
+  "timestamp": "2026-05-05T14:24:35.880Z",
+  "price": 2.37,
+  "oi_total": 380582718.7535,
+  "oi_concentration_hhi": 0.17110561478276018,
+  "oi_top3_share": 0.6480818562631904,
+  "oi_growing_exchanges": 3,
+  "oi_shrinking_exchanges": 9,
+  "oi_acceleration": -8066106.604600012,
+  "oi_accel_trend": "减速",
+  "funding_oi_divergence": "NEUTRAL",
+  "price_oi_efficiency": 0.0038088854884892717,
+  "liq_up_total": 1213305.23,
+  "liq_down_total": 1713944.62,
+  "liq_bias": -0.17102721518629513,
+  "dex_volume_24h": 998753.039352295,
+  "dex_spread": 0.602936
+}

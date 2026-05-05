@@ -58,6 +58,7 @@
     "intelligence:lab:commander": "tsx src/altcoin/intelligence/lab/lab_intelligence_commander.ts",
     "intelligence:lab:commander-v2": "tsx src/altcoin/intelligence/lab/lab_intelligence_commander_v2.ts",
     "intelligence:lab:commander-all": "tsx src/altcoin/intelligence/lab/lab_intelligence_commander.ts && tsx src/altcoin/intelligence/lab/lab_intelligence_commander_v2.ts",
+    "intelligence:lab:advanced-indicators": "tsx src/altcoin/intelligence/lab/lab_advanced_indicators.ts",
     "intelligence:lab:deep-insight": "tsx src/altcoin/intelligence/lab/lab_deep_insight.ts",
     "intelligence:lab:push-feishu": "tsx src/altcoin/intelligence/lab/lab_feishu_push.ts",
     "feishu:test-send": "tsx src/integrations/feishu/feishu_test_send.ts",
