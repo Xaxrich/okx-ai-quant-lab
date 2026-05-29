@@ -2,6 +2,27 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync, appendFileSync } fr
 import { join } from "path";
 import { createHash } from "crypto";
 
+const ROOT = join(import.meta.dirname, "..", "..", "..", "..");
+
+function loadDotenvOnce(): void {
+  const envPath = join(ROOT, ".env");
+  if (!existsSync(envPath)) return;
+  for (const rawLine of readFileSync(envPath, "utf-8").split(/\r?\n/)) {
+    const line = rawLine.trim();
+    if (!line || line.startsWith("#")) continue;
+    const eqIndex = line.indexOf("=");
+    if (eqIndex <= 0) continue;
+    const name = line.slice(0, eqIndex).trim();
+    let value = line.slice(eqIndex + 1).trim();
+    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+      value = value.slice(1, -1);
+    }
+    if (name && !process.env[name]) process.env[name] = value;
+  }
+}
+
+loadDotenvOnce();
+
 const TRIAL_END = process.env.ARKHAM_TRIAL_END || "2026-06-03";
 const CANCEL_DECISION = process.env.ARKHAM_CANCEL_DECISION_DATE || "2026-06-01";
 const DISABLE_HEAVY = process.env.ARKHAM_DISABLE_HEAVY_AFTER || "2026-06-01";

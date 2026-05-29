@@ -1,5 +1,6 @@
 import { writeFileSync, mkdirSync, existsSync } from "fs";
 import { join } from "path";
+import { fetchCompatWithFallback as fetch } from "../../../utils/http.js";
 
 const MORALIS_KEY = process.env.MORALIS_API_KEY || "";
 const MORALIS_BASE = "https://deep-index.moralis.io/api/v2.2";

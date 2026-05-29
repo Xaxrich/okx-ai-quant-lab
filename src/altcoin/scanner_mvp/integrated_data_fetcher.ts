@@ -1,5 +1,6 @@
 import { writeFileSync, mkdirSync, existsSync } from "fs";
 import { join } from "path";
+import { fetchCompatWithFallback as fetch } from "../../utils/http.js";
 
 const DATA_DIR = join(import.meta.dirname, "..", "..", "..", "data", "altcoin", "scanner_validation_365d", "raw");
 const ETHERSCAN_KEY = process.env.ETHERSCAN_API_KEY || "";

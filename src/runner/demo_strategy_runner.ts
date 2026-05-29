@@ -560,7 +560,7 @@ async function main() {
   if (!existsSync(SIGNAL_JOURNAL_DIR)) mkdirSync(SIGNAL_JOURNAL_DIR, { recursive: true });
   const journalPath = join(SIGNAL_JOURNAL_DIR, "signal_journal.jsonl");
   for (const entry of allEntries) {
-    appendFileSync(journalPath, JSON.stringify(entry) + "\n");
+    appendFileSync(journalPath, JSON.stringify(entry) + "\n", "utf-8");
   }
   console.log(`  Written: ${allEntries.length} entries (complete, no truncation)`);
 
@@ -581,7 +581,7 @@ async function main() {
   if (!existsSync(REPORTS_DIR)) mkdirSync(REPORTS_DIR, { recursive: true });
   const report = generateReport(config, allEntries, summaries, instrumentSummaries, snapshots, regimes, ledger, pnlTracker, runId);
   const reportPath = join(REPORTS_DIR, `demo_strategy_runner_${new Date().toISOString().slice(0, 10).replace(/-/g, "")}.md`);
-  writeFileSync(reportPath, report);
+  writeFileSync(reportPath, report, "utf-8");
   console.log(`  Report: ${reportPath}`);
 
   // ── Final summary ──

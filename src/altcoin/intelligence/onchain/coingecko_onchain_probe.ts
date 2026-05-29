@@ -1,5 +1,6 @@
 import { writeFileSync, mkdirSync, existsSync } from "fs";
 import { join } from "path";
+import { fetchCompatWithFallback } from "../../../utils/http.js";
 
 const CG_KEY = process.env.COINGECKO_PRO_API_KEY || "";
 const CG_BASE = CG_KEY ? "https://pro-api.coingecko.com/api/v3" : "https://api.coingecko.com/api/v3";
@@ -43,7 +44,7 @@ async function probeCoinGeckoOnchain(token: typeof TOKENS[0]): Promise<OnchainPr
 
   // 1. Search pools by token
   try {
-    const poolR = await fetch(`${CG_BASE}/onchain/networks/${netId}/tokens/${token.contract}/pools`, { headers: HEADERS });
+    const poolR = await fetchCompatWithFallback(`${CG_BASE}/onchain/networks/${netId}/tokens/${token.contract}/pools`, { headers: HEADERS });
     if (poolR.ok) {
       const poolD = await poolR.json() as any;
       const pools = poolD.data || [];
@@ -57,7 +58,7 @@ async function probeCoinGeckoOnchain(token: typeof TOKENS[0]): Promise<OnchainPr
   // 2. Pool OHLCV (day)
   if (result.primaryPoolAddress) {
     try {
-      const ohlcvR = await fetch(`${CG_BASE}/onchain/networks/${netId}/pools/${result.primaryPoolAddress}/ohlcv/day`, { headers: HEADERS });
+      const ohlcvR = await fetchCompatWithFallback(`${CG_BASE}/onchain/networks/${netId}/pools/${result.primaryPoolAddress}/ohlcv/day`, { headers: HEADERS });
       if (ohlcvR.ok) {
         const ohlcvD = await ohlcvR.json() as any;
         const rows = ohlcvD.data || [];
@@ -72,20 +73,20 @@ async function probeCoinGeckoOnchain(token: typeof TOKENS[0]): Promise<OnchainPr
 
     // 3. Pool OHLCV (hour)
     try {
-      const ohlcvHR = await fetch(`${CG_BASE}/onchain/networks/${netId}/pools/${result.primaryPoolAddress}/ohlcv/hour`, { headers: HEADERS });
+      const ohlcvHR = await fetchCompatWithFallback(`${CG_BASE}/onchain/networks/${netId}/pools/${result.primaryPoolAddress}/ohlcv/hour`, { headers: HEADERS });
       result.poolOhlcvHour = ohlcvHR.ok;
     } catch { result.limitations.push("Pool OHLCV hour failed"); }
 
     // 4. Pool trades
     try {
-      const tradesR = await fetch(`${CG_BASE}/onchain/networks/${netId}/pools/${result.primaryPoolAddress}/trades`, { headers: HEADERS });
+      const tradesR = await fetchCompatWithFallback(`${CG_BASE}/onchain/networks/${netId}/pools/${result.primaryPoolAddress}/trades`, { headers: HEADERS });
       result.poolTrades = tradesR.ok;
     } catch { result.limitations.push("Pool trades failed"); }
   }
 
   // 5. Top holders
   try {
-    const holdersR = await fetch(`${CG_BASE}/onchain/networks/${netId}/tokens/${token.contract}/top_holders`, { headers: HEADERS });
+    const holdersR = await fetchCompatWithFallback(`${CG_BASE}/onchain/networks/${netId}/tokens/${token.contract}/top_holders`, { headers: HEADERS });
     if (holdersR.ok) {
       const holdersD = await holdersR.json() as any;
       const holders = holdersD.data || [];

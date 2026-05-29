@@ -30,7 +30,7 @@ export class AuditLogger {
       ...entry,
       timestamp: entry.timestamp || new Date().toISOString(),
     });
-    writeFileSync(this.logPath, line + "\n", { flag: "a" });
+    writeFileSync(this.logPath, line + "\n", { encoding: "utf-8", flag: "a" });
   }
 
   logOrderIntent(intent: OrderIntent, riskDecision: string): void {

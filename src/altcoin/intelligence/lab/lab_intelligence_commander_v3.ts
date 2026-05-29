@@ -1,14 +1,41 @@
-import { writeFileSync, mkdirSync, existsSync, readFileSync } from "fs";
+import { writeFileSync, mkdirSync, existsSync, readFileSync, readdirSync } from "fs";
 import { join } from "path";
 import { readCsv } from "../../../utils/csv.js";
+import { fetchCompatWithFallback as fetch } from "../../../utils/http.js";
 import { sendFeishuText, isFeishuEnabled, isDryRun, getChatIdMasked, sanitizeMessage } from "../../../integrations/feishu/feishu_client.js";
 
 const OUT_DIR = join(import.meta.dirname, "..", "..", "..", "..", "data", "altcoin", "intelligence", "lab", "live");
 const REPORTS_DIR = join(import.meta.dirname, "..", "..", "..", "..", "reports", "altcoin", "intelligence", "lab");
 const INTEL_DIR = join(import.meta.dirname, "..", "..", "..", "..", "data", "altcoin", "intelligence");
+const SNAPSHOT_DIR = join(OUT_DIR, "whale_snapshots");
 const CHAT_ID = process.env.FEISHU_CHAT_ID || "";
 const CG_API = process.env.COINGLASS_API_KEY || "";
 const CG_KEY = process.env.COINGECKO_PRO_API_KEY || "";
+
+// ── Whale snapshot loader ──
+interface WhaleSnapshot {
+  timestamp: string; token: string; totalHolders: number;
+  labelledCount: number; unknownCount: number; cexCount: number;
+  top1Share: number; top5Share: number; top10Share: number;
+  topCexShare: number; topUnknownShare: number;
+  cexTotalShare: number; unknownWhaleShare: number;
+  holderConcentration: number;
+  dumpPotential: {
+    totalWhaleShare: number; whaleShareOnCex: number;
+    whaleShareOffCex: number; estimatedDumpableUsd: number;
+    marketCap: number; dumpRatio: number;
+  };
+}
+
+function loadLatestWhaleSnapshot(): WhaleSnapshot | null {
+  try {
+    if (!existsSync(SNAPSHOT_DIR)) return null;
+    const files = readdirSync(SNAPSHOT_DIR).filter((f: string) => f.startsWith("whale_") && f.endsWith(".json")).sort();
+    if (files.length === 0) return null;
+    const latest = files[files.length - 1];
+    return JSON.parse(readFileSync(join(SNAPSHOT_DIR, latest), "utf-8")) as WhaleSnapshot;
+  } catch { return null; }
+}
 
 function col(r:string[],h:string[],n:string):string{const i=h.indexOf(n);return i>=0?(r[i]||""):"";}
 function num(r:string[],h:string[],n:string):number{const v=parseFloat(col(r,h,n));return isNaN(v)?0:v;}
@@ -106,8 +133,10 @@ async function main(){
 
   console.log("采集数据...");
   const[dex,ex]=await Promise.all([fetchDexScreener(),fetchExchangeOI()]);
+  const whale = loadLatestWhaleSnapshot();
   console.log(`DEX: ${dex?dex.total_pairs+"对 $"+dex.total_volume_24h.toFixed(0)+" vol":"不可用"}`);
   console.log(`交易所OI: ${ex?"$"+(ex.total_oi/1e6).toFixed(0)+"M HHI="+ex.hhi.toFixed(3):"不可用"}`);
+  console.log(`鲸鱼快照: ${whale?`Top1 ${(whale.top1Share*100).toFixed(1)}% Top5 ${(whale.top5Share*100).toFixed(1)}% CEX ${(whale.cexTotalShare*100).toFixed(1)}% MCap $${(whale.dumpPotential.marketCap/1e6).toFixed(0)}M`:"不可用"}`);
 
   // Composite signals
   console.log("\n── 组合信号 ──");
@@ -132,7 +161,7 @@ async function main(){
   const trend=Math.max(0,Math.min(100,60+(oiChg>0?15:0)+(fund<8?10:0)-(fund>10?10:0)-(oiFromPeak<-0.1?10:0)));
   const reversal=Math.max(0,Math.min(100,(fundFromPeak>2?20:0)+(oiChg<0?15:0)+(liq>1e6?15:0)+(peaks.liq>2e6?15:0)+(score>40?10:0)));
   const resetRebound=Math.max(0,Math.min(100,(hasLiqReset?40:0)+(oiFromPeak>-0.08?20:0)+(fund<10?15:0)+(oiChg>=0?10:0)));
-  const liqFrag=Math.max(0,Math.min(100,dex?((dex.volume_to_liquidity>30?50:dex.volume_to_liquidity>15?30:10)):0+(ex&&ex.okx_share<0.05?20:0)));
+  let liqFrag=Math.max(0,Math.min(100,dex?((dex.volume_to_liquidity>30?50:dex.volume_to_liquidity>15?30:10)):0+(ex&&ex.okx_share<0.05?20:0)));
   const dataConf=Math.max(0,Math.min(100,70+(dex?10:0)+(ex?10:0)-10)); // -10 single-day penalty
 
   // Evidence chain
@@ -142,8 +171,22 @@ async function main(){
   if(fundFromPeak>3) evidenceChain.push(`资金费率从${peaks.fund.toFixed(1)}%峰值回落至${fund.toFixed(1)}%`);
   if(dex&&dex.volume_to_liquidity>20) evidenceChain.push(`DEX流动性极薄(${(dex.volume_to_liquidity).toFixed(0)}x turnover)——价格易被放大`);
   if(dex&&Math.abs(dex.buy_ratio-0.5)<0.05) evidenceChain.push(`DEX买卖均衡(${(dex.buy_ratio*100).toFixed(0)}%买)——无单边情绪`);
+  // Whale evidence
+  if(whale){
+    if(whale.holderConcentration>0.7) evidenceChain.push(`⚠持仓极度集中: Top5持有${(whale.holderConcentration*100).toFixed(0)}%——有效流通远小于名义市值`);
+    if(whale.dumpPotential.whaleShareOffCex>0.5) evidenceChain.push(`⚠${(whale.dumpPotential.whaleShareOffCex*100).toFixed(0)}%供应量未上交易所(\$${(whale.dumpPotential.estimatedDumpableUsd/1e6).toFixed(0)}M)——潜在解锁抛压`);
+    if(whale.dumpPotential.marketCap>0){
+      const oiToEffective = whale.cexTotalShare>0 ? oi/(whale.dumpPotential.marketCap*whale.cexTotalShare) : 0;
+      if(oiToEffective>0.3) evidenceChain.push(`⚠OI/CEX流通 = ${(oiToEffective*100).toFixed(0)}%——衍生品规模接近实际可交易供应量`);
+    }
+    if(whale.cexTotalShare<0.3) evidenceChain.push(`CEX持仓仅${(whale.cexTotalShare*100).toFixed(0)}%——实际流动盘极小，价格易被衍生品主导`);
+  }
 
-  const contradiction=`${phase}: 去杠杆压力已释放，但资金费率仍处${fund>8?"偏高":"正常"}水平(${fund.toFixed(1)}%)。OI${oiFromPeak<-0.05?"已":"未"}从峰值显著回落。${dex&&dex.volume_to_liquidity>20?"DEX现货池极薄——价格结构脆弱。":""}`;
+  // Adjust liqFrag for whale concentration
+  if(whale && whale.holderConcentration>0.7) liqFrag = Math.min(100, liqFrag + 25);
+  if(whale && whale.cexTotalShare<0.3) liqFrag = Math.min(100, liqFrag + 15);
+
+  const contradiction=`${phase}: ${whale&&whale.holderConcentration>0.7?`持仓极度集中(Top5 ${(whale.holderConcentration*100).toFixed(0)}%)。`:""}去杠杆压力已释放，但资金费率仍处${fund>8?"偏高":"正常"}水平(${fund.toFixed(1)}%)。OI${oiFromPeak<-0.05?"已":"未"}从峰值显著回落。${dex&&dex.volume_to_liquidity>20?"DEX现货池极薄——价格结构脆弱。":""}${whale&&whale.dumpPotential.whaleShareOffCex>0.5?`${(whale.dumpPotential.whaleShareOffCex*100).toFixed(0)}%供应量未上交易所——潜在抛压未释放。`:""}`;
 
   // Invalidation
   const invalidation=[
@@ -165,23 +208,33 @@ async function main(){
       `清算是否突破$1M——当前$${(liq/1e3).toFixed(0)}K`,
       `DEX turnover${dex&&dex.volume_to_liquidity>20?"仍在":"是否升至"}极端水平`,
     ],
+    whale_intel: whale ? {
+      top5Concentration: whale.holderConcentration,
+      cexShare: whale.cexTotalShare,
+      offCexShare: whale.dumpPotential.whaleShareOffCex,
+      estimatedMCap: whale.dumpPotential.marketCap,
+      estimatedDumpableUsd: whale.dumpPotential.estimatedDumpableUsd,
+      cexCount: whale.cexCount,
+      labelledRatio: whale.labelledCount / Math.max(1, whale.totalHolders),
+      keyRisk: whale.holderConcentration > 0.7 ? "EXTREME_CONCENTRATION" : whale.cexTotalShare < 0.3 ? "LOW_FLOAT" : "MODERATE",
+    } : null,
     case_insight:hasLiqReset?{signal:"LIQUIDATION_RESET_REBOUND",stat_confidence:"LOW",case_importance:"HIGH",note:"本轮最关键的转折——清算从$2.1M峰值完全回落，标志急性去杠杆结束"}:null,
     sample_limitations:`快照${rows.length}条|单日单币|组合信号未经多周期回测`,
     commander_push_grade:"PREVIEW_OK",
-    commander_summary:`${phase}。清算压力已释放，OI从峰值回落，资金费率${fund>8?"仍偏高但":"已"}回落至${fund.toFixed(1)}%。${dex&&dex.volume_to_liquidity>20?`⚠DEX现货池极薄(${(dex.volume_to_liquidity).toFixed(0)}x turnover)——价格结构脆弱。`:""}`,
+    commander_summary:`${phase}。${whale&&whale.holderConcentration>0.7?`⚠持仓极度集中(Top5 ${(whale.holderConcentration*100).toFixed(0)}%)。`:""}清算压力已释放，OI从峰值回落，资金费率${fund>8?"仍偏高但":"已"}回落至${fund.toFixed(1)}%。${dex&&dex.volume_to_liquidity>20?`⚠DEX现货池极薄(${(dex.volume_to_liquidity).toFixed(0)}x turnover)——价格结构脆弱。`:""}${whale&&whale.dumpPotential.whaleShareOffCex>0.5?`⚠${(whale.dumpPotential.whaleShareOffCex*100).toFixed(0)}%供应量未上交易所(\$${(whale.dumpPotential.estimatedDumpableUsd/1e6).toFixed(0)}M)。`:""}`,
     dex_microstructure:dex?{liquidity:dex.total_liquidity,volume_24h:dex.total_volume_24h,volume_to_liquidity:dex.volume_to_liquidity,buy_ratio:dex.buy_ratio,state:dex.microstructure_state}:"不可用",
     exchange_oi:ex?{total_oi:ex.total_oi,hhi:ex.hhi,top3:ex.top3_share,growing:ex.growing_exchanges,shrinking:ex.shrinking_exchanges}:"不可用",
   };
 
   // Write JSON
-  writeFileSync(join(OUT_DIR,"lab_commander_brief_v3.json"),JSON.stringify(cdr,null,2));
+  writeFileSync(join(OUT_DIR,"lab_commander_brief_v3.json"),JSON.stringify(cdr,null,2), "utf-8");
 
   // Console output
   console.log(`\n── Commander v3 ──`);
   console.log(`阶段: ${cdr.market_phase} | 主导信号: ${dominant?.name||"无"}`);
   console.log(`趋势:${trend} 反转:${reversal} 重置:${resetRebound} 流动脆弱:${liqFrag} 置信:${dataConf}`);
   if(dex) console.log(`DEX: ${dex.microstructure_state} turnover=${dex.volume_to_liquidity.toFixed(0)}x buy=${(dex.buy_ratio*100).toFixed(0)}%`);
-  if(ex) console.log(`交易所: $${(ex.total_oi/1e6).toFixed(0)}M HHI=${ex.hhi.toFixed(2)} ${ex.growing}+/${ex.shrinking}-`);
+  if(ex) console.log(`交易所: $${(ex.total_oi/1e6).toFixed(0)}M HHI=${ex.hhi.toFixed(2)} ${ex.growing_exchanges}+/${ex.shrinking_exchanges}-`);
 
   // Feishu push
   if(CHAT_ID&&isFeishuEnabled()&&!isDryRun()){
@@ -201,11 +254,16 @@ ${cdr.main_contradiction}
 评分:
 趋势${trend} | 反转${reversal} | 重置${resetRebound} | 流动脆弱${liqFrag} | 置信${dataConf}
 
+${whale?`🐋 鲸鱼持仓:
+Top5集中度 ${(whale.holderConcentration*100).toFixed(0)}% | CEX持仓 ${(whale.cexTotalShare*100).toFixed(1)}%
+非CEX鲸鱼 ${(whale.dumpPotential.whaleShareOffCex*100).toFixed(1)}% (≈\$${(whale.dumpPotential.estimatedDumpableUsd/1e6).toFixed(0)}M)
+估算市值 \$${(whale.dumpPotential.marketCap/1e6).toFixed(0)}M | 风险: ${cdr.whale_intel?.keyRisk||"N/A"}
+`:""}
 DEX微观:
 ${dex?`流动性$${(dex.total_liquidity/1e6).toFixed(2)}M | 24h量$${(dex.total_volume_24h/1e6).toFixed(2)}M | 换手${dex.volume_to_liquidity.toFixed(0)}x | 买入${(dex.buy_ratio*100).toFixed(0)}% | ${dex.microstructure_state}`:"不可用"}
 
 交易所:
-${ex?`总OI$${(ex.total_oi/1e6).toFixed(0)}M | 集中度${ex.hhi.toFixed(2)} | ${ex.growing}↑/${ex.shrinking}↓`:""}
+${ex?`总OI$${(ex.total_oi/1e6).toFixed(0)}M | 集中度${ex.hhi.toFixed(2)} | ${ex.growing_exchanges}↑/${ex.shrinking_exchanges}↓`:""}
 
 下次看:
 1. ${cdr.next_3_observations[0]}
@@ -229,11 +287,12 @@ ${cdr.sample_limitations}
     "","## 2. 五维评分","| 维度 | 得分 |","|------|------|",`| 趋势延续 | ${trend}/100 |`,`| 反转风险 | ${reversal}/100 |`,`| 重置再加速 | ${resetRebound}/100 |`,`| 流动脆弱性 | ${liqFrag}/100 |`,`| 数据置信 | ${dataConf}/100 |`,
     "","## 3. 组合信号","| ID | 名称 | 触发 | 置信度 | 分类 |","|----|------|------|--------|------|",...signals.map((s:any)=>`| ${s.id} | ${s.name} | ${s.triggered?"✓":""} | ${s.confidence} | ${s.lead_or_lag} |`),
     "","## 4. DEX微观结构",dex?`- 交易对: ${dex.total_pairs}\n- 流动性: $${(dex.total_liquidity/1e6).toFixed(2)}M\n- 24h量: $${(dex.total_volume_24h/1e6).toFixed(2)}M\n- 换手率: ${dex.volume_to_liquidity.toFixed(0)}x\n- 买入占比: ${(dex.buy_ratio*100).toFixed(0)}%\n- 状态: ${dex.microstructure_state}`:"不可用",
-    "","## 5. 交易所OI",ex?`- 总OI: $${(ex.total_oi/1e6).toFixed(0)}M\n- HHI: ${ex.hhi.toFixed(3)}\n- 前3: ${(ex.top3_share*100).toFixed(0)}%\n- 1h: ${ex.growing}所↑ ${ex.shrinking}所↓`:"不可用",
-    "","## 6. 证据链",cdr.strongest_evidence_chain,"","## 7. 推翻条件",...cdr.invalidation_conditions.map((s:string,i:number)=>`${i+1}. ${s}`),
-    "","## 8. 边界",cdr.sample_limitations,"本报告仅为情报分析。",
+    "","## 5. 鲸鱼持仓",whale?`- Top5集中度: ${(whale.holderConcentration*100).toFixed(0)}%\n- CEX持仓: ${(whale.cexTotalShare*100).toFixed(1)}%\n- 非CEX鲸鱼: ${(whale.dumpPotential.whaleShareOffCex*100).toFixed(1)}% (≈$${(whale.dumpPotential.estimatedDumpableUsd/1e6).toFixed(0)}M)\n- 估算市值: $${(whale.dumpPotential.marketCap/1e6).toFixed(0)}M\n- 已标记: ${whale.labelledCount}/${whale.totalHolders}\n- 风险评级: ${cdr.whale_intel?.keyRisk||"N/A"}`:"不可用",
+    "","## 6. 交易所OI",ex?`- 总OI: $${(ex.total_oi/1e6).toFixed(0)}M\n- HHI: ${ex.hhi.toFixed(3)}\n- 前3: ${(ex.top3_share*100).toFixed(0)}%\n- 1h: ${ex.growing_exchanges}所↑ ${ex.shrinking_exchanges}所↓`:"不可用",
+    "","## 7. 证据链",cdr.strongest_evidence_chain,"","## 8. 推翻条件",...cdr.invalidation_conditions.map((s:string,i:number)=>`${i+1}. ${s}`),
+    "","## 9. 边界",cdr.sample_limitations,"本报告仅为情报分析。",
   ];
-  writeFileSync(join(REPORTS_DIR,"lab_intraday_commander_report_v3.md"),report.join("\n"));
+  writeFileSync(join(REPORTS_DIR,"lab_intraday_commander_report_v3.md"),report.join("\n"), "utf-8");
   console.log(`\n报告: ${REPORTS_DIR}/lab_intraday_commander_report_v3.md`);
 }
 

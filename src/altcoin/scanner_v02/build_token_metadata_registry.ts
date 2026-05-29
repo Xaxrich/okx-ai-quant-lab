@@ -1,5 +1,6 @@
 import { writeFileSync, readFileSync, mkdirSync, existsSync } from "fs";
 import { join } from "path";
+import { fetchCompatWithFallback as fetch } from "../../utils/http.js";
 
 const REGISTRY_DIR = join(import.meta.dirname, "..", "..", "..", "data", "altcoin", "scanner_v02", "registry");
 const CMC_KEY = process.env.COINMARKETCAP_API_KEY || "";

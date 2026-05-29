@@ -1,7 +1,10 @@
 import { writeFileSync, mkdirSync, existsSync, readFileSync } from "fs";
 import { join } from "path";
 import { normalizeCoinGlassTimestamp } from "./coinglass_time.js";
+import { fetchCompatWithFallback as fetch } from "../../../utils/http.js";
+import { loadDotenvOnce } from "../../../config/env.js";
 
+loadDotenvOnce();
 const CG_KEY = process.env.COINGLASS_API_KEY || "";
 const CG_BASE = "https://open-api-v4.coinglass.com";
 const OUT_DIR = join(import.meta.dirname, "..", "..", "..", "..", "data", "altcoin", "intelligence", "coinglass");
@@ -326,4 +329,5 @@ async function main() {
   console.log(`\nReports saved.`);
 }
 
-main().catch(console.error);
+const isMain = process.argv[1]?.includes("coinglass_feature_builder");
+if (isMain) main().catch(console.error);

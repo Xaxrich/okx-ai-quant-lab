@@ -1,3 +1,5 @@
+import { fetchCompatWithFallback } from "../../utils/http.js";
+
 const APP_ID = process.env.FEISHU_APP_ID || "";
 const APP_SECRET = process.env.FEISHU_APP_SECRET || "";
 const FEISHU_DOMAIN = process.env.FEISHU_DOMAIN || "https://open.feishu.cn";
@@ -18,12 +20,12 @@ export function getChatIdMasked(): string {
 async function getToken(): Promise<string | null> {
   if (cachedToken && Date.now() < tokenExpiresAt - 60000) return cachedToken;
   try {
-    const r = await fetch(`${FEISHU_DOMAIN}/open-apis/auth/v3/tenant_access_token/internal`, {
+    const r = await fetchCompatWithFallback(`${FEISHU_DOMAIN}/open-apis/auth/v3/tenant_access_token/internal`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ app_id: APP_ID, app_secret: APP_SECRET }),
     });
-    const j = await r.json();
+    const j = await r.json() as any;
     if (j.code === 0 && j.tenant_access_token) {
       cachedToken = j.tenant_access_token;
       tokenExpiresAt = Date.now() + j.expire * 1000;
@@ -38,12 +40,12 @@ export async function sendFeishuText(chatId: string, text: string): Promise<{ ok
   const token = await getToken();
   if (!token) return { ok: false, error: "No auth token" };
   try {
-    const r = await fetch(`${FEISHU_DOMAIN}/open-apis/im/v1/messages?receive_id_type=chat_id`, {
+    const r = await fetchCompatWithFallback(`${FEISHU_DOMAIN}/open-apis/im/v1/messages?receive_id_type=chat_id`, {
       method: "POST",
       headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
       body: JSON.stringify({ receive_id: chatId, msg_type: "text", content: JSON.stringify({ text }) }),
     });
-    const j = await r.json();
+    const j = await r.json() as any;
     if (j.code === 0) return { ok: true, msgId: j.data?.message_id };
     return { ok: false, error: `Feishu API error: ${j.code} ${j.msg}` };
   } catch (e: any) { return { ok: false, error: e.message }; }

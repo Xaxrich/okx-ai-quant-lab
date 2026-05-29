@@ -1,8 +1,8 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
-import { join } from "path";
+import { dirname, join } from "path";
 
-const LEDGER_DIR = join(import.meta.dirname, "..", "..", "data", "portfolio");
-const LEDGER_PATH = join(LEDGER_DIR, "positions.json");
+const DEFAULT_LEDGER_DIR = join(import.meta.dirname, "..", "..", "data", "portfolio");
+const DEFAULT_LEDGER_PATH = join(DEFAULT_LEDGER_DIR, "positions.json");
 
 export interface Position {
   instId: string;
@@ -27,21 +27,25 @@ export interface FillRecord {
 
 export class PositionLedger {
   private positions: Map<string, Position> = new Map();
+  private ledgerPath: string;
 
-  constructor() {
-    if (!existsSync(LEDGER_DIR)) {
-      mkdirSync(LEDGER_DIR, { recursive: true });
+  constructor(ledgerPath: string = DEFAULT_LEDGER_PATH) {
+    this.ledgerPath = ledgerPath;
+
+    const ledgerDir = dirname(this.ledgerPath);
+    if (!existsSync(ledgerDir)) {
+      mkdirSync(ledgerDir, { recursive: true });
     }
     this.load();
   }
 
   private load(): void {
-    if (!existsSync(LEDGER_PATH)) {
+    if (!existsSync(this.ledgerPath)) {
       this.save();
       return;
     }
     try {
-      const raw = JSON.parse(readFileSync(LEDGER_PATH, "utf-8")) as Position[];
+      const raw = JSON.parse(readFileSync(this.ledgerPath, "utf-8")) as Position[];
       for (const p of raw) {
         this.positions.set(p.instId, p);
       }
@@ -52,7 +56,7 @@ export class PositionLedger {
 
   private save(): void {
     const arr = Array.from(this.positions.values());
-    writeFileSync(LEDGER_PATH, JSON.stringify(arr, null, 2));
+    writeFileSync(this.ledgerPath, JSON.stringify(arr, null, 2), "utf-8");
   }
 
   get(instId: string): Position | undefined {

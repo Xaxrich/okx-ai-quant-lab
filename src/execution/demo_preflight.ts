@@ -184,7 +184,7 @@ async function main() {
 
   const reportsDir = join(import.meta.dirname, "..", "..", "reports");
   if (!existsSync(reportsDir)) mkdirSync(reportsDir, { recursive: true });
-  writeFileSync(join(reportsDir, "demo_preflight_report.md"), lines.join("\n"));
+  writeFileSync(join(reportsDir, "demo_preflight_report.md"), lines.join("\n"), "utf-8");
 
   console.log("\nReport: reports/demo_preflight_report.md");
 

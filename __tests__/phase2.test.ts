@@ -8,12 +8,21 @@ import { PositionLedger, type FillRecord } from "../src/portfolio/position_ledge
 import { PnLTracker } from "../src/portfolio/pnl_tracker.js";
 import type { OrderIntent } from "../src/risk/order_guard.js";
 
-const LEDGER_PATH = join(import.meta.dirname, "..", "data", "portfolio", "positions.json");
-const STATS_PATH = join(import.meta.dirname, "..", "data", "portfolio", "daily_stats.json");
+const TEST_STORAGE_DIR = join(import.meta.dirname, "..", "data", "portfolio", "test-phase2");
+const LEDGER_PATH = join(TEST_STORAGE_DIR, "positions.json");
+const STATS_PATH = join(TEST_STORAGE_DIR, "daily_stats.json");
 
 function cleanLedgerFiles() {
   if (existsSync(LEDGER_PATH)) unlinkSync(LEDGER_PATH);
   if (existsSync(STATS_PATH)) unlinkSync(STATS_PATH);
+}
+
+function createLedger(): PositionLedger {
+  return new PositionLedger(LEDGER_PATH);
+}
+
+function createTracker(ledger: PositionLedger, startingEquity: number): PnLTracker {
+  return new PnLTracker(ledger, startingEquity, STATS_PATH);
 }
 
 const cleanStats = { tradeCount: 0, dailyLossUSDT: 0 };
@@ -128,7 +137,7 @@ describe("Position Ledger", () => {
   beforeEach(cleanLedgerFiles);
 
   it("tracks positions from fills", () => {
-    const ledger = new PositionLedger();
+    const ledger = createLedger();
 
     ledger.applyFill({
       instId: "BTC-USDT",
@@ -147,7 +156,7 @@ describe("Position Ledger", () => {
   });
 
   it("handles partial fills", () => {
-    const ledger = new PositionLedger();
+    const ledger = createLedger();
 
     ledger.applyFill({
       instId: "ETH-USDT",
@@ -175,7 +184,7 @@ describe("Position Ledger", () => {
   });
 
   it("calculates unrealized PnL", () => {
-    const ledger = new PositionLedger();
+    const ledger = createLedger();
 
     ledger.applyFill({
       instId: "BTC-USDT",
@@ -196,7 +205,7 @@ describe("Position Ledger", () => {
       { instId: "BTC-USDT", side: "buy", fillSz: 0.001, fillPx: 78000, fee: 0, feeCcy: "USDT", ts: 1 },
     ];
 
-    const ledger = new PositionLedger();
+    const ledger = createLedger();
     ledger.rebuildFromFills(fills, { "BTC-USDT": 79000 });
     expect(ledger.getTotalUnrealizedPnl({ "BTC-USDT": 79000 })).toBe(1);
   });
@@ -206,26 +215,26 @@ describe("PnL Tracker", () => {
   beforeEach(cleanLedgerFiles);
 
   it("starts at given equity", () => {
-    const ledger = new PositionLedger();
-    const tracker = new PnLTracker(ledger, 1000);
+    const ledger = createLedger();
+    const tracker = createTracker(ledger, 1000);
     expect(tracker.getStats().startingEquity).toBe(1000);
   });
 
   it("tracks trade count", () => {
-    const ledger = new PositionLedger();
-    const tracker = new PnLTracker(ledger, 1000);
+    const ledger = createLedger();
+    const tracker = createTracker(ledger, 1000);
     tracker.recordTrade();
     expect(tracker.getStats().tradeCountToday).toBe(1);
   });
 
   it("checks loss limit", () => {
-    const ledger = new PositionLedger();
+    const ledger = createLedger();
     ledger.applyFill({
       instId: "BTC-USDT", side: "buy", fillSz: 0.01, fillPx: 78000,
       fee: 0, feeCcy: "USDT", ts: Date.now(),
     }, 70000);
 
-    const tracker = new PnLTracker(ledger, 1000);
+    const tracker = createTracker(ledger, 1000);
     tracker.update({ "BTC-USDT": 70000 });
     expect(tracker.checkLossLimit(20)).toBe(true);
   });

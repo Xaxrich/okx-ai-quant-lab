@@ -1,5 +1,6 @@
 import { writeFileSync, mkdirSync, existsSync, readFileSync, appendFileSync, statSync } from "fs";
 import { join } from "path";
+import { fetchCompatWithFallback as fetch } from "../../../utils/http.js";
 
 const OUT_DIR = join(import.meta.dirname, "..", "..", "..", "..", "data", "altcoin", "intelligence", "lab", "live");
 const CACHE_DIR = join(OUT_DIR, "cache");
@@ -18,7 +19,7 @@ function cacheGet(key: string, maxAgeMin: number): { hit: boolean; data?: string
   const p = join(CACHE_DIR, `${key}.json`); if (!existsSync(p)) return { hit: false };
   try { const s = statSync(p); if ((Date.now() - s.mtimeMs) / 60000 > maxAgeMin) return { hit: false }; return { hit: true, data: readFileSync(p, "utf-8") }; } catch { return { hit: false }; }
 }
-function cachePut(key: string, data: string) { if (!existsSync(CACHE_DIR)) mkdirSync(CACHE_DIR, { recursive: true }); writeFileSync(join(CACHE_DIR, `${key}.json`), data); }
+function cachePut(key: string, data: string) { if (!existsSync(CACHE_DIR)) mkdirSync(CACHE_DIR, { recursive: true }); writeFileSync(join(CACHE_DIR, `${key}.json`), data, "utf-8"); }
 function getCacheAge(key: string): number | null {
   const p = join(CACHE_DIR, `${key}.json`); if (!existsSync(p)) return null;
   try { return (Date.now() - statSync(p).mtimeMs) / 60000; } catch { return null; }
@@ -31,7 +32,7 @@ function getTodayCGUsage(): number {
     try { const e = JSON.parse(l); return e.timestamp.slice(0, 10) === today && e.source === "coinglass" && e.counted_call; } catch { return false; }
   }).length;
 }
-function logUsage(e: Record<string, any>) { if (!existsSync(OUT_DIR)) mkdirSync(OUT_DIR, { recursive: true }); appendFileSync(USAGE_LEDGER, JSON.stringify(e) + "\n"); }
+function logUsage(e: Record<string, any>) { if (!existsSync(OUT_DIR)) mkdirSync(OUT_DIR, { recursive: true }); appendFileSync(USAGE_LEDGER, JSON.stringify(e) + "\n", "utf-8"); }
 
 async function fetchWithCache(url: string, headers: Record<string, string>, key: string, ttl: number, src: string, grp: string, mode: string) {
   const c = cacheGet(key, ttl); if (c.hit && c.data) { logUsage({ timestamp: new Date().toISOString(), source: src, endpoint_group: grp, mode, cache_hit: true, counted_call: false, status: "CACHE_HIT" }); return { data: c.data, cached: true }; }
@@ -64,7 +65,7 @@ async function getLiq(mode: Mode, budget: { ok: boolean }) {
   if (!CG_API) return { liq4h: null, liqLong: null, liqShort: null, calls: 0, age: null };
   if (!budget.ok) { const c = cacheGet("liq", 30); if (c.hit && c.data) { try { const j = JSON.parse(c.data); if (j.code === "0" && j.data?.length > 0) { const l = parseFloat(j.data[0].aggregated_long_liquidation_usd || "0"), s = parseFloat(j.data[0].aggregated_short_liquidation_usd || "0"); return { liq4h: l + s, liqLong: l, liqShort: s, calls: 0, age: getCacheAge("liq") }; } } catch { /* */ } } return { liq4h: null, liqLong: null, liqShort: null, calls: 0, age: null }; }
   const ttl = 15;
-  const { data, cached } = await fetchWithCache(`https://open-api-v4.coinglass.com/api/futures/liquidation/aggregated-history?symbol=${LAB.sym}&interval=4h&limit=1&exchange_list=Binance,OKX,Bybit`, { "CG-API-KEY": CG_API }, "liq", ttl, "coinglass", "liq", mode);
+  const { data, cached } = await fetchWithCache(`https://open-api-v4.coinglass.com/api/futures/liquidation/aggregated-history?symbol=${LAB.sym}&interval=4h&limit=1&exchange_list=Binance,OKX,Bybit,KuCoin,Bitget,BingX,Gate`, { "CG-API-KEY": CG_API }, "liq", ttl, "coinglass", "liq", mode);
   try { const j = JSON.parse(data); if (j.code === "0" && j.data?.length > 0) { const l = parseFloat(j.data[0].aggregated_long_liquidation_usd || "0"), s = parseFloat(j.data[0].aggregated_short_liquidation_usd || "0"); return { liq4h: l + s, liqLong: l, liqShort: s, calls: cached ? 0 : 1, age: cached ? getCacheAge("liq") : 0 }; } } catch { /* */ }
   return { liq4h: null, liqLong: null, liqShort: null, calls: 0, age: null };
 }
@@ -209,8 +210,8 @@ async function main() {
   const row = [ts, LAB.sym, mode, price.price || "", price.src, price.ret24 || "", oi.oi || "", oi.oi4h || "", oiChgFromPrev || "", fund.rate ? (fund.rate * 100).toFixed(2) : "", fundChgFromPrev?.toFixed(2) || "", fund.streak || "", liq.liq4h || "", liqChgFromPrev || "", liq.liqLong || "", liq.liqShort || "", state, score, reviewLabel, prevState || "", prevScore || "", extCalls, cgCalls, cgUsed, cgRem, oi.age?.toFixed(1) || "", fund.age?.toFixed(1) || "", liq.age?.toFixed(1) || "", freshness, changes.join("; "), nextWatch.join("; ")];
   const esc = (v: any) => String(v ?? "").includes(",") ? `"${v}"` : String(v ?? "");
   const sp = join(OUT_DIR, "lab_fast_watch_v2.csv");
-  if (!existsSync(sp)) writeFileSync(sp, hdr + "\n");
-  appendFileSync(sp, row.map(esc).join(",") + "\n");
+  if (!existsSync(sp)) writeFileSync(sp, hdr + "\n", "utf-8");
+  appendFileSync(sp, row.map(esc).join(",") + "\n", "utf-8");
 
   // ── 轻量报告 ──
   const rpt = [
@@ -238,7 +239,7 @@ async function main() {
     "",
     `**不构成交易建议。无法推断方向性意图。**`,
   ];
-  writeFileSync(join(REPORTS_DIR, "lab_fast_watch_latest.md"), rpt.join("\n"));
+  writeFileSync(join(REPORTS_DIR, "lab_fast_watch_latest.md"), rpt.join("\n"), "utf-8");
   console.log(`\n报告: ${REPORTS_DIR}/lab_fast_watch_latest.md`);
 }
 

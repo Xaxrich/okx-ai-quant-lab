@@ -1,6 +1,7 @@
 import { writeFileSync, mkdirSync, existsSync } from "fs";
 import { join } from "path";
 import { readCsv, writeCsv } from "../../../utils/csv.js";
+import { fetchCompatWithFallback as fetch } from "../../../utils/http.js";
 
 const OUT_DIR = join(import.meta.dirname, "..", "..", "..", "..", "data", "altcoin", "intelligence", "lab", "live");
 const REPORTS_DIR = join(import.meta.dirname, "..", "..", "..", "..", "reports", "altcoin", "intelligence", "lab");

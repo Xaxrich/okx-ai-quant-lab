@@ -1,11 +1,68 @@
+import { existsSync, readFileSync } from "fs";
+import { join } from "path";
+import { fetchTextWithFallback } from "../../../utils/http.js";
 import {
   checkTrialStatus, isHeavyEndpoint, estimateCostClass,
   cacheGet, cachePut, logUsage, canMakeRequest,
 } from "./arkham_trial_guard.js";
 import type { UsageEntry } from "./arkham_trial_guard.js";
 
-const ARKHAM_KEY = process.env.ARKHAM_API_KEY || "";
 const ARKHAM_BASE = "https://api.arkm.com";
+const ROOT = join(import.meta.dirname, "..", "..", "..", "..");
+let dotenvLoaded = false;
+
+function arkhamKey(): string {
+  loadDotenvOnce();
+  return process.env.ARKHAM_API_KEY || "";
+}
+
+function loadDotenvOnce(): void {
+  if (dotenvLoaded) return;
+  dotenvLoaded = true;
+  const envPath = join(ROOT, ".env");
+  if (!existsSync(envPath)) return;
+  for (const rawLine of readFileSync(envPath, "utf-8").split(/\r?\n/)) {
+    const line = rawLine.trim();
+    if (!line || line.startsWith("#")) continue;
+    const eqIndex = line.indexOf("=");
+    if (eqIndex <= 0) continue;
+    const name = line.slice(0, eqIndex).trim();
+    let value = line.slice(eqIndex + 1).trim();
+    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+      value = value.slice(1, -1);
+    }
+    if (name && !process.env[name]) process.env[name] = value;
+  }
+}
+
+interface ArkhamHttpResponse {
+  statusCode: number;
+  text: string;
+  contentType: string;
+  error?: string;
+}
+
+async function arkhamHttpGet(path: string, key: string): Promise<ArkhamHttpResponse> {
+  const url = `${ARKHAM_BASE}${path}`;
+  try {
+    const response = await fetchTextWithFallback(url, {
+      headers: { "API-Key": key, "Accept": "application/json", "User-Agent": "okx-ai-quant-lab/arkham-client" },
+    }, 60_000);
+    return {
+      statusCode: response.status,
+      text: response.text,
+      contentType: response.headers["content-type"] || "",
+    };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return {
+      statusCode: 0,
+      text: "",
+      contentType: "",
+      error: message,
+    };
+  }
+}
 
 export interface ArkhamResponse {
   ok: boolean;
@@ -54,7 +111,8 @@ export async function arkhamGet(
     channel: "ARKHAM_CHANNEL", data: null, cacheHit: false,
   };
 
-  if (!ARKHAM_KEY) {
+  const key = arkhamKey();
+  if (!key) {
     base.error = "ARKHAM_API_KEY not set in environment";
     base.limitations = ["No API key configured"];
     return base;
@@ -109,15 +167,15 @@ export async function arkhamGet(
     };
     logUsage(usageEntry);
 
+    base.ok = true;
+    base.status = "OK";
     try {
-      base.ok = true;
-      base.status = "OK";
       base.data = JSON.parse(cached.data);
-      base.cacheHit = true;
-      return base;
     } catch {
-      // Cache corrupted, fall through to fetch
+      base.data = cached.data;
     }
+    base.cacheHit = true;
+    return base;
   }
 
   // Rate limit
@@ -141,15 +199,15 @@ export async function arkhamGet(
   let lastError = "";
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
-      const url = `${ARKHAM_BASE}${path}`;
-      const r = await fetch(url, {
-        headers: { "API-Key": ARKHAM_KEY, "Accept": "application/json" },
-      });
+      const r = await arkhamHttpGet(path, key);
+      const statusCode = r.statusCode;
 
-      const statusCode = r.status;
+      if (statusCode === 0) {
+        throw new Error(r.error || "Arkham request failed before HTTP response");
+      }
 
       if (statusCode === 429) {
-        const retryAfter = parseInt(r.headers.get("Retry-After") || "5") * 1000;
+        const retryAfter = 5000;
         rateLimitEvents.push({ endpoint: path, retryAfterMs: retryAfter, timestamp: new Date().toISOString() });
         if (attempt < 2) {
           await new Promise(resolve => setTimeout(resolve, retryAfter + 1000));
@@ -170,7 +228,7 @@ export async function arkhamGet(
       }
 
       if (statusCode === 403) {
-        const text = await r.text().catch(() => "");
+        const text = r.text;
         base.status = "ARKHAM_FORBIDDEN";
         base.error = text.slice(0, 200) || "Access denied";
         logUsage({ timestamp: new Date().toISOString(), endpoint: endpointPath, token: opts?.token || "", request_type: heavy ? "HEAVY" : "STANDARD", heavy_endpoint: heavy, cache_hit: false, status: "FORBIDDEN", estimated_cost_class: "FREE (failed)", limitations: "403" });
@@ -184,7 +242,7 @@ export async function arkhamGet(
         return base;
       }
 
-      const text = await r.text();
+      const text = r.text;
       let parsed: unknown;
       try { parsed = JSON.parse(text); } catch { parsed = text; }
 
@@ -236,4 +294,4 @@ export function arkhamConfidence(
   return { confidence: "UNKNOWN", limitation: "No entity or label attribution available" };
 }
 
-export function isArkhamConfigured(): boolean { return ARKHAM_KEY.length > 0; }
+export function isArkhamConfigured(): boolean { return arkhamKey().length > 0; }

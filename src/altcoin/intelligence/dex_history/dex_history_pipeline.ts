@@ -1,6 +1,7 @@
 import { writeFileSync, mkdirSync, existsSync, readFileSync } from "fs";
 import { join } from "path";
 import { getCoinGeckoAuth } from "../../data_sources/coingecko_auth.js";
+import { fetchCompatWithFallback as fetch } from "../../../utils/http.js";
 
 const auth = getCoinGeckoAuth();
 const OUT_DIR = join(import.meta.dirname, "..", "..", "..", "..", "data", "altcoin", "intelligence", "dex_history");

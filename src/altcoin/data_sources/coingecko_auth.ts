@@ -1,3 +1,5 @@
+import { loadDotenvOnce } from "../../config/env.js";
+
 export type CgAuthMode = "PRO" | "DEMO" | "NO_KEY";
 
 export interface CgAuth {
@@ -8,6 +10,7 @@ export interface CgAuth {
 }
 
 export function getCoinGeckoAuth(): CgAuth {
+  loadDotenvOnce();
   const proKey = process.env.COINGECKO_PRO_API_KEY;
   const demoKey = process.env.COINGECKO_DEMO_API_KEY;
 

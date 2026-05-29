@@ -1,5 +1,6 @@
 import { writeFileSync, mkdirSync, existsSync } from "fs";
 import { join } from "path";
+import { fetchCompatWithFallback as fetch } from "../../utils/http.js";
 
 const RAW_DIR = join(import.meta.dirname, "..", "..", "..", "data", "altcoin", "scanner_validation", "raw");
 const CG_BASE = "https://api.coingecko.com/api/v3";

@@ -8,12 +8,21 @@ import { existsSync, unlinkSync, readFileSync } from "fs";
 import { join } from "path";
 import type { OrderIntent } from "../src/risk/order_guard.js";
 
-const LEDGER_PATH = join(import.meta.dirname, "..", "data", "portfolio", "positions.json");
-const STATS_PATH = join(import.meta.dirname, "..", "data", "portfolio", "daily_stats.json");
+const TEST_STORAGE_DIR = join(import.meta.dirname, "..", "data", "portfolio", "test-phase25");
+const LEDGER_PATH = join(TEST_STORAGE_DIR, "positions.json");
+const STATS_PATH = join(TEST_STORAGE_DIR, "daily_stats.json");
 
 function cleanLedgerFiles() {
   if (existsSync(LEDGER_PATH)) unlinkSync(LEDGER_PATH);
   if (existsSync(STATS_PATH)) unlinkSync(STATS_PATH);
+}
+
+function createLedger(): PositionLedger {
+  return new PositionLedger(LEDGER_PATH);
+}
+
+function createTracker(ledger: PositionLedger, startingEquity: number): PnLTracker {
+  return new PnLTracker(ledger, startingEquity, STATS_PATH);
 }
 
 const validIntent: OrderIntent = {
@@ -141,7 +150,7 @@ describe("Position Ledger Lifecycle", () => {
   beforeEach(cleanLedgerFiles);
 
   it("unchanged on no fill (cancel before any fill)", () => {
-    const ledger = new PositionLedger();
+    const ledger = createLedger();
     // Simulate: order submitted, cancelled, no fill
     // Position should not exist
     const pos = ledger.get("BTC-USDT");
@@ -151,7 +160,7 @@ describe("Position Ledger Lifecycle", () => {
   });
 
   it("updated on partial fill", () => {
-    const ledger = new PositionLedger();
+    const ledger = createLedger();
 
     // Partial fill: buy 0.00005 of 0.0001 BTC
     ledger.applyFill({
@@ -186,7 +195,7 @@ describe("Position Ledger Lifecycle", () => {
   });
 
   it("correctly tracks avg entry with multiple buys", () => {
-    const ledger = new PositionLedger();
+    const ledger = createLedger();
 
     ledger.applyFill({
       instId: "ETH-USDT",
@@ -219,7 +228,7 @@ describe("Position Ledger Lifecycle", () => {
       { instId: "BTC-USDT", side: "sell", fillSz: 0.0005, fillPx: 78000, fee: 0.039, feeCcy: "USDT", ts: 2 },
     ];
 
-    const ledger = new PositionLedger();
+    const ledger = createLedger();
     ledger.rebuildFromFills(fills, { "BTC-USDT": 78000 });
 
     const pos = ledger.get("BTC-USDT");
@@ -232,20 +241,20 @@ describe("PnL Tracker Lifecycle", () => {
   beforeEach(cleanLedgerFiles);
 
   it("starts with zero stats", () => {
-    const ledger = new PositionLedger();
-    const tracker = new PnLTracker(ledger, 1000);
+    const ledger = createLedger();
+    const tracker = createTracker(ledger, 1000);
     expect(tracker.getStats().tradeCountToday).toBe(0);
     expect(tracker.getStats().dailyRealizedPnlUSDT).toBe(0);
   });
 
   it("enforces loss limit", () => {
-    const ledger = new PositionLedger();
+    const ledger = createLedger();
     ledger.applyFill({
       instId: "BTC-USDT", side: "buy", fillSz: 0.01, fillPx: 78000,
       fee: 0, feeCcy: "USDT", ts: Date.now(),
     }, 70000);
 
-    const tracker = new PnLTracker(ledger, 1000);
+    const tracker = createTracker(ledger, 1000);
     tracker.update({ "BTC-USDT": 70000 });
     expect(tracker.checkLossLimit(20)).toBe(true);
   });

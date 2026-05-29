@@ -1,5 +1,6 @@
 import { writeFileSync, mkdirSync, existsSync, readFileSync, appendFileSync } from "fs";
 import { join } from "path";
+import { fetchCompatWithFallback as fetch } from "../../../utils/http.js";
 
 const CG_KEY = process.env.COINGECKO_PRO_API_KEY || "";
 const CG_BASE = "https://pro-api.coingecko.com/api/v3";

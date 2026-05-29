@@ -58,7 +58,7 @@ export function generateBacktestReport(results: BacktestResult[]): string {
   if (!existsSync(REPORTS_DIR)) {
     mkdirSync(REPORTS_DIR, { recursive: true });
   }
-  writeFileSync(join(REPORTS_DIR, "backtest_report.md"), report);
+  writeFileSync(join(REPORTS_DIR, "backtest_report.md"), report, "utf-8");
 
   return report;
 }
@@ -104,7 +104,7 @@ export function generateWalkForwardReport(wfReport: WalkForwardReport): string {
   if (!existsSync(REPORTS_DIR)) {
     mkdirSync(REPORTS_DIR, { recursive: true });
   }
-  writeFileSync(join(REPORTS_DIR, "walk_forward_report.md"), report);
+  writeFileSync(join(REPORTS_DIR, "walk_forward_report.md"), report, "utf-8");
 
   return report;
 }

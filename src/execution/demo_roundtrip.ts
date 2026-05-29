@@ -425,7 +425,7 @@ function generateReport(log: RoundtripLogger, outcome: string): void {
   lines.push("5. Audit — write complete audit trail");
 
   if (!existsSync(REPORTS_DIR)) mkdirSync(REPORTS_DIR, { recursive: true });
-  writeFileSync(join(REPORTS_DIR, "demo_order_roundtrip_report.md"), lines.join("\n"));
+  writeFileSync(join(REPORTS_DIR, "demo_order_roundtrip_report.md"), lines.join("\n"), "utf-8");
   console.log("\nReport: reports/demo_order_roundtrip_report.md");
 }
 

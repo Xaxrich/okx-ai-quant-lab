@@ -217,16 +217,18 @@ describe("Position Ledger", () => {
   it("paper positions are isolated from real funds", () => {
     const lp = join(import.meta.dirname, "..", "data", "portfolio", "positions_test.json");
     if (existsSync(lp)) unlinkSync(lp);
-    const ledger = new PositionLedger();
+    const ledger = new PositionLedger(lp);
     expect(ledger.getAll().length).toBeGreaterThanOrEqual(0);
   });
 
   it("PnL tracker starts at given equity", () => {
     // Clean stats file to avoid cross-test contamination
-    const sp = join(import.meta.dirname, "..", "data", "portfolio", "daily_stats.json");
+    const lp = join(import.meta.dirname, "..", "data", "portfolio", "positions_test_pnl.json");
+    const sp = join(import.meta.dirname, "..", "data", "portfolio", "daily_stats_test.json");
+    if (existsSync(lp)) unlinkSync(lp);
     if (existsSync(sp)) unlinkSync(sp);
-    const ledger = new PositionLedger();
-    const tracker = new PnLTracker(ledger, 10000);
+    const ledger = new PositionLedger(lp);
+    const tracker = new PnLTracker(ledger, 10000, sp);
     expect(tracker.getStats().startingEquity).toBe(10000);
   });
 });

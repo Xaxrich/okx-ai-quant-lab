@@ -19,6 +19,11 @@ const SECRET_PATTERNS = [
   /passphrase[=:]\s*\S+/gi,
 ];
 
+const BENIGN_STDERR_PATTERNS = [
+  /^Update available for @okx_ai\/okx-trade-cli: .+$/i,
+  /^Run: npm install -g @okx_ai\/okx-trade-cli$/i,
+];
+
 function sanitizeForLog(args: string[]): string {
   const joined = args.join(" ");
   let sanitized = joined;
@@ -31,14 +36,38 @@ function sanitizeForLog(args: string[]): string {
   return sanitized;
 }
 
+function stripAnsi(value: string): string {
+  return value.replace(/\x1B\[[0-?]*[ -/]*[@-~]/g, "");
+}
+
+function actionableStderr(stderr: string): string {
+  return stderr
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .filter((line) => {
+      const plain = stripAnsi(line);
+      return !BENIGN_STDERR_PATTERNS.some((pattern) => pattern.test(plain));
+    })
+    .join("\n");
+}
+
+function quoteCmdArg(arg: string): string {
+  if (/^[A-Za-z0-9_/:=.,@+-]+$/.test(arg)) return arg;
+  return `"${arg.replace(/(["^&|<>%])/g, "^$1")}"`;
+}
+
 export async function okx(args: string[]): Promise<OkxCliResult> {
-  const cmd = "okx";
-  const sanitizedCmd = `${cmd} ${sanitizeForLog(args)}`;
+  const okxCmd = "okx";
+  const cmd = process.platform === "win32" ? "cmd.exe" : okxCmd;
+  const spawnArgs = process.platform === "win32"
+    ? ["/d", "/s", "/c", [okxCmd, ...args].map(quoteCmdArg).join(" ")]
+    : args;
+  const sanitizedCmd = `${okxCmd} ${sanitizeForLog(args)}`;
 
   return new Promise((resolve) => {
-    const child = spawn(cmd, args, {
+    const child = spawn(cmd, spawnArgs, {
       stdio: ["ignore", "pipe", "pipe"],
-      shell: true,
     });
 
     let stdout = "";
@@ -53,11 +82,12 @@ export async function okx(args: string[]): Promise<OkxCliResult> {
     });
 
     child.on("close", (exitCode) => {
-      if (exitCode !== 0 || stderr.trim()) {
+      const filteredStderr = actionableStderr(stderr);
+      if (exitCode !== 0 || filteredStderr) {
         resolve({
           ok: false,
           data: null,
-          stderr: stderr.trim(),
+          stderr: filteredStderr || stderr.trim(),
           exitCode,
         });
         return;
@@ -68,14 +98,14 @@ export async function okx(args: string[]): Promise<OkxCliResult> {
         resolve({
           ok: true,
           data: parsed,
-          stderr: stderr.trim(),
+          stderr: filteredStderr,
           exitCode,
         });
       } catch {
         resolve({
           ok: true,
           data: stdout.trim(),
-          stderr: stderr.trim(),
+          stderr: filteredStderr,
           exitCode,
         });
       }

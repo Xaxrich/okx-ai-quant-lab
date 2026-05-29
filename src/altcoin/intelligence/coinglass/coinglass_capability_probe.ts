@@ -1,5 +1,6 @@
 import { writeFileSync, mkdirSync, existsSync } from "fs";
 import { join } from "path";
+import { fetchCompatWithFallback as fetch } from "../../../utils/http.js";
 
 const CG_KEY = process.env.COINGLASS_API_KEY || "";
 const CG_BASE = "https://open-api-v4.coinglass.com";

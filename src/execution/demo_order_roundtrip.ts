@@ -30,7 +30,7 @@ export async function proposeOrderIntent(intent: OrderIntent): Promise<string> {
   const filename = `order_intent_${intent.intentId}.json`;
   const filepath = join(INTENT_DIR, filename);
 
-  writeFileSync(filepath, JSON.stringify(intent, null, 2));
+  writeFileSync(filepath, JSON.stringify(intent, null, 2), "utf-8");
 
   audit.logOrderIntent(
     {

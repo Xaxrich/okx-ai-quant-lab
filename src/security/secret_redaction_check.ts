@@ -1,20 +1,45 @@
 import { readFileSync, readdirSync, existsSync, statSync } from "fs";
 import { join } from "path";
 
+function loadDotenvValues(): Record<string, string> {
+  const envPath = join(import.meta.dirname, "..", "..", ".env");
+  if (!existsSync(envPath)) return {};
+
+  const values: Record<string, string> = {};
+  const lines = readFileSync(envPath, "utf-8").split(/\r?\n/);
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    if (!line || line.startsWith("#")) continue;
+    const eqIndex = line.indexOf("=");
+    if (eqIndex <= 0) continue;
+    const name = line.slice(0, eqIndex).trim();
+    let value = line.slice(eqIndex + 1).trim();
+    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+      value = value.slice(1, -1);
+    }
+    values[name] = value;
+  }
+  return values;
+}
+
+const DOTENV_VALUES = loadDotenvValues();
+const secretValue = (name: string): string => process.env[name] || DOTENV_VALUES[name] || "";
+
 const KEYS: { name: string; value: string }[] = [
-  { name: "ETHERSCAN_API_KEY", value: process.env.ETHERSCAN_API_KEY || "" },
-  { name: "COINMARKETCAP_API_KEY", value: process.env.COINMARKETCAP_API_KEY || "" },
-  { name: "COINGECKO_PRO_API_KEY", value: process.env.COINGECKO_PRO_API_KEY || "" },
-  { name: "COINGECKO_DEMO_API_KEY", value: process.env.COINGECKO_DEMO_API_KEY || "" },
-  { name: "BSCSCAN_API_KEY", value: process.env.BSCSCAN_API_KEY || "" },
-  { name: "COINGLASS_API_KEY", value: process.env.COINGLASS_API_KEY || "" },
-  { name: "MORALIS_API_KEY", value: process.env.MORALIS_API_KEY || "" },
-  { name: "ARKHAM_API_KEY", value: process.env.ARKHAM_API_KEY || "" },
-  { name: "OKX_API_KEY", value: process.env.OKX_API_KEY || "" },
-  { name: "OKX_SECRET_KEY", value: process.env.OKX_SECRET_KEY || "" },
-  { name: "OKX_PASSPHRASE", value: process.env.OKX_PASSPHRASE || "" },
-  { name: "FEISHU_APP_ID", value: process.env.FEISHU_APP_ID || "" },
-  { name: "FEISHU_APP_SECRET", value: process.env.FEISHU_APP_SECRET || "" },
+  { name: "ETHERSCAN_API_KEY", value: secretValue("ETHERSCAN_API_KEY") },
+  { name: "COINMARKETCAP_API_KEY", value: secretValue("COINMARKETCAP_API_KEY") },
+  { name: "COINGECKO_PRO_API_KEY", value: secretValue("COINGECKO_PRO_API_KEY") },
+  { name: "COINGECKO_DEMO_API_KEY", value: secretValue("COINGECKO_DEMO_API_KEY") },
+  { name: "BSCSCAN_API_KEY", value: secretValue("BSCSCAN_API_KEY") },
+  { name: "COINGLASS_API_KEY", value: secretValue("COINGLASS_API_KEY") },
+  { name: "MORALIS_API_KEY", value: secretValue("MORALIS_API_KEY") },
+  { name: "ARKHAM_API_KEY", value: secretValue("ARKHAM_API_KEY") },
+  { name: "OKX_API_KEY", value: secretValue("OKX_API_KEY") },
+  { name: "OKX_SECRET_KEY", value: secretValue("OKX_SECRET_KEY") },
+  { name: "OKX_PASSPHRASE", value: secretValue("OKX_PASSPHRASE") },
+  { name: "FEISHU_APP_ID", value: secretValue("FEISHU_APP_ID") },
+  { name: "FEISHU_APP_SECRET", value: secretValue("FEISHU_APP_SECRET") },
+  { name: "FEISHU_CHAT_ID", value: secretValue("FEISHU_CHAT_ID") },
 ];
 
 const nonEmptyKeys = KEYS.filter(k => k.value.length > 0);

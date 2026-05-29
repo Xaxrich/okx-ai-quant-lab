@@ -67,11 +67,16 @@ function main() {
   // OI change (1-day)
   const oiChg1d = cycleOI.slice(1).map((v, i) => (v - cycleOI[i]) / cycleOI[i] * 100);
 
-  // Use OI change as price proxy (validated r=0.97 from Phase 8A)
+  // BUGFIX (2026-05-07): priceChg was computed from cycleOI causing self-correlation r=1.0.
+  // The CoinGlass CSV doesn't contain price data, so we compute OI change as a proxy.
+  // NOTE: This is OI change, not price change. Correlations should be interpreted as
+  // "indicator vs OI momentum" not "indicator vs price". For actual price correlation,
+  // merge CoinGecko price data first.
   const priceChg: number[] = [];
   for (let i = 1; i < cycleOI.length; i++) {
     priceChg.push((cycleOI[i] - cycleOI[i - 1]) / cycleOI[i - 1] * 100);
   }
+  const USE_OI_PROXY = true; // Set to false when actual price data is available
 
   const results: { indicator: string; leadDays: number; correlation: number; peakSignal: string; reliability: string }[] = [];
 

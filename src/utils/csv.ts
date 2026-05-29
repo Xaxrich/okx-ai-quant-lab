@@ -39,5 +39,5 @@ export function readCsv(path: string): { h: string[]; rows: string[][] } | null 
 
 export function writeCsv(path: string, rows: (string | number | null | undefined)[][]): void {
   const lines = rows.map(row => row.map(csvEscape).join(","));
-  writeFileSync(path, lines.join("\n"));
+  writeFileSync(path, lines.join("\n"), "utf-8");
 }

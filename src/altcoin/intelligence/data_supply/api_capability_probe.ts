@@ -1,5 +1,6 @@
 import { writeFileSync, mkdirSync, existsSync } from "fs";
 import { join } from "path";
+import { fetchCompatWithFallback as fetch } from "../../../utils/http.js";
 
 const CMC_KEY = process.env.COINMARKETCAP_API_KEY || "";
 const ETHERSCAN_KEY = process.env.ETHERSCAN_API_KEY || "";

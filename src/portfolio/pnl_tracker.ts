@@ -1,9 +1,9 @@
 import { PositionLedger } from "./position_ledger.js";
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from "fs";
-import { join } from "path";
+import { dirname, join } from "path";
 
-const TRACKER_DIR = join(import.meta.dirname, "..", "..", "data", "portfolio");
-const DAILY_STATS_PATH = join(TRACKER_DIR, "daily_stats.json");
+const DEFAULT_TRACKER_DIR = join(import.meta.dirname, "..", "..", "data", "portfolio");
+const DEFAULT_DAILY_STATS_PATH = join(DEFAULT_TRACKER_DIR, "daily_stats.json");
 
 export interface DailyPnLStats {
   date: string;
@@ -20,13 +20,20 @@ export class PnLTracker {
   ledger: PositionLedger;
   private stats: DailyPnLStats;
   private peakEquity: number;
+  private statsPath: string;
 
-  constructor(ledger: PositionLedger, startingEquity: number = 0) {
+  constructor(
+    ledger: PositionLedger,
+    startingEquity: number = 0,
+    statsPath: string = DEFAULT_DAILY_STATS_PATH
+  ) {
     this.ledger = ledger;
     this.peakEquity = startingEquity;
+    this.statsPath = statsPath;
 
-    if (!existsSync(TRACKER_DIR)) {
-      mkdirSync(TRACKER_DIR, { recursive: true });
+    const trackerDir = dirname(this.statsPath);
+    if (!existsSync(trackerDir)) {
+      mkdirSync(trackerDir, { recursive: true });
     }
 
     const today = new Date().toISOString().slice(0, 10);
@@ -52,9 +59,9 @@ export class PnLTracker {
   }
 
   private loadStats(today: string): DailyPnLStats | null {
-    if (!existsSync(DAILY_STATS_PATH)) return null;
+    if (!existsSync(this.statsPath)) return null;
     try {
-      const raw = JSON.parse(readFileSync(DAILY_STATS_PATH, "utf-8")) as DailyPnLStats;
+      const raw = JSON.parse(readFileSync(this.statsPath, "utf-8")) as DailyPnLStats;
       return raw;
     } catch {
       return null;
@@ -62,7 +69,7 @@ export class PnLTracker {
   }
 
   private saveStats(): void {
-    writeFileSync(DAILY_STATS_PATH, JSON.stringify(this.stats, null, 2));
+    writeFileSync(this.statsPath, JSON.stringify(this.stats, null, 2), "utf-8");
   }
 
   update(currentPrices: Record<string, number>): void {
