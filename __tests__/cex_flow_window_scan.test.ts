@@ -3,12 +3,20 @@ import {
   bucketCexFlow,
   buildAddressLabelMapFromRows,
   decimalStringToNumber,
+  normalizeCexFlowSource,
   parseEtherscanTokenTransfer,
 } from "../src/altcoin/intelligence/onchain/cex_flow_window_scan.js";
 
 const NOW = Date.UTC(2026, 4, 10, 12, 0, 0);
 
 describe("bucketCexFlow", () => {
+  it("normalizes transfer source selection", () => {
+    expect(normalizeCexFlowSource("explorer")).toBe("explorer");
+    expect(normalizeCexFlowSource("moralis")).toBe("moralis");
+    expect(normalizeCexFlowSource("unknown")).toBe("auto");
+    expect(normalizeCexFlowSource(undefined)).toBe("auto");
+  });
+
   it("flags CEX inflow risk when deposits dominate withdrawals", () => {
     const stats = bucketCexFlow("AAA", [
       { token: "AAA", timestampMs: NOW - 10 * 60 * 1000, valueDecimal: 100, direction: "TO_CEX_PROXY", labeled: true },

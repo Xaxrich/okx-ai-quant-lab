@@ -45,6 +45,11 @@ interface ScanOptions {
   windows: number[];
   targetWindowHours: number;
   tokens: Set<string>;
+  source: "auto" | "moralis" | "explorer";
+}
+
+export function normalizeCexFlowSource(value: string | undefined): ScanOptions["source"] {
+  return value === "explorer" || value === "moralis" ? value : "auto";
 }
 
 export interface EntityTransferRow {
@@ -522,7 +527,13 @@ async function fetchTransfers(
   pages: number,
   targetWindowHours: number,
   labels: Map<string, AddressLabel>,
+  source: ScanOptions["source"] = "auto",
 ): Promise<TransferFetchResult> {
+  if (source === "explorer") {
+    const explorer = await fetchExplorerTransfers(candidate, pages, targetWindowHours, labels);
+    return { ...explorer, fetchStatus: `FORCED_EXPLORER_${explorer.fetchStatus}` };
+  }
+
   if (moralisDisabledForRun) {
     const fallback = await fetchExplorerTransfers(candidate, pages, targetWindowHours, labels);
     return { ...fallback, fetchStatus: fallback.fetchStatus === "ETHERSCAN_OK" ? "MORALIS_DISABLED_ETHERSCAN_OK" : fallback.fetchStatus };
@@ -646,6 +657,7 @@ function parseArgs(): ScanOptions {
   const arg = (name: string): string | undefined => process.argv.find((value) => value.startsWith(`--${name}=`))?.split("=")[1];
   const limit = Number(arg("limit") || "5");
   const pages = Number(arg("pages") || "3");
+  const sourceArg = arg("source");
   const windows = (arg("windows") || "1,4,24")
     .split(",")
     .map((value) => Number(value.trim()))
@@ -661,6 +673,7 @@ function parseArgs(): ScanOptions {
       .split(",")
       .map((value) => value.trim().toUpperCase())
       .filter(Boolean)),
+    source: normalizeCexFlowSource(sourceArg),
   };
 }
 
@@ -708,7 +721,7 @@ async function main() {
 
   const allStats: FlowWindowStats[] = [];
   for (const candidate of candidates) {
-    const fetched = await fetchTransfers(candidate, options.pages, options.targetWindowHours, labels);
+    const fetched = await fetchTransfers(candidate, options.pages, options.targetWindowHours, labels, options.source);
     const transfers = fetched.transfers;
     const latestTs = transfers.length > 0 ? Math.max(...transfers.map((row) => row.timestampMs)) : Date.now();
     for (const windowHours of options.windows) {
