@@ -46,10 +46,15 @@ interface ScanOptions {
   targetWindowHours: number;
   tokens: Set<string>;
   source: "auto" | "moralis" | "explorer";
+  mergeExisting: boolean;
 }
 
 export function normalizeCexFlowSource(value: string | undefined): ScanOptions["source"] {
   return value === "explorer" || value === "moralis" ? value : "auto";
+}
+
+export function normalizeMergeExisting(value: string | undefined): boolean {
+  return value === "true" || value === "1" || value === "yes";
 }
 
 export interface EntityTransferRow {
@@ -658,6 +663,7 @@ function parseArgs(): ScanOptions {
   const limit = Number(arg("limit") || "5");
   const pages = Number(arg("pages") || "3");
   const sourceArg = arg("source");
+  const mergeExistingArg = arg("merge-existing");
   const windows = (arg("windows") || "1,4,24")
     .split(",")
     .map((value) => Number(value.trim()))
@@ -674,6 +680,7 @@ function parseArgs(): ScanOptions {
       .map((value) => value.trim().toUpperCase())
       .filter(Boolean)),
     source: normalizeCexFlowSource(sourceArg),
+    mergeExisting: normalizeMergeExisting(mergeExistingArg),
   };
 }
 
@@ -739,7 +746,7 @@ async function main() {
   const reportPath = join(REPORTS_DIR, "cex_flow_window_scan_latest.md");
   const header = ["checked_at", "token", "window_hours", "transfers", "labeled_transfers", "label_coverage", "cex_in_count", "cex_out_count", "cex_in_value", "cex_out_value", "net_cex_count", "net_cex_value", "dex_count", "unknown_count", "sample_start", "sample_end", "window_coverage_ratio", "window_fully_covered", "sample_exhausted", "fetch_pages", "fetch_stop_reason", "fetch_status", "decision"];
   const selectedTokens = new Set(allStats.map((row) => row.token.toUpperCase()));
-  const mergeTokens = options.tokens.size > 0 ? selectedTokens : new Set<string>();
+  const mergeTokens = options.mergeExisting ? selectedTokens : new Set<string>();
   writeCsv(outPath, [
     header,
     ...mergeExistingRows(outPath, header, mergeTokens),

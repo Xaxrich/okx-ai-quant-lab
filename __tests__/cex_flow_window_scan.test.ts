@@ -4,6 +4,7 @@ import {
   buildAddressLabelMapFromRows,
   decimalStringToNumber,
   normalizeCexFlowSource,
+  normalizeMergeExisting,
   parseEtherscanTokenTransfer,
 } from "../src/altcoin/intelligence/onchain/cex_flow_window_scan.js";
 
@@ -15,6 +16,14 @@ describe("bucketCexFlow", () => {
     expect(normalizeCexFlowSource("moralis")).toBe("moralis");
     expect(normalizeCexFlowSource("unknown")).toBe("auto");
     expect(normalizeCexFlowSource(undefined)).toBe("auto");
+  });
+
+  it("requires an explicit flag before merging old latest rows", () => {
+    expect(normalizeMergeExisting("true")).toBe(true);
+    expect(normalizeMergeExisting("1")).toBe(true);
+    expect(normalizeMergeExisting("yes")).toBe(true);
+    expect(normalizeMergeExisting("false")).toBe(false);
+    expect(normalizeMergeExisting(undefined)).toBe(false);
   });
 
   it("flags CEX inflow risk when deposits dominate withdrawals", () => {
