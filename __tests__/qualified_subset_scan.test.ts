@@ -33,7 +33,7 @@ describe("classifyQualifiedSubset", () => {
 
   it("keeps directional short setups watch-only when execution is not ready", () => {
     const result = classifyQualifiedSubset({
-      readinessDecision: "READY_FOR_DEEP_SCAN",
+      readinessDecision: "RISK_MONITOR_CEX_FLOW",
       primaryDirection: "SHORT_SETUP",
       longBucket: "NO_LONG",
       shortBucket: "SHORT_SETUP",
@@ -44,5 +44,33 @@ describe("classifyQualifiedSubset", () => {
     expect(result.included).toBe(true);
     expect(result.side).toBe("SHORT");
     expect(result.executionGate).toBe("WATCH_ONLY");
+  });
+
+  it("does not mark blocked short execution rows as scan allowed", () => {
+    const result = classifyQualifiedSubset({
+      readinessDecision: "RISK_MONITOR_CEX_FLOW",
+      primaryDirection: "SHORT_SETUP",
+      longBucket: "NO_LONG",
+      shortBucket: "SHORT_SETUP",
+      confidence: "MEDIUM",
+      shortExecutionDecision: "SHORT_EXEC_READY",
+      shortExecutionBlockers: "COINGLASS_OI_INCOMPLETE",
+    });
+
+    expect(result.included).toBe(true);
+    expect(result.executionGate).toBe("WATCH_ONLY");
+  });
+
+  it("does not let risk-monitor rows into the long subset", () => {
+    const result = classifyQualifiedSubset({
+      readinessDecision: "RISK_MONITOR_CEX_FLOW",
+      primaryDirection: "LONG_AMBUSH",
+      longBucket: "LONG_AMBUSH",
+      shortBucket: "NO_SHORT",
+      confidence: "MEDIUM",
+    });
+
+    expect(result.included).toBe(false);
+    expect(result.executionGate).toBe("REPAIR_ONLY");
   });
 });

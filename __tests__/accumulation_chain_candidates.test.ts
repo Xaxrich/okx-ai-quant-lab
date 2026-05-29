@@ -51,4 +51,27 @@ describe("decideAccumulationChainCandidate", () => {
     expect(decision.decision).toBe("DATA_REPAIR_REQUIRED");
     expect(decision.reason).toContain("missing_contract_address");
   });
+
+  it("can promote liquid EVM watch rows in research-scan mode", () => {
+    const decision = decideAccumulationChainCandidate({
+      ...base,
+      accumulationScore: 10,
+      riskScore: 20,
+      executionScore: 70,
+    }, { ...opts, researchScan: true });
+
+    expect(decision.decision).toBe("READY_FOR_CHAIN_SCAN");
+    expect(decision.reason).toBe("RESEARCH_WATCH_SCAN");
+  });
+
+  it("keeps default accumulation mode strict for low-score watch rows", () => {
+    const decision = decideAccumulationChainCandidate({
+      ...base,
+      accumulationScore: 10,
+      riskScore: 20,
+      executionScore: 70,
+    }, opts);
+
+    expect(decision.decision).toBe("WATCH_ONLY");
+  });
 });

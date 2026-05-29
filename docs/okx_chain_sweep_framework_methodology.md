@@ -220,6 +220,31 @@ Reason:
 - A report should read `latest` as the latest run, not a rolling union of unrelated candidates.
 - Readiness, directional, and qualified-subset stages should consume a clean candidate-aligned CEX-flow file.
 
+## Ten-Result Directional Research Mode
+
+The original strict pipeline is long-accumulation first. It is intentionally conservative and can produce only one or two results when the market has few clean long setups. For broader research mandates, the framework now supports a directional research mode:
+
+Command:
+
+```bash
+npm run intelligence:accumulation:chain-candidates -- --limit=40 --min-accumulation=15 --min-execution=40 --max-risk=100 --research-scan --write-chain-candidates
+npm run validation:chain-gate -- --input=data/altcoin/intelligence/validation/accumulation_chain_candidates_latest.csv --min-opportunity=0 --min-tradability=40 --max-fragility=100
+```
+
+Rules:
+
+- Long candidates still need `READY_FOR_DEEP_SCAN` before they can enter `LONG_AMBUSH_SCAN` or `LONG_WATCH_SCAN`.
+- Short candidates are allowed into the qualified subset when readiness is `RISK_MONITOR_CEX_FLOW` and directional output is `SHORT_SETUP` or `SHORT_WATCH`.
+- `SHORT_EXEC_READY` plus no blockers upgrades the execution gate to `SCAN_ALLOWED`.
+- If short execution has blockers, the row remains included but is capped at `WATCH_ONLY`.
+- `DATA_REPAIR`, `NO_DATA`, and low-confidence rows remain excluded.
+
+Reason:
+
+- CEX inflow risk is negative for long accumulation, but it can be useful short-side research evidence.
+- A 10-result report should not force 10 long candidates when the chain data only supports one long setup.
+- Separating `SCAN_ALLOWED` from `WATCH_ONLY` preserves risk discipline.
+
 ## Latest Verified Scan Result
 
 Scan date: 2026-05-29
@@ -228,18 +253,19 @@ Expanded candidate run:
 
 - OKX scan universe selected: 215
 - Reviewed small/mid rows: 30
-- Chain-ready candidates: 6
+- Research chain-ready candidates: 19
+- Qualified directional candidates: 10
 - Qualified long candidates: 1
+- Qualified short candidates: 9
 
 Candidate outcomes:
 
 - `CHZ`: included, `LONG`, `LONG_AMBUSH_SCAN`, `SCAN_ALLOWED`, confidence `HIGH`.
-- `ARB`: excluded, data repair; 24h CEX-flow partial and 4h inflow risk.
-- `OP`: excluded, no usable current CEX-flow due Optimism free explorer limitation.
-- `INJ`: excluded from long; persistent 24h CEX inflow risk, directional `SHORT_SETUP`.
-- `SAHARA`: excluded from long; 1h and 24h CEX inflow risk, directional `SHORT_SETUP`.
-- `H`: excluded from long; 4h and 24h CEX inflow risk, directional `SHORT_SETUP`.
+- `LIT`, `SAHARA`, `RAVE`: included, `SHORT`, `SHORT_SETUP_SCAN`, `SCAN_ALLOWED`.
+- `ENA`, `WLD`, `H`, `BSB`, `INJ`, `AI`: included, `SHORT`, `SHORT_SETUP_SCAN`, `WATCH_ONLY`.
+- `ARB`, `OP`, `LAB`, `UB`, `BEAT`, `EDEN`, `RIVER`: excluded for data repair, no data, or low-confidence coverage.
+- `ALLO`, `BILL`: clean transfer flow but no active directional bucket; excluded.
 
 Conclusion:
 
-`CHZ-USDT-SWAP` is the only current suitable long-side ambush research result. It remains `WAIT_CONFIRMATION` in the final OKX layer, so the next work is to deepen holder/entity-flow evidence and wait for a fresh CVD/OI confirmation before treating it as execution-ready.
+The framework currently finds 10 suitable directional research results: one long ambush candidate and nine short setup candidates. `CHZ-USDT-SWAP` remains the only current long-side ambush result. The short-side set is led by `LIT`, `SAHARA`, and `RAVE` as `SCAN_ALLOWED`; the rest are watch-only until execution blockers clear.

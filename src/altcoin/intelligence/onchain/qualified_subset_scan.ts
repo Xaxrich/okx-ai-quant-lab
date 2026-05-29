@@ -42,6 +42,7 @@ export interface QualifiedSubsetInput {
   shortBucket: string;
   confidence: string;
   shortExecutionDecision?: string;
+  shortExecutionBlockers?: string;
 }
 
 export interface QualifiedSubsetDecision {
@@ -73,7 +74,12 @@ function rowsToObjects<T extends object>(path: string): T[] {
 }
 
 export function classifyQualifiedSubset(input: QualifiedSubsetInput): QualifiedSubsetDecision {
-  if (input.readinessDecision !== "READY_FOR_DEEP_SCAN" || input.primaryDirection === "DATA_REPAIR") {
+  const shortResearchReady =
+    input.readinessDecision === "RISK_MONITOR_CEX_FLOW" &&
+    (input.primaryDirection === "SHORT_SETUP" || input.primaryDirection === "SHORT_WATCH");
+  const longResearchReady = input.readinessDecision === "READY_FOR_DEEP_SCAN";
+
+  if ((!longResearchReady && !shortResearchReady) || input.primaryDirection === "DATA_REPAIR") {
     return {
       included: false,
       side: "NONE",
@@ -118,13 +124,13 @@ export function classifyQualifiedSubset(input: QualifiedSubsetInput): QualifiedS
   }
 
   if (input.primaryDirection === "SHORT_SETUP" && input.shortBucket === "SHORT_SETUP") {
-    const shortExecReady = input.shortExecutionDecision === "SHORT_EXEC_READY";
+    const shortExecReady = input.shortExecutionDecision === "SHORT_EXEC_READY" && !input.shortExecutionBlockers;
     return {
       included: true,
       side: "SHORT",
       scanBucket: "SHORT_SETUP_SCAN",
       executionGate: shortExecReady ? "SCAN_ALLOWED" : "WATCH_ONLY",
-      reason: shortExecReady ? "short setup passed directional and execution gates" : "short setup passed directionally but execution gate is not ready",
+      reason: shortExecReady ? "short setup passed directional and execution gates" : "short setup passed directionally but execution gate is not clean",
       nextAction: shortExecReady ? "send to pre-trade risk review" : "keep on short watchlist; do not approve short execution",
     };
   }
@@ -158,11 +164,11 @@ function buildReport(rows: Array<DirectionalRow & QualifiedSubsetDecision & { sh
 
   const table = (items: typeof rows) => {
     const lines = [
-      "| token | side | bucket | gate | confidence | opp | frag | trad | reason | next_action | invalidation |",
-      "| --- | --- | --- | --- | --- | ---: | ---: | ---: | --- | --- | --- |",
+      "| token | side | bucket | gate | confidence | opp | frag | trad | short_exec | blockers | reason | next_action | invalidation |",
+      "| --- | --- | --- | --- | --- | ---: | ---: | ---: | --- | --- | --- | --- | --- |",
     ];
     for (const row of items) {
-      lines.push(`| ${row.token} | ${row.side} | ${row.scanBucket} | ${row.executionGate} | ${row.confidence} | ${row.opportunity_score} | ${row.fragility_score} | ${row.tradability_score} | ${row.reason} | ${row.nextAction} | ${row.invalidation} |`);
+      lines.push(`| ${row.token} | ${row.side} | ${row.scanBucket} | ${row.executionGate} | ${row.confidence} | ${row.opportunity_score} | ${row.fragility_score} | ${row.tradability_score} | ${row.short_exec_decision} | ${row.blockers} | ${row.reason} | ${row.nextAction} | ${row.invalidation} |`);
     }
     return lines.join("\n");
   };
@@ -172,7 +178,7 @@ function buildReport(rows: Array<DirectionalRow & QualifiedSubsetDecision & { sh
     "",
     `Generated: ${new Date().toISOString()}`,
     "",
-    "Scope: only READY_FOR_DEEP_SCAN candidates with a non-repair directional bucket are allowed into this opportunity subset.",
+    "Scope: READY_FOR_DEEP_SCAN long candidates plus RISK_MONITOR_CEX_FLOW short-side research candidates with non-repair directional buckets.",
     "",
     "## Long Qualified",
     "",
@@ -211,6 +217,7 @@ async function main() {
         shortBucket: row.short_bucket,
         confidence: row.confidence,
         shortExecutionDecision: shortExec?.decision,
+        shortExecutionBlockers: shortExec?.blockers,
       }),
       short_exec_decision: shortExec?.decision || "",
       execution_score: shortExec?.execution_score || "",

@@ -19,6 +19,7 @@ export interface AccumulationCandidateOptions {
   minExecution: number;
   maxRisk: number;
   writeChainCandidates: boolean;
+  researchScan: boolean;
 }
 
 export interface CandidateInput {
@@ -97,13 +98,14 @@ function stateMatrix(input: CandidateInput): string {
   ].join("__");
 }
 
-export function decideAccumulationChainCandidate(input: CandidateInput, options: Pick<AccumulationCandidateOptions, "minAccumulation" | "minExecution" | "maxRisk">): AccumulationChainCandidate {
+export function decideAccumulationChainCandidate(input: CandidateInput, options: Pick<AccumulationCandidateOptions, "minAccumulation" | "minExecution" | "maxRisk"> & { researchScan?: boolean }): AccumulationChainCandidate {
   const primaryChain = input.cgChain || input.registryChain;
   const scanChain = normalizeChain(primaryChain);
   const contractAddress = input.cgContract || input.registryContract;
   const hasMetadata = Boolean(scanChain && contractAddress);
   const scorePass = input.accumulationScore >= options.minAccumulation && input.executionScore >= options.minExecution && input.riskScore <= options.maxRisk;
   const hardRisk = input.state === "DISTRIBUTION_RISK" || input.cexFlowGate === "BLOCKED";
+  const researchPass = Boolean(options.researchScan) && hasMetadata && input.executionScore >= options.minExecution && input.riskScore <= options.maxRisk;
 
   let decision: AccumulationChainCandidate["decision"] = "WATCH_ONLY";
   let reason = "ACCUMULATION_FILTER_NOT_MET";
@@ -116,7 +118,7 @@ export function decideAccumulationChainCandidate(input: CandidateInput, options:
       !scanChain ? `unsupported_chain=${primaryChain || "missing"}` : "",
     ].filter(Boolean).join(";") || "metadata_repair_required";
     nextAction = "Repair CoinGecko/registry chain and contract mapping before chain scan.";
-  } else if (hardRisk) {
+  } else if (hardRisk && !researchPass) {
     decision = "WATCH_ONLY";
     reason = input.state === "DISTRIBUTION_RISK" ? "distribution_risk_blocks_accumulation_scan" : "cex_flow_gate_blocked";
     nextAction = "Keep as risk monitor only; do not scan as long-side accumulation candidate.";
@@ -124,6 +126,12 @@ export function decideAccumulationChainCandidate(input: CandidateInput, options:
     decision = "READY_FOR_CHAIN_SCAN";
     reason = "ACCUMULATION_CONTEXT_AND_METADATA_PASS";
     nextAction = "Run light holders/transfers/CEX-flow scan, then promote only if 4h/24h CEX windows and holder identity pass.";
+  } else if (researchPass) {
+    decision = "READY_FOR_CHAIN_SCAN";
+    reason = hardRisk ? "RESEARCH_RISK_MONITOR_SCAN" : "RESEARCH_WATCH_SCAN";
+    nextAction = hardRisk
+      ? "Run CEX-flow and directional scan as risk/short research only; do not promote to long accumulation without risk clearing."
+      : "Run CEX-flow and directional scan as broader research; promote only if directional gates pass.";
   }
 
   return {
@@ -161,6 +169,7 @@ function parseArgs(): AccumulationCandidateOptions {
     minExecution: numArg("min-execution", 45),
     maxRisk: numArg("max-risk", 55),
     writeChainCandidates: process.argv.includes("--write-chain-candidates"),
+    researchScan: process.argv.includes("--research-scan"),
   };
 }
 
@@ -215,6 +224,7 @@ function writeOutputs(rows: AccumulationChainCandidate[], options: AccumulationC
     "",
     `Generated: ${new Date().toISOString()}`,
     `Write chain candidates: ${options.writeChainCandidates}`,
+    `Research scan mode: ${options.researchScan}`,
     "",
     "## Ready For Light Chain Scan",
     "",
